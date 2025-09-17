@@ -1,0 +1,26 @@
+:root {
+    /* Główne kolory */
+    --header-color: #edb37c;
+  
+    --nav-active-background-color: #4f3b30;
+    --nav-active-border-color: #cf804c;
+    --nav-active-hover-color: #f89d48;
+    --nav-hover-color: #f89d48;
+    --nav-module-color: #4caa87;
+
+    /* Kolory details w nav */
+    --nav-details-summary-color: #f89748;
+    --nav-details-active-open-color-text: #f84848;
+  
+    /* Kolory details w content */
+    --content-border-color: #634132;
+    --content-details-summary-color: #d99862;
+  
+    /* Kolory przycisku kopiuj kod */
+    --copy-button-background-color: #594f49;
+    --copy-button-hover-background-color: #3a312e;
+  
+    /* Kolory tabel */
+    --table-header-background-color: #302724;
+    --table-border-color: #634432;
+  }

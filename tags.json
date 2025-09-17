@@ -1,0 +1,7 @@
+{
+  "tag-location": ["forest", "castle", "cave", "beach", "city"],
+  "tag-character": ["Lytha", "Hestia", "Xardas", "Aria"],
+  "tag-action": ["attack", "defend", "healing", "stealth"],
+  "tag-nsfw": ["adult", "hugging", "kissing", "intimate"],
+  "tag-emotion": ["happy", "sad", "angry", "surprised"]
+}

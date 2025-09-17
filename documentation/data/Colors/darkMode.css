@@ -1,0 +1,87 @@
+:root {
+  /* Sekcje na stronie głównej */
+  --course-card-background-color1: #4e2727;
+  --course-card-background-color2: #292953;
+  --course-card-background-color3: #2b502b;
+  --login-background-color: #383838;
+  /* Przyciski */
+  --primary-btn-color: #444;
+  --primary-btn-hover-color: #555;
+  --primary-btn-text-color: #fff;
+
+  /* link a href */
+  --link-color: cornflowerblue;
+  --link-visited-color: mediumorchid;
+
+  /* scrollbar */
+  --scrollbar-thumb-color: #ffffff;
+  --scrollbar-thumb-hover-color: #b1b1b1;
+
+  /* Główne kolory */
+  --body-background-color: #1b1b1b;
+  --body-color: #a9a195;
+
+  --header-background-color: #333;
+
+  --nav-background-color: #444;
+  --nav-color: #dbdbdb;
+
+  --nav-summary-active-open-border-left-color: #ffffff50;
+  --nav-summary-active-open-background-color: #00000050;
+
+  --nav-sidebar-color: #ccc;
+
+  --content-background-color: #181818;
+
+  --footer-background-color: #333;
+  --footer-color: #fff;
+
+  /* Kolory podpowiedzi */
+  --hint-text-color: #d9d9d9;
+
+
+  --hint-info-background-color: #112438;
+  --hint-info-border-color: #2196f3;
+
+  --hint-success-background-color: #1a2b13;
+  --hint-success-border-color: #4caf50;
+
+  --hint-warning-background-color: #352c06;
+  --hint-warning-border-color: #ffe600;
+
+  --hint-danger-background-color: #3d1414;
+  --hint-danger-border-color: #f44336;
+
+  /* Kolory kodu */
+  /* Kolory przycisku kopiuj kod */
+  --code-background-color: #333333;
+  --code-color: #d1d1d1;
+  --copy-button-color: #d5d5d5;
+
+  /* Kolory tabel */
+  --table-color: #c7c2b8;
+  --table-header-color: #d9d9d9;
+
+  /* Kolory zakładek */
+  --tabs-background-color: #252525;
+  --tabs-border-color: #75716b;
+
+  /* Pierwszy tytułowy h1 */
+  --art-title-background-color: #ffffff10;
+  --art-title-bootom-border-color: #a9a195;
+
+  /* Podkreślenie Nagłówków h1 h2 h3 */
+
+  --hTag-border-color: #c0fffc42;
+
+  /* Kolory formatowania tekstu */
+
+  --em-text-color: #91af13;
+  --strong-text-color: #b59e7c;
+  --strong-em-text-color: #acacac;
+  --em-strong-text-color: #6591ac;
+
+
+  --blur-text-shadow: 1px 1px 15px #fff;
+
+}

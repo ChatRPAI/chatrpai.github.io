@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="pl">
+  <head>
+    <meta charset="UTF-8" />
+    <title>AI RP Chat</title>
+    <link rel="stylesheet" href="/static/data/global-layout.css" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+    />
+  </head>
+  <body class="bg-dark text-light flex flex-col items-center">
+    <div id="app" class="flex flex-col items-center w-full h-full">
+      <h1 class="text-center text-lg mt-10">AI RP Chat</h1>
+      <div
+        id="chat-wrapper"
+        class="w-full max-w-1200 flex flex-col justify-end m-auto"
+      >
+        <div
+          id="chat-container"
+          class="bg-panel p-10 br-3 mb-20 max-w-1200"
+          role="log"
+          aria-live="polite"
+          aria-label="Historia rozmowy z AI"
+        ></div>
+      </div>
+      <form
+        id="input-area"
+        class="flex gap-10 items-center bg-dark p-10 w-full max-w-1200"
+        aria-label="Formularz wysyłania wiadomości do AI"
+        onsubmit='sendPrompt(); return false;'
+      >
+        <p id="prompt-desc" hidden>
+          Wpisz wiadomość, którą AI ma zinterpretować w kontekście narracyjnym.
+          Możesz używać komend: @nazwa_postaci aby skierować wiadomość, lub
+          /set-location(nazwa) aby zmienić scenę. Podpowiedzi pojawią się
+          automatycznie.
+        </p>
+
+        <textarea
+          id="prompt"
+          class="form-element textarea-base flex-1"
+          rows="4"
+          lang="pl"
+          placeholder="Wpisz wiadomość... [Możesz wysyłać ją przez Ctrl+Enter]"
+          aria-label="Wiadomość do AI"
+          aria-describedby="prompt-desc"
+          title="Możesz używać komend: @nazwa_postaci aby skierować wiadomość, lub /set-location(nazwa) aby zmienić scenę. Podpowiedzi pojawią się automatycznie."
+          aria-autocomplete="list"
+          required
+          autofocus
+        ></textarea>
+
+        <button
+          type="submit"
+          class="form-element button-base br-2"
+          aria-controls="chat-container"
+          title="Wyślij wiadomość"
+        >
+          ▷
+        </button>
+      </form>
+
+      <button id="burger-toggle" class="button-icon">☰</button>
+      <aside id="web-side-panel" class="bg-panel p-10 br-2">
+        <!-- Tu będą linki do poszczególnych stron -->
+      </aside>
+
+      <button id="settings-toggle" class="button-icon">⚙️</button>
+      <aside id="side-panel" class="bg-panel p-10 br-2">
+        <label for="user_name" class="text-sm">
+          Podaj swoje imię:
+          <input
+            type="text"
+            id="user_name"
+            class="form-element text-base w-full mt-10"
+            placeholder="Twoje imię (max 20 znaków)"
+            onchange="setUserName()"
+            maxlength="20"
+          />
+        </label>
+      </aside>
+
+      <template class="tag-panel-template">
+        <label class="text-base">
+          Lokalizacja:
+          <input
+            list="location-tags"
+            id="tag-location"
+            class="form-element w-full"
+          />
+        </label>
+        <datalist id="location-tags">
+          <option value="forest"></option>
+          <option value="castle"></option>
+          <option value="cave"></option>
+          <option value="village"></option>
+        </datalist>
+
+        <label class="text-base">
+          Postać:
+          <input
+            list="character-tags"
+            id="tag-character"
+            class="form-element w-full"
+          />
+        </label>
+        <datalist id="character-tags">
+          <option value="Lytha"></option>
+          <option value="Aredia"></option>
+          <option value="Xavier"></option>
+        </datalist>
+
+        <label class="text-base">
+          Czynność (nonNSFW):
+          <input
+            list="action-tags"
+            id="tag-action"
+            class="form-element w-full"
+          />
+        </label>
+        <datalist id="action-tags">
+          <option value="healing"></option>
+          <option value="combat"></option>
+          <option value="ritual"></option>
+        </datalist>
+
+        <label class="text-base">
+          Czynność (NSFW):
+          <input list="nsfw-tags" id="tag-nsfw" class="form-element w-full" />
+        </label>
+        <datalist id="nsfw-tags">
+          <option value="intimacy"></option>
+          <option value="touch"></option>
+          <option value="kiss"></option>
+        </datalist>
+
+        <label class="text-base">
+          Emocja:
+          <input
+            list="emotion-tags"
+            id="tag-emotion"
+            class="form-element w-full"
+          />
+        </label>
+        <datalist id="emotion-tags">
+          <option value="joy"></option>
+          <option value="sadness"></option>
+          <option value="fear"></option>
+          <option value="love"></option>
+        </datalist>
+
+        <div id="image-gallery" class="gallery-grid mt-10"></div>
+      </template>
+    </div>
+
+    <script src="/static/data/script.js"></script>
+  </body>
+</html>

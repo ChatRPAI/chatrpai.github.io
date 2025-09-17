@@ -1,0 +1,61 @@
+po anulowaniu edycji znikną avatar dla wiadomości AI oraz zmieniła się kolorystyka (najpewniej przez zmianę na statyczne msg-id) czas generowania też chyba jest z placeholder-a bo zmienił się z 0.5s na 0s
+
+
+## Problematyka walidacji promptu
+App.init() nadaje Event wysłania prompta:
+```
+    this.ctx.dom.prompt.addEventListener("keydown", (e) => {
+      if (e.ctrlKey && e.key === "Enter") {
+        this.chatManager.sendPrompt();
+        e.preventDefault();
+      }
+    });
+```
+wiec ChatManager musi validować prompt:
+```
+  /**
+   * Wysyła prompt użytkownika i obsługuje odpowiedź AI.
+   * @returns {Promise<void>}
+   */
+  async sendPrompt() {
+    const raw = this.dom.prompt.value.trim();
+    const { valid, errors } = PromptValidator.validate(raw);
+
+    if (!valid) {
+      alert("Błąd walidacji promptu:\n" + errors.join("\n"));
+      return;
+    }
+```
+Jeżeli wysłanie jest przez przycisk a nie przez kobinację klawiszy CTRL + ENTER to mamy podwujnie wywołaną walidację prompta:
+```
+ /** Obserwuje długość promptu i aktywuje walidację. */
+  attachPromptLengthWatcher() {
+    const textarea = this.dom.prompt;
+    const info = this.dom.inputArea.querySelector(".max-text-length-warning");
+    const form = this.dom.inputArea;
+    const errorMsgEl = this.dom.inputArea.querySelector(".prompt-error");
+
+    if (!textarea || !info || !form || !errorMsgEl) return;
+
+    let isDirty = false; // czy użytkownik już edytował ręcznie?
+
+    const update = () => {
+      const value = textarea.value;
+      const len = value.length;
+      const { valid, errors } = PromptValidator.validate(value);
+
+      // zawsze aktualizujemy licznik i stan przycisku
+      info.textContent = `${len}/${PromptValidator.maxLength} znaków`;
+      info.style.color = len > PromptValidator.maxLength ? "tomato" : "";
+      form.querySelector('button[type="submit"]').disabled = !valid;
+
+      // pokazujemy błąd tylko gdy isDirty==true i prompt jest nie-valid
+      errorMsgEl.textContent = isDirty && !valid ? errors[0] : "";
+    };
+
+    // Gdy użytkownik coś wpisze/usuwa – ustawiamy isDirty i odpalamy update
+    textarea.addEventListener("input", (e) => {
+      isDirty = true;
+      update();
+    });
+```

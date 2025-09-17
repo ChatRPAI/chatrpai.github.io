@@ -1,0 +1,108 @@
+:root {
+  /* Sekcje na stronie głównej */
+  --course-card-background-color1: #ffe1e1;
+  --course-card-background-color2: #e1e1ff;
+  --course-card-background-color3: #e1ffe1;
+  --login-background-color: #f9f9f9;
+  /* Przyciski */
+  --primary-btn-color: #444;
+  --primary-btn-hover-color: #555;
+  --primary-btn-text-color: #fff;
+
+  /* link a href */
+  --link-color: cornflowerblue;
+  --link-visited-color: mediumorchid;
+
+  /* scrollbar */
+  --scrollbar-thumb-color: #75d3ff;
+  --scrollbar-thumb-hover-color: #05b0ff;
+
+  /* Główne kolory */
+  --body-background-color: #f0f0f0;
+  --body-color: #000;
+
+  --header-background-color: #d9d7d7;
+  /* --header-color: #89be65; */
+
+  --nav-background-color: #e7e7e7;
+  --nav-color: #0e0e0e;
+
+  --nav-summary-active-open-border-left-color: #ffffff50;
+  --nav-summary-active-open-background-color: #00000050;
+
+  --nav-sidebar-color: #1b1b1b;
+
+  --content-background-color: #fbfbfb;
+
+  --footer-background-color: #333;
+  --footer-color: #fff;
+
+  /* Kolory podpowiedzi */
+  --hint-text-color: #000000;
+
+  --hint-info-background-color: #cde7fc;
+  --hint-info-border-color: #0062be;
+
+  --hint-success-background-color: #b8e0ba;
+  --hint-success-border-color: #1f5f04;
+
+  --hint-warning-background-color: #fffac8;
+  --hint-warning-border-color: #e6e200;
+
+  --hint-danger-background-color: #f7d6d4;
+  --hint-danger-border-color: #cc0000;
+
+  /* Kolory kodu */
+  /* Kolory przycisku kopiuj kod */
+  --code-background-color: #b7b7b7;
+  --code-color: #d1d1d1;
+  --copy-button-color: #d5d5d5;
+
+  /* Kolory tabel */
+  --table-color: #725d33;
+  --table-header-color: #d9d9d9;
+
+  /* Kolory zakładek */
+  --tabs-background-color: #dfdfdf;
+  --tabs-border-color: #61594e;
+
+  /* Pierwszy tytułowy h1 */
+  --art-title-background-color: #00000017;
+  --art-title-bootom-border-color: #75654c;
+
+  /* Podkreślenie Nagłówków h1 h2 h3 */
+
+  --hTag-border-color: #079992ee;
+
+  /* Kolory formatowania tekstu */
+
+  --em-text-color: #658805;
+  --strong-text-color: #9605ff;
+  --strong-em-text-color: #bb4f00;
+  --em-strong-text-color: #0074a2;
+
+  --nav-active-background-color: transparent;
+  --table-header-background-color: #d9d9d9;
+  --table-header-color: #000;
+  --table-color: #000000;
+
+  --blur-text-shadow: 1px 1px 7px #000;
+}
+
+code {
+  background-color: #000 !important;
+  filter: invert(100%) hue-rotate(168deg) saturate(200%);
+  border: 1px solid;
+}
+nav ul li.module,
+nav ul li.active a,
+nav ul li a:hover {
+  filter: brightness(80%);
+}
+body,html{
+  text-shadow: 0 0 1px #0000008c;
+}
+header h1{
+  text-shadow: none;
+  filter: brightness(70%);
+}

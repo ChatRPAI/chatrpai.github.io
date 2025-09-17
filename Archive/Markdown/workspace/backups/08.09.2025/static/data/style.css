@@ -1,0 +1,511 @@
+/* === Reset i układ główny === */
+html,
+body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden;
+}
+
+body {
+  font-family: Arial, sans-serif;
+  background: #111;
+  color: #eee;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* === Formularze i pola tekstowe === */
+input,
+textarea,
+button {
+  font-family: inherit;
+  background: #222;
+  color: #eee;
+  border: none;
+  border-radius: 5px;
+  margin: 3px;
+}
+
+input:focus,
+textarea:focus,
+button:focus {
+  outline: 2px solid #079bac;
+  outline-offset: 2px;
+}
+
+textarea {
+  width: auto;
+  resize: none;
+  padding: 10px;
+  font-size: 16px;
+}
+
+/* === Przycisk wysyłania === */
+button {
+  margin-top: 10px;
+  padding: 10px;
+  font-size: 16px;
+  background: #555;
+  cursor: pointer;
+  display: block;
+}
+
+button:hover {
+  background: #666;
+}
+
+/* === Panel użytkownika === */
+.user-name-label {
+  position: absolute;
+  right: 2px;
+  bottom: 2px;
+  width: 190px;
+  background: #222;
+  border: 1px solid #555;
+  padding: 5px;
+  font-size: 14px;
+  z-index: 1000;
+}
+
+.user-name-label input {
+  width: 180px;
+  margin-top: 7px;
+  font-size: 14px;
+}
+#chat-container {
+  height: var(--chat-height, 65vh);
+}
+/* === Kontener czatu === */
+#chat-container {
+  width: 1200px;
+  /* height: 65vh; */
+  overflow-y: auto;
+  background: #222;
+  padding: 20px;
+  border-radius: 10px;
+  margin-bottom: 20px;
+}
+
+/* === Wiadomości czatu === */
+.message {
+  margin-bottom: 15px;
+  padding: 10px;
+  border-radius: 5px;
+  width: 90%;
+}
+.message img {
+  max-width: 100%;
+  border-radius: 5px;
+  margin-top: 10px;
+}
+
+.user {
+  position: relative;
+  background: #333;
+  text-align: right;
+  left: 5%;
+}
+
+.ai {
+  background: #444;
+  text-align: left;
+}
+
+/* === Obszar wejściowy === */
+#chat-container {
+  /* display: flex; */
+  /* gap: 10px; */
+  width: 93%;
+  max-width: 1200px;
+  /* flex-direction: column; */
+  flex: 1;
+  overflow-y: auto;
+  padding: 20px;
+}
+#input-area {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  width: 100vw;
+  max-width: 1200px;
+}
+#input-area {
+  position: fixed;
+  background: #111;
+  z-index: 999;
+}
+#input-area {
+  flex-shrink: 0;
+  padding: 10px;
+  background: #111;
+}
+
+#chat-wrapper {
+  position: fixed;
+  left: 0;
+  right: 0;
+  background: #111;
+  z-index: 999;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  max-width: 1200px;
+  margin: auto;
+  top: 60px;
+  height: calc(100dvh - 120px);
+}
+
+#input-area textarea {
+  flex: 1;
+  min-height: 60px;
+}
+
+#input-area button {
+  flex: 0 0 60px;
+  height: 60px;
+  font-size: 44px;
+  padding: 0;
+  background: #444;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: brown;
+  font-weight: bold;
+  margin-right: 15px;
+}
+
+#input-area button:hover {
+  background: #666;
+}
+
+/* === Formularz oceny wiadomości === */
+.rating-form {
+  background: #333;
+  padding: 10px 15px;
+  border-radius: 10px;
+  margin: 10px auto;
+  color: #eee;
+  width: 600px;
+  font-size: 13px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.rating-form h3 {
+  grid-column: span 2;
+  font-size: 14px;
+  margin-bottom: 5px;
+}
+
+.rating-form label {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.rating-form input[type="range"] {
+  width: 150px;
+}
+
+.rating-form button {
+  grid-column: span 2;
+  margin-top: 10px;
+  padding: 8px;
+  background: #666;
+  color: #fff;
+}
+
+.rating-form button:hover {
+  background: #777;
+}
+
+/* === Sekcja rozwijana === */
+details {
+  display: block;
+  cursor: pointer;
+  margin-top: -15px;
+  margin-bottom: 30px;
+  text-align: center;
+  width: 90%;
+}
+
+summary:hover {
+  background-color: #2b2b2b;
+}
+
+details,
+summary {
+  padding: 2px;
+}
+
+/* === Panel tagów === */
+.tag-panel {
+  display: flex;
+  flex-direction: column;
+  background-color: #2d2d2d60;
+  padding: 15px;
+}
+
+.tag-panel input {
+  width: 100%;
+  background: #252525;
+  color: #00e5ff;
+  font-size: 16px;
+  border: 1px solid #ffffff55;
+  padding: 3px;
+}
+
+.tag-panel label {
+  font-size: 18px;
+  margin-bottom: 10px;
+  color: #65b2bb;
+}
+
+.tag-panel #image-gallery {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  grid-template-rows: 1fr 1fr 1fr;
+  gap: 0px 0px;
+  grid-auto-flow: row;
+  grid-template-areas: ". . .";
+  overflow-y: auto;
+  max-height: 450px;
+}
+
+.tag-panel img {
+  height: auto;
+  width: 90%;
+  border: 2px solid transparent;
+  margin: 5px 0;
+}
+
+.tag-panel img:hover {
+  border: 2px solid #49a0c2;
+  cursor: pointer;
+}
+
+.tag-panel input[type="radio"] {
+  display: none;
+}
+
+/* === Responsywność === */
+@media (max-width: 768px) {
+  html,
+  body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+  }
+
+  #chat-container {
+    height: 85dvh;
+    overflow-y: auto;
+    padding: 10px;
+    background: #222;
+    border-radius: 10px;
+    margin: 0 3px;
+    margin-bottom: 120px;
+  }
+
+  textarea {
+    flex: 1 1 70%;
+    min-height: 60px;
+  }
+
+  button {
+    flex: 1 1 25%;
+    margin-top: 0;
+    height: 60px;
+  }
+
+  .user-name-label {
+    position: static;
+    width: 100%;
+    margin-top: 10px;
+    font-size: 0.875rem;
+  }
+
+  .user-name-label input {
+    width: 95%;
+    font-size: 0.875rem;
+  }
+
+  .rating-form {
+    width: 100%;
+    font-size: 0.875rem;
+    grid-template-columns: 1fr;
+  }
+
+  .rating-form h3 {
+    grid-column: span 1;
+  }
+
+  .rating-form button {
+    grid-column: span 1;
+  }
+
+  .tag-panel {
+    position: static;
+    width: 90%;
+    height: auto;
+    margin-top: 20px;
+  }
+
+  .tag-panel label {
+    font-size: 1rem;
+  }
+
+  .tag-panel input {
+    font-size: 1rem;
+  }
+
+  .tag-panel img {
+    width: 100%;
+  }
+  .tag-panel #image-gallery {
+    grid-template-columns: 1fr;
+    grid-template-areas: ".";
+    padding: 10px;
+  }
+  .tag-select-mobile {
+    width: 100%;
+    margin: 5px 0;
+    background-color: #222;
+    outline: 1px solid #079bac;
+    border: transparent;
+    padding: 5px;
+    color: #ddd;
+  }
+}
+
+/* === Panel ustawień === */
+.settings-panel {
+  width: 100%;
+  max-width: 400px;
+  background: #222;
+  color: #eee;
+  border: 1px solid #555;
+  border-radius: 5px;
+  padding: 10px;
+  margin-bottom: 20px;
+}
+
+.settings-panel summary {
+  font-size: 1rem;
+  cursor: pointer;
+  padding: 5px;
+  background: #333;
+  border-radius: 3px;
+}
+
+.settings-panel label {
+  display: block;
+  margin-top: 10px;
+  font-size: 0.9rem;
+}
+
+.settings-panel input {
+  width: 100%;
+  margin-top: 5px;
+  padding: 5px;
+  font-size: 1rem;
+  background: #252525;
+  color: #eee;
+  border: 1px solid #555;
+  border-radius: 3px;
+}
+
+/* === Burger menu === */
+#settings-toggle,
+#burger-toggle {
+  position: fixed;
+  top: 10px;
+  background: #333;
+  color: #eee;
+  border: none;
+  font-size: 20px;
+  z-index: 1001;
+  border-radius: 5px;
+  height: 40px;
+  width: 40px;
+  padding: 5px;
+}
+#settings-toggle {
+  right: 10px;
+}
+#burger-toggle {
+  left: 10px;
+}
+
+/* === Panel boczny === */
+#web-side-panel {
+  position: fixed;
+  top: 60px;
+  left: -260px;
+  width: 250px;
+  height: 100vh;
+  color: #eee;
+  padding: 5px;
+  transition: left 0.3s ease;
+  z-index: 1000;
+  overflow-y: auto;
+}
+#side-panel {
+  position: fixed;
+  top: 60px;
+  right: -260px;
+  width: 250px;
+  height: 100vh;
+  color: #eee;
+  padding: 5px;
+  transition: right 0.3s ease;
+  z-index: 1000;
+  overflow-y: auto;
+}
+#web-side-panel *,
+#side-panel * {
+  width: 100%;
+  display: block;
+  background-color: #222;
+  padding: 5px;
+}
+#web-side-panel label,
+#side-panel label {
+  font-size: 16px;
+  margin-bottom: 5px;
+  color: #65b2bb;
+}
+#web-side-panel label input,
+#side-panel label input {
+  margin: 10px 5px;
+  width: 90%;
+}
+#web-side-panel.open {
+  left: 0;
+  background: #333;
+}
+#side-panel.open {
+  right: 0;
+  background: #333;
+}
+#web-side-panel .close-toggle,
+#side-panel .close-toggle {
+  position: absolute;
+  top: 10px;
+  left: -40px;
+  width: 40px;
+  height: 40px;
+  background: red;
+  color: #eee;
+  border: none;
+  font-size: 24px;
+  border-radius: 5px 0 0 5px;
+  cursor: pointer;
+}
+#web-side-panel:not(.open) *:not(#burger-toggle),
+#side-panel:not(.open) *:not(#settings-toggle) {
+  display: none;
+}

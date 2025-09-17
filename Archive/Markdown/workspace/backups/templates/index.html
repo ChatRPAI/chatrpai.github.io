@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="pl">
+  <head>
+    <meta charset="UTF-8" />
+    <title>AI RP Chat</title>
+    <link rel="stylesheet" href="/static/data/style.css" />
+  </head>
+  <body>
+    <h1>Rozmowa z AI Bielik</h1>
+    <div id="chat-container"></div>
+    <div id="input-area">
+      <textarea
+        id="prompt"
+        rows="4"
+        placeholder="Wpisz wiadomość..."
+      ></textarea>
+      <button onclick="sendPrompt()">Wyślij</button>
+    </div>
+
+    <label for="user_name" class="user-name-label"
+      >Podaj swoje imię:
+      <input
+        type="text"
+        id="user_name"
+        placeholder="Twoje imię"
+        onchange="setUserName()"
+      />
+    </label>
+
+
+    <template class="tag-panel-template">
+      <label
+        >Lokalizacja: <input list="location-tags" id="tag-location"
+      /></label>
+      <datalist id="location-tags">
+        <option value="forest"></option>
+        <option value="castle"></option>
+        <option value="cave"></option>
+        <option value="village"></option>
+      </datalist>
+
+      <label>Postać: <input list="character-tags" id="tag-character" /></label>
+      <datalist id="character-tags">
+        <option value="Lytha"></option>
+        <option value="Aredia"></option>
+        <option value="Xavier"></option>
+      </datalist>
+
+      <label
+        >Czynność (nonNSFW): <input list="action-tags" id="tag-action"
+      /></label>
+      <datalist id="action-tags">
+        <option value="healing"></option>
+        <option value="combat"></option>
+        <option value="ritual"></option>
+      </datalist>
+
+      <label>Czynność (NSFW): <input list="nsfw-tags" id="tag-nsfw" /></label>
+      <datalist id="nsfw-tags">
+        <option value="intimacy"></option>
+        <option value="touch"></option>
+        <option value="kiss"></option>
+      </datalist>
+
+      <label>Emocja: <input list="emotion-tags" id="tag-emotion" /></label>
+      <datalist id="emotion-tags">
+        <option value="joy"></option>
+        <option value="sadness"></option>
+        <option value="fear"></option>
+        <option value="love"></option>
+      </datalist>
+
+      <div id="image-gallery" style="margin-top: 10px"></div>
+    </template>
+
+    <script src="/static/data/script.js"></script>
+  </body>
+</html>

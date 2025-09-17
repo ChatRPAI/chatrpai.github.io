@@ -1,0 +1,104 @@
+# ✅ AI RP Chat – Refaktoryzacja i Rozwój (TODO)
+
+Źródła:
+- `dokumentacja.md` – dokumentacja klas
+- `Zaktualizowany-i-scalony-kod-JS.md` – scalony kod źródłowy
+- Feedback Kamila – 12–13.09.2025
+
+---
+
+## 🔧 Refaktoryzacja strukturalna
+
+### UI i kontrola
+- [ ] Rozdzielić `ChatUI` na dwie warstwy: renderowanie vs interakcje użytkownika
+- [ ] Wydzielić `Dom` jako zależność przekazywaną do klas (nie globalny singleton)
+- [ ] Przebudować `PanelsController`:
+  - [ ] Mobile: tylko jeden panel otwarty naraz
+  - [ ] Desktop: oba panele mogą być otwarte jednocześnie
+  - [ ] `setting-side-panel` sterowany ciasteczkiem (`COOKIE_PANELS`)
+  - [ ] Dodać metody: `addPanel()`, `isPanelOpen()`, `getOpenPanel()`, `destroy()`
+
+### API i logika
+- [ ] Ujednolicić API `GalleryLoader` i `ImageResolver` – wspólne metody: `loadImages()`, `clearCache()`, `preload(limit)`
+- [ ] Przenieść `PromptValidator` i `EditValidator` do jednego modułu `ValidationService`
+- [ ] Wydzielić `RequestRetryManager` jako niezależny serwis z:
+  - [ ] `isRetryable(error)`
+  - [ ] `getBackoffTime(attempt)`
+  - [ ] `onRetry(callback)`
+  - [ ] `maxTotalTime` jako parametr
+
+---
+
+## 🧪 Testowalność i kontrakty
+
+### Testy jednostkowe
+- [ ] `BackendAPI` – testy kontraktu odpowiedzi: `{ id, sender, text, tags?, duration?, avatarUrl? }`
+- [ ] `RequestRetryManager` – testy retry, backoff, limit czasu
+- [ ] `EditValidator` – testy reguł walidacji w trybie strict/relaxed
+
+### Testy integracyjne
+- [ ] Przepływ: `sendPrompt()` → AI → `rateResponse()` → `editResponse()` → `submitEdit()`
+- [ ] Przepływ: `loadGallery()` → `renderImages()` → `selectImage()`
+
+### Kontrakty danych
+- [ ] Zdefiniować typ `Message`
+- [ ] Zdefiniować typ `Tag`
+- [ ] Zdefiniować typ `ImageResource`
+- [ ] Zdefiniować typ `PanelState` (dla ciasteczek)
+
+---
+
+## 🚀 Rozszerzenia klas
+
+### ChatManager
+- [ ] `sendPromptWithStreaming()` – obsługa streamingu odpowiedzi
+- [ ] `abortPrompt()` – anulowanie generowania (AbortController)
+- [ ] `sendPromptWithRetry()` – retry UX + logika z `RequestRetryManager`
+
+### BackendAPI
+- [ ] `uploadImage(file)` – walidacja + POST
+- [ ] `getSessionMessages()` – pobieranie historii sesji
+- [ ] `deleteMessage(id)` – usuwanie wiadomości
+
+### GalleryLoader / ImageResolver
+- [ ] `clearCache()` – czyszczenie cache obrazów
+- [ ] `preload(limit)` – preload z limitem i TTL
+
+---
+
+## 🧠 Stabilizacja UX
+
+- [ ] `EditManager.submitEdit()` – walidacja treści, obsługa błędów, możliwość anulowania
+- [ ] `RatingForm.disable()` – blokada po ocenie
+- [ ] `ChatUI.clearChat()` – reset widoku czatu
+- [ ] `ChatUI.renderSystemMessage(msg)` – komunikaty systemowe (np. błędy, info)
+
+---
+
+## 🐞 Błędy do naprawy
+
+- [ ] `enableEdit()` – ReferenceError: `categorizeTag` is not defined
+- [ ] `Diagnostics.runAll()` – TypeError: `grouped[group].push` is not funkcją
+- [ ] `TagsPanel` – kontener nie jest elementem DOM
+- [ ] `Utils.q()` – brak elementu `#non-existent` → poprawić logikę fallbacku
+- [ ] `editResponse()` i `rateResponse()` – nie działają (brak efektu w UI)
+
+---
+
+## 📚 Dokumentacja dla Ciebie (etap 2)
+
+- [ ] Generowanie opisów klas z perspektywy użytkownika (nie techniczna)
+- [ ] Historia zmian klas (diff vs poprzednia wersja)
+- [ ] Wizualizacja zależności klas (diagram SVG lub HTML)
+- [ ] Raport zmian w stylu changeloga (v0.9.0 → v1.0.0)
+
+---
+
+## 📦 Dodatki i ergonomia
+
+- [ ] Dodanie `@example` w JSDoc dla kluczowych metod
+- [ ] Dodanie `@throws` dla metod mogących rzucać błędy
+- [ ] Dodanie `@see` dla powiązanych klas/metod
+- [ ] Ujednolicenie stylu JSDoc w całym projekcie
+- [ ] Tryb debug zawsze aktywny – bez przełączników
+

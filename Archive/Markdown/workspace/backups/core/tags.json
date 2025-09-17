@@ -1,0 +1,14 @@
+{
+  "location": {
+    "forest": ["las", "leś", "drzew"],
+    "castle": ["zamek", "mur", "komnat"]
+  },
+  "emotion": {
+    "joy": ["rado", "śmiech"],
+    "sadness": ["smut", "żal"]
+  },
+  "action": {
+    "healing": ["lecze", "rana"],
+    "nsfw": ["nago", "seks"]
+  }
+}

@@ -1,0 +1,15 @@
+Bielik-7B-Instruct-v0.1/*
+static/NarrativeIMG/*
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+venv/
+.env/
+.vscode/
+.idea/
+Thumbs.db
+Desktop.ini
+*.bak
+*.tmp
+*~

@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="pl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Dokumentacja</title>
+    <link
+      rel="shortcut icon"
+      href="../static/favicons/favicon-32x32.png"
+      type="image/x-icon"
+    />
+    <link rel="stylesheet" href="../documentation/data/Colors/orange.css" />
+    <link rel="stylesheet" href="../documentation/data/styles.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/styles/atom-one-dark.min.css"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/katex.min.css"
+    />
+  </head>
+  <body>
+    <header>
+      <h1>Dokumentacja</h1>
+      <label class="switch">
+        <input type="checkbox" id="theme-switcher" />
+        <span class="slider round"></span>
+      </label>
+    </header>
+    <div class="container">
+      <nav>
+        <ul>
+          <!-- Wygeneruje się tu menu nawigacyjne bazujące na Pages/_index.md  -->
+        </ul>
+      </nav>
+      <main id="content">
+        <!-- Zawartość będzie ładować się zawartość plików MarkDown -->
+      </main>
+      <nav class="sidebar">
+        <ul>
+          <!-- Wygeneruje się spis treści dokumentu MarkDown chwytając najwyższe znaczniki h1 i h2 -->
+        </ul>
+      </nav>
+    </div>
+
+    <div id="loading-doc-page">
+      <div>
+        <div class="loader"></div>
+        <p class="loading-message">Ładowanie komponentów</p>
+      </div>
+    </div>
+ <footer>
+      <p>© Koala-V</p>
+      <p>Autor: Kamil Zbrzeźniak</p>
+      <p data-id="email">
+        kamil.zbrzezniak@teb.edu.pl
+      </p>
+    </footer>
+    <script src="../documentation/data/Colors/colorsStyle.js"></script>
+    
+
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/highlight.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/languages/powershell.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/languages/apache.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/languages/dos.min.js"></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/katex.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/contrib/auto-render.min.js"></script>
+
+    <script src="../documentation/data/script.js"></script>
+  </body>
+</html>

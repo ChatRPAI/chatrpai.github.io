@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="pl">
+  <head>
+    <meta charset="UTF-8" />
+    <title>AI RP Chat</title>
+    <link rel="stylesheet" href="/static/data/style.css" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  </head>
+  <body>
+    <h1>AI RP Chat</h1>
+    <div id="chat-wrapper">
+      <div
+        id="chat-container"
+        role="log"
+        aria-live="polite"
+        aria-label="Historia rozmowy z AI"
+      ></div>
+      <form
+        id="input-area"
+        aria-label="Formularz wysyłania wiadomości do AI"
+        onsubmit="sendPrompt(); return false;"
+      >
+        <p id="prompt-desc" hidden>
+          Wpisz wiadomość, którą AI ma zinterpretować w kontekście narracyjnym.
+          Możesz używać komend: @nazwa_postaci aby skierować wiadomość, lub
+          /set-location(nazwa) aby zmienić scenę. Podpowiedzi pojawią się
+          automatycznie.
+        </p>
+        <textarea
+          id="prompt"
+          rows="4"
+          lang="pl"
+          placeholder="Wpisz wiadomość... [Możesz wysyłać ją przez Ctrl+Enter]"
+          aria-label="Wiadomość do AI"
+          aria-describedby="prompt-desc"
+          title="Możesz używać komend: @nazwa_postaci aby skierować wiadomość, lub /set-location(nazwa) aby zmienić scenę. Podpowiedzi pojawią się automatycznie."
+          aria-autocomplete="list"
+          required
+          autofocus
+          onfocus="setTimeout(() => window.scrollTo(0, 0), 100);"
+        ></textarea>
+        <button
+          type="submit"
+          aria-controls="chat-container"
+          title="Wyślij wiadomość"
+        >
+          ▷
+        </button>
+      </form>
+    </div>
+    <button id="burger-toggle">☰</button>
+    <aside id="web-side-panel">
+      <!-- Tu będą linki do poszczególnych stron -->
+    </aside>
+
+    <button id="settings-toggle">⚙️</button>
+    <aside id="side-panel">
+      <label for="user_name"
+        >Podaj swoje imię:
+        <input
+          type="text"
+          id="user_name"
+          placeholder="Twoje imię (max 20 znaków)"
+          onchange="setUserName()"
+          maxlength="20"
+        />
+      </label>
+      <!-- Tu będą ustawienia dotyczące czatu i aktualnej narracji -->
+    </aside>
+
+    <template class="tag-panel-template">
+      <label
+        >Lokalizacja: <input list="location-tags" id="tag-location"
+      /></label>
+      <datalist id="location-tags">
+        <option value="forest"></option>
+        <option value="castle"></option>
+        <option value="cave"></option>
+        <option value="village"></option>
+      </datalist>
+
+      <label>Postać: <input list="character-tags" id="tag-character" /></label>
+      <datalist id="character-tags">
+        <option value="Lytha"></option>
+        <option value="Aredia"></option>
+        <option value="Xavier"></option>
+      </datalist>
+
+      <label
+        >Czynność (nonNSFW): <input list="action-tags" id="tag-action"
+      /></label>
+      <datalist id="action-tags">
+        <option value="healing"></option>
+        <option value="combat"></option>
+        <option value="ritual"></option>
+      </datalist>
+
+      <label>Czynność (NSFW): <input list="nsfw-tags" id="tag-nsfw" /></label>
+      <datalist id="nsfw-tags">
+        <option value="intimacy"></option>
+        <option value="touch"></option>
+        <option value="kiss"></option>
+      </datalist>
+
+      <label>Emocja: <input list="emotion-tags" id="tag-emotion" /></label>
+      <datalist id="emotion-tags">
+        <option value="joy"></option>
+        <option value="sadness"></option>
+        <option value="fear"></option>
+        <option value="love"></option>
+      </datalist>
+
+      <div id="image-gallery" style="margin-top: 10px"></div>
+    </template>
+
+    <script src="/static/data/script.js"></script>
+  </body>
+</html>

@@ -1,0 +1,37 @@
+No to lecimy, Kamil 💻🔥  
+Mamy dokumentację, mamy scalony kod, mamy checklistę — teraz czas na konkretne działania. Proponuję zacząć od **naprawy podstawowych błędów i przywrócenia działania kluczowych funkcji**, żeby projekt znów był stabilny. Oto plan startowy:
+
+---
+
+## 🔧 Etap 1 – Przywrócenie działania projektu
+
+### 1. Naprawa błędów z konsoli
+- [ ] `categorizeTag is not defined` → sprawdź, czy funkcja jest zaimportowana lub zadeklarowana
+- [ ] `grouped[group].push is not a function` → upewnij się, że `grouped[group]` jest tablicą
+- [ ] `Dom → [object Object]` → `TagsPanel` otrzymuje błędny kontener, popraw przekazywanie DOM elementu
+- [ ] `#non-existent` → popraw `Utils.q()` żeby nie logował błędów dla nieistniejących elementów (lub dodaj fallback)
+
+### 2. Przywrócenie funkcji użytkownika
+- [ ] Edytowanie wiadomości (`enableEdit()`) – sprawdź, czy `categorizeTag()` działa, czy `editBtn` ma dostęp do DOM
+- [ ] Wysyłanie oceny (`rateResponse()`) – sprawdź, czy event jest zarejestrowany i czy backend odpowiada
+- [ ] Side-panele na desktopie – zmień logikę `PanelsController`, by pozwalała na wiele otwartych paneli
+
+---
+
+## 🧪 Etap 2 – Testy działania
+
+- [ ] Uruchom testy `testAppInitTagModules` – popraw DOM kontener
+- [ ] Sprawdź `testAddClearImageCacheButton` – czy przycisk działa i czyści cache
+- [ ] Dodaj test dla `ChatManager.sendPrompt()` – czy prompt trafia do backendu i wraca odpowiedź
+
+---
+
+## 🚀 Etap 3 – Rozszerzenia, które warto wdrożyć od razu
+
+- [ ] Dodaj `abortPrompt()` do `ChatManager` – użyj `AbortController`
+- [ ] Dodaj `clearCache()` do `GalleryLoader` – usuń obrazki z pamięci
+- [ ] Dodaj `COOKIE_PANELS` do `PanelsController` – inicjalizacja paneli z ciasteczek
+
+---
+
+Jeśli chcesz, mogę teraz pomóc Ci przejść przez pierwszy punkt — np. zlokalizować `categorizeTag` i sprawdzić, gdzie go brakuje. Albo od razu wejść w `PanelsController` i zmienić logikę desktopową. Ty wybierasz, co robimy jako pierwsze.
