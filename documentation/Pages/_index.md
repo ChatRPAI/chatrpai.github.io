@@ -1,3 +1,23 @@
-# Cheat Sheet (wersja Copilot‑friendly)
+# App
+# AppStorageManager
 # BackendAPI
+# ChatEditView
+# ChatManager
+# ChatRatingView
+# ChatUIView
+# Context
+# Diagnostics
+# Dom
+# EditValidator
 # GalleryLoader
+# ImageResolver
+# LoggerService
+# PanelsController
+# PromptValidator
+# RequestRetryManager
+# SenderRegistry
+# TagSelectorFactory
+# TagsPanel
+# UserManager
+# Utils
+# VirtualKeyboardDock

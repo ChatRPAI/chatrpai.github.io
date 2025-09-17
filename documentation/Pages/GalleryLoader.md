@@ -1,98 +1,152 @@
-# 📦 GalleryLoader
+# GalleryLoader
 
-FEEDBACK KAMILA (12.09.2025)
-=============================
-- ✅ Klasa `GalleryLoader` renderuje obrazy w galerii na podstawie tagów lub danych z API
-- ✅ Obsługuje fallbacki, komunikaty, selekcję i błędy
-- ✅ Integruje się z `ImageResolver`, `Utils`, `LoggerService`
-- ⚠️ Brakuje metody `renderImages(urls)` — musi być zdefiniowana, bo jest wywoływana
-- ✅ Możliwość dodania metod: `setLogger()`, `setGallerySelector()`, `destroy()`
-- ❌ Refaktoryzacja nie jest konieczna — kod jest modularny i czytelny
-
-GalleryLoader
 =============
-Loader obrazów do galerii:
-- Renderuje obrazy z tagów i z API
-- Obsługuje komunikaty, błędy, selekcję
-- Integruje się z `ImageResolver`, `Utils`, `LoggerService`
+Komponent odpowiedzialny za renderowanie galerii obrazów w przekazanym kontenerze.
+Współpracuje z ImageResolver w celu wyszukiwania obrazów na podstawie tagów.
+Umożliwia wybór obrazu przez użytkownika (radio name="gallery-choice").
+Zasady:
+-------
+✅ Dozwolone:
+  - Renderowanie obrazów w kontenerze
+  - Współpraca z ImageResolver
+  - Obsługa wyboru obrazu przez użytkownika
+  - Pobieranie obrazów z API (GET)
+❌ Niedozwolone:
+  - Logika promptów, edycji, ocen
+  - Połączenia z BackendAPI poza prostym GET
+  - Mutacje globalnego stanu
+TODO:
+  - setMaxImages(n)
+  - disableSelection()
+  - exposeSelected(): string | null
+  - support multi-select mode
+Refaktoryzacja?:
+  - Rozdzielenie na podkomponenty:
+    • GalleryRenderer → renderowanie i czyszczenie
+    • GallerySelector → obsługa wyboru i podświetlenia
+    • GalleryFetcher → integracja z ImageResolver i API
 
 ---
-## 🧬 Konstruktor
 
-/**
-Tworzy instancję loadera.
-⚙️ *@param {HTMLElement}* - Kontener zawierający `#image-gallery`.
-/
+## constructor
 
-```js
-constructor(container) {
-if (!(container instanceof HTMLElement)) {
-      const actualType =
-        container === null
-          ? "null"
-          : Array.isArray(container)
-          ? "Array"
-          : container?.constructor?.name || typeof container;
+@param {HTMLElement|{galleryContainer?:HTMLElement}} [root] - Kontener lub obiekt z polem galleryContainer.
 
-      throw new Error(
-        `[GalleryLoader] Przekazany kontener nie jest elementem DOM. ` +
-          `Otrzymano: ${actualType} → ${String(container)}`
-      );
-    }
-
-    /** @type {HTMLElement|null} Element galerii obrazów */
-    this.gallery = container.querySelector("#image-gallery");
-}
+```javascript
+  constructor(root) {
+    /** @type {HTMLElement|null} */
+    this.container = null;
+    /** @type {HTMLElement|null} */
+    this.gallery = null;
+    if (root) this.setContainer(root.galleryContainer || root);
+  }
 ```
 
 ---
-## 🔧 Metody
 
-### `clearGallery()`
+## setContainer()
 
+Ustawia kontener galerii. Obsługuje:
+- `<div id="image-gallery">` jako bezpośrednią galerię,
+- dowolny `<div>` (galeria = ten div),
+- wrapper zawierający element #image-gallery.
 
-### `showMessage(message)`
+**_@param_** *`{HTMLElement}`* _**el**_  Element kontenera
 
-Wyświetla komunikat w galerii.
-
-**Parametry:**
-- `message` (`string`): Tekst komunikatu.
-
-### `renderImages(urls)`
-
-Renderuje obrazy w galerii na podstawie przekazanych URLi.
-Każdy obraz jest opakowany w `<label>` z ukrytym `input[type="radio"]`,
-umożliwiającym wybór i podświetlenie.
-
-**Parametry:**
-- `urls` (`string[]`): Lista URLi obrazów do wyświetlenia.
-
-### `renderFromTags(tags)`
-
-Renderuje obrazy na podstawie tagów.
-
-**Parametry:**
-- `tags` (`string[]`): Lista tagów.
-
-### `highlightSelected(selectedWrapper)`
-
-Podświetla wybrany obraz.
-
-**Parametry:**
-- `selectedWrapper` (`HTMLElement`): Element `<label>` z obrazem.
-
-### `loadFromAPI(endpoint, params = {})`
-
-Pobiera dane z API i renderuje obrazy.
-
-**Parametry:**
-- `endpoint` (`string`): Ścieżka API.
-- `params` (`Object`): Parametry zapytania.
+```javascript
+  setContainer(el) {
+    if (!(el instanceof HTMLElement)) {
+      LoggerService.record("error", "[GalleryLoader] setContainer: brak HTMLElement", el);
+      return;
+    }
+    this.container = el;
+    this.gallery = el.querySelector?.("#image-gallery") || el;
+  }
+```
 
 ---
-## 🔗 Zależności
 
-- `GalleryLoader`
-- `ImageResolver`
-- `LoggerService`
-- `Utils`
+## clearGallery()
+
+Czyści zawartość galerii.
+
+```javascript
+  clearGallery() {
+    if (this.gallery) this.gallery.innerHTML = "";
+  }
+```
+
+---
+
+## showMessage()
+
+Pokazuje komunikat w galerii, czyszcząc poprzednią zawartość.
+
+**_@param_** *`{string}`* _**message**_  Treść komunikatu
+
+```javascript
+  showMessage(message) {
+    if (!this.gallery) return;
+    this.clearGallery();
+    const msg = document.createElement("div");
+    msg.classList.add("gallery-message");
+    msg.textContent = message;
+    this.gallery.appendChild(msg);
+  }
+```
+
+---
+
+## renderImages()
+
+Renderuje obrazy jako label z ukrytym input[type=radio] name="gallery-choice".
+Dzięki temu EditManager może odczytać wybór.
+
+**_@param_** *`{string[]}`* _**urls**_  Lista URL-i obrazów
+
+```javascript
+  renderImages(urls) {
+    if (!this.gallery) return;
+    this.clearGallery();
+    urls.forEach((url, idx) => {
+      const label = document.createElement("label");
+      label.className = "image-option";
+
+      const input = document.createElement("input");
+      input.type = "radio";
+      input.name = "gallery-choice";
+      input.value = url;
+      input.style.display = "none";
+
+      const img = document.createElement("img");
+      img.src = url;
+      img.alt = `Obraz ${idx + 1}`;
+      img.loading = "lazy";
+
+      label.append(input, img);
+      this.gallery.appendChild(label);
+      label.addEventListener("click", () => this._highlight(label));
+    });
+  }
+```
+
+---
+
+## _highlight()
+
+Zaznacza wybraną opcję i odznacza pozostałe.
+@private
+
+**_@param_** *`{HTMLElement}`* _**selected**_  Element label z klasą .image-option
+
+```javascript
+  _highlight(selected) {
+    if (!this.gallery) return;
+    this.gallery.querySelectorAll(".image-option").forEach((el) => el.classList.remove("selected"));
+    selected.classList.add("selected");
+    const radio = selected.querySelector('input[type="radio"]');
+    if (radio) radio.checked = true;
+  }
+```
+
+---

@@ -40,7 +40,7 @@ let zmienna = 7;
 ```
 </pre>
 
-Inline: ``let zmienna = 7;``
+Inline: `let zmienna = 7;`
 
 ---
 
@@ -105,29 +105,4 @@ $$ \And\And $$
     - piąty  
         - szósty  
 
----
-
-## Element szczegółu (details)
-
-```markdown
-<details>
-<summary>Kategorie produktów spożywczych</summary>
-
-- Warzywa
-- Owoce
-- Mięso
-- Nabiał
-
-</details>
-```
-
-<details>
-<summary>Kategorie produktów spożywczych</summary>
-
-- Warzywa
-- Owoce
-- Mięso
-- Nabiał
-
-</details>
 
