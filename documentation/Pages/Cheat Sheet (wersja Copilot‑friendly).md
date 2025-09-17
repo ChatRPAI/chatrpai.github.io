@@ -131,36 +131,3 @@ $$ \And\And $$
 
 </details>
 
----
-
-## Cytaty / Hinty (markdownowa wersja)
-
-```markdown
-> [INFO] To jest hint informacyjny.
-> [SUCCESS] To jest hint sukcesu.
-> [WARNING] To jest hint ostrzegawczy.
-> [DANGER] To jest hint niebezpieczeństwa.
-```
-
-> [INFO] To jest hint informacyjny.  
-> [SUCCESS] To jest hint sukcesu.  
-> [WARNING] To jest hint ostrzegawczy.  
-> [DANGER] To jest hint niebezpieczeństwa.  
-
----
-
-## Linki do multimediów
-
-Audio jako link:
-
-```markdown
-[Odsłuchaj plik audio](ścieżka/do/pliku.wav)
-```
-
-YouTube jako link:
-
-```markdown
-[Zobacz na YouTube](https://www.youtube.com/watch?v=dQw4w9WgXcQ)
-```
-
----
