@@ -1,58 +1,48 @@
 /**
- * BackendAPI
- * ==========
+ *
  * Warstwa komunikacji z backendem HTTP — odporna na błędy sieciowe, spójna i centralnie konfigurowalna.
  * Umożliwia wysyłanie żądań POST/GET z automatycznym retry i backoffem.
  * Integruje się z `RequestRetryManager` i zarządza tokenem autoryzacyjnym.
  *
- * Zasady:
- * -------
- * ✅ Odpowiedzialność:
+ * ## Zasady:
+ *
+ * - ✅ Dozwolone:
  *   - Budowanie żądań HTTP (URL, headers, body)
  *   - Dekodowanie odpowiedzi JSON
  *   - Obsługa błędów sieciowych i retry
  *   - Centralne zarządzanie baseURL i tokenem
  *
- * ❌ Niedozwolone:
+ * - ❌ Niedozwolone:
  *   - Logika UI
  *   - Cache’owanie domenowe
  *   - Mutowanie danych biznesowych
- *
- * API:
- * ----
- * - `setBaseURL(url: string)` — ustawia bazowy adres backendu
- * - `setAuthToken(token: string|null)` — ustawia lub usuwa token autoryzacyjny
- * - `generate(prompt: string)` — wysyła prompt użytkownika
- * - `rate(ratings: object)` — przesyła oceny odpowiedzi AI
- * - `edit(editedText: string, tags: object, sessionId: string, msgId: string)` — przesyła edytowaną odpowiedź
- * - `postMessage({sender,text})` — przesyła wiadomość użytkownika
- * - `getTags()` — pobiera słownik tagów
- *
- * Zależności:
- *  - `RequestRetryManager`: obsługuje retry i backoff
- *  - `LoggerService` (opcjonalnie): logowanie błędów
  */
 class BackendAPI {
-  /** Bazowy adres backendu (np. "https://api.example.com") */
+  /** 
+   * Bazowy adres backendu
+   * @type {string} (bez końcowego slasha, pusty = względny)
+  */
   static baseURL = "";
 
-  /** Token autoryzacyjny Bearer */
+  /** 
+   * Token autoryzacyjny Bearer 
+   * @type {string|null}
+  */
   static authToken = null;
 
   /**
    * Ustawia bazowy adres względny backendu.
    * @param {string} url - Adres URL bez końcowego slasha.
    */
-static setBaseURL(url) {
-  if (!url || url === "/") {
-    // tryb względny — używamy hosta, z którego załadowano front
-    this.baseURL = "";
-  } else {
-    // czyścimy końcowe slashe
-    this.baseURL = url.replace(/\/+$/, "");
+  static setBaseURL(url) {
+    if (!url || url === "/") {
+      // tryb względny — używamy hosta, z którego załadowano front
+      this.baseURL = "";
+    } else {
+      // czyścimy końcowe slashe
+      this.baseURL = url.replace(/\/+$/, "");
+    }
   }
-}
-
 
   /**
    * Ustawia lub usuwa token autoryzacyjny.

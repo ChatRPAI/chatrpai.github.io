@@ -1,16 +1,15 @@
 /**
- * EditValidator
- * =============
+ *
  * Walidator tekstu edytowanego przez AI oraz przypisanych tagów.
  * Sprawdza długość tekstu i tagów oraz obecność treści.
  *
- * Zasady:
- * -------
- * ✅ Dozwolone:
+ * ## Zasady:
+ *
+ * - ✅ Dozwolone:
  *   - Stałe limitów: maxTextLength, maxTagLength
  *   - Metoda: validate(text, tags)
  *
- * ❌ Niedozwolone:
+ * - ❌ Niedozwolone:
  *   - Operacje na DOM
  *   - Zlecenia sieciowe (fetch, localStorage)
  *   - Logika aplikacyjna (np. renderowanie, wysyłka)

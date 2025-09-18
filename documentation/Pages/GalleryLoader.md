@@ -1,30 +1,18 @@
 # GalleryLoader
 
-=============
 Komponent odpowiedzialny za renderowanie galerii obrazów w przekazanym kontenerze.
 Współpracuje z ImageResolver w celu wyszukiwania obrazów na podstawie tagów.
 Umożliwia wybór obrazu przez użytkownika (radio name="gallery-choice").
-Zasady:
--------
-✅ Dozwolone:
+## Zasady:
+- ✅ Dozwolone:
   - Renderowanie obrazów w kontenerze
   - Współpraca z ImageResolver
   - Obsługa wyboru obrazu przez użytkownika
   - Pobieranie obrazów z API (GET)
-❌ Niedozwolone:
+- ❌ Niedozwolone:
   - Logika promptów, edycji, ocen
   - Połączenia z BackendAPI poza prostym GET
   - Mutacje globalnego stanu
-TODO:
-  - setMaxImages(n)
-  - disableSelection()
-  - exposeSelected(): string | null
-  - support multi-select mode
-Refaktoryzacja?:
-  - Rozdzielenie na podkomponenty:
-    - GalleryRenderer → renderowanie i czyszczenie
-    - GallerySelector → obsługa wyboru i podświetlenia
-    - GalleryFetcher → integracja z ImageResolver i API
 
 ---
 
@@ -44,7 +32,7 @@ Refaktoryzacja?:
 
 ---
 
-this.container = null;
+    this.container = null;
 
 ---
 
@@ -60,7 +48,11 @@ Ustawia kontener galerii. Obsługuje:
 ```javascript
   setContainer(el) {
     if (!(el instanceof HTMLElement)) {
-      LoggerService.record("error", "[GalleryLoader] setContainer: brak HTMLElement", el);
+      LoggerService.record(
+        "error",
+        "[GalleryLoader] setContainer: brak HTMLElement",
+        el
+      );
       return;
     }
     this.container = el;
@@ -147,7 +139,10 @@ Renderuje obrazy na podstawie tagów, używając ImageResolver.resolve().
 ```javascript
   async renderFromTags(tags) {
     if (!this.gallery) {
-      LoggerService.record("error", "[GalleryLoader] Brak container w renderFromTags");
+      LoggerService.record(
+        "error",
+        "[GalleryLoader] Brak container w renderFromTags"
+      );
       return;
     }
     try {
@@ -159,7 +154,11 @@ Renderuje obrazy na podstawie tagów, używając ImageResolver.resolve().
       this.renderImages(urls);
       await this.highlightSelected(tags);
     } catch (err) {
-      LoggerService.record("error", "[GalleryLoader] renderFromTags error", err);
+      LoggerService.record(
+        "error",
+        "[GalleryLoader] renderFromTags error",
+        err
+      );
       this.showMessage("❌ Błąd renderowania galerii.");
     }
   }
@@ -184,7 +183,8 @@ Ustawia również stan zaznaczenia radio.
     const items = this.gallery.querySelectorAll(".image-option");
     items.forEach((label) => {
       const img = label.querySelector("img");
-      const match = img && (img.src.endsWith(target) || img.src.includes(target));
+      const match =
+        img && (img.src.endsWith(target) || img.src.includes(target));
       label.classList.toggle("selected", !!match);
       const radio = label.querySelector('input[type="radio"]');
       if (radio) radio.checked = !!match;
@@ -210,15 +210,25 @@ Endpoint może zwrócić: string[] lub { images: string[] }.
     try {
       this.showMessage("Ładowanie...");
       const url = new URL(endpoint, window.location.origin);
-      Object.entries(params).forEach(([k, v]) => v && url.searchParams.append(k, v));
+      Object.entries(params).forEach(
+        ([k, v]) => v && url.searchParams.append(k, v)
+      );
       const res = await fetch(url);
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const data = await res.json();
-      const images = Array.isArray(data) ? data : (Array.isArray(data.images) ? data.images : []);
+      const images = Array.isArray(data)
+        ? data
+        : Array.isArray(data.images)
+        ? data.images
+        : [];
       if (!images.length) return this.showMessage("Brak wyników.");
       this.renderImages(images);
     } catch (err) {
-      LoggerService.record("error", "[GalleryLoader] Błąd ładowania obrazów", err);
+      LoggerService.record(
+        "error",
+        "[GalleryLoader] Błąd ładowania obrazów",
+        err
+      );
       this.showMessage("❌ Błąd ładowania obrazów.");
     }
   }
@@ -236,7 +246,9 @@ Zaznacza wybraną opcję i odznacza pozostałe.
 ```javascript
   _highlight(selected) {
     if (!this.gallery) return;
-    this.gallery.querySelectorAll(".image-option").forEach((el) => el.classList.remove("selected"));
+    this.gallery
+      .querySelectorAll(".image-option")
+      .forEach((el) => el.classList.remove("selected"));
     selected.classList.add("selected");
     const radio = selected.querySelector('input[type="radio"]');
     if (radio) radio.checked = true;
@@ -246,6 +258,7 @@ Zaznacza wybraną opcję i odznacza pozostałe.
 ---
 
 ## Pełny kod klasy
+
 ```javascript
 class GalleryLoader {
   constructor(root) {
@@ -256,7 +269,11 @@ class GalleryLoader {
 
   setContainer(el) {
     if (!(el instanceof HTMLElement)) {
-      LoggerService.record("error", "[GalleryLoader] setContainer: brak HTMLElement", el);
+      LoggerService.record(
+        "error",
+        "[GalleryLoader] setContainer: brak HTMLElement",
+        el
+      );
       return;
     }
     this.container = el;
@@ -302,7 +319,10 @@ class GalleryLoader {
 
   async renderFromTags(tags) {
     if (!this.gallery) {
-      LoggerService.record("error", "[GalleryLoader] Brak container w renderFromTags");
+      LoggerService.record(
+        "error",
+        "[GalleryLoader] Brak container w renderFromTags"
+      );
       return;
     }
     try {
@@ -314,7 +334,11 @@ class GalleryLoader {
       this.renderImages(urls);
       await this.highlightSelected(tags);
     } catch (err) {
-      LoggerService.record("error", "[GalleryLoader] renderFromTags error", err);
+      LoggerService.record(
+        "error",
+        "[GalleryLoader] renderFromTags error",
+        err
+      );
       this.showMessage("❌ Błąd renderowania galerii.");
     }
   }
@@ -326,7 +350,8 @@ class GalleryLoader {
     const items = this.gallery.querySelectorAll(".image-option");
     items.forEach((label) => {
       const img = label.querySelector("img");
-      const match = img && (img.src.endsWith(target) || img.src.includes(target));
+      const match =
+        img && (img.src.endsWith(target) || img.src.includes(target));
       label.classList.toggle("selected", !!match);
       const radio = label.querySelector('input[type="radio"]');
       if (radio) radio.checked = !!match;
@@ -338,22 +363,34 @@ class GalleryLoader {
     try {
       this.showMessage("Ładowanie...");
       const url = new URL(endpoint, window.location.origin);
-      Object.entries(params).forEach(([k, v]) => v && url.searchParams.append(k, v));
+      Object.entries(params).forEach(
+        ([k, v]) => v && url.searchParams.append(k, v)
+      );
       const res = await fetch(url);
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const data = await res.json();
-      const images = Array.isArray(data) ? data : (Array.isArray(data.images) ? data.images : []);
+      const images = Array.isArray(data)
+        ? data
+        : Array.isArray(data.images)
+        ? data.images
+        : [];
       if (!images.length) return this.showMessage("Brak wyników.");
       this.renderImages(images);
     } catch (err) {
-      LoggerService.record("error", "[GalleryLoader] Błąd ładowania obrazów", err);
+      LoggerService.record(
+        "error",
+        "[GalleryLoader] Błąd ładowania obrazów",
+        err
+      );
       this.showMessage("❌ Błąd ładowania obrazów.");
     }
   }
 
   _highlight(selected) {
     if (!this.gallery) return;
-    this.gallery.querySelectorAll(".image-option").forEach((el) => el.classList.remove("selected"));
+    this.gallery
+      .querySelectorAll(".image-option")
+      .forEach((el) => el.classList.remove("selected"));
     selected.classList.add("selected");
     const radio = selected.querySelector('input[type="radio"]');
     if (radio) radio.checked = true;

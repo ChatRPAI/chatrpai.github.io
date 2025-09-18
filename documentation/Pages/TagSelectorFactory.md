@@ -1,27 +1,18 @@
 # TagSelectorFactory
 
-==================
 Fabryka elementów UI do wyboru tagów.
 Tworzy pola wyboru w dwóch wariantach w zależności od środowiska:
  - Mobile → `<select>` z listą opcji
  - Desktop → `<input>` z przypisanym `<datalist>`
-Zasady:
--------
-✅ Dozwolone:
+## Zasady:
+- ✅ Dozwolone:
   - Generowanie elementów formularza dla tagów
   - Nadawanie etykiet polom na podstawie słownika
   - Obsługa wariantu mobilnego i desktopowego
-❌ Niedozwolone:
+- ❌ Niedozwolone:
   - Walidacja wybranych tagów
   - Operacje sieciowe
   - Bezpośrednia integracja z backendem
-TODO:
-  - Obsługa pól wielokrotnego wyboru (multi-select)
-  - Dodanie atrybutów dostępności (ARIA)
-  - Możliwość ustawiania placeholderów w trybie desktop
-Refaktoryzacja?:
-  - Ujednolicenie API metod `create` i `createTagField`
-  - Wydzielenie generatora opcji do osobnej metody
 
 ---
 
@@ -54,7 +45,7 @@ Używany do generowania pojedynczych selektorów w UI.
     if (Utils.isMobile()) {
       // Mobile: <select> z opcjami
       const select = document.createElement("select");
-      options.forEach(opt => {
+      options.forEach((opt) => {
         const optionEl = document.createElement("option");
         optionEl.value = opt;
         optionEl.textContent = opt;
@@ -67,7 +58,7 @@ Używany do generowania pojedynczych selektorów w UI.
       input.setAttribute("list", `${type}-list`);
       const datalist = document.createElement("datalist");
       datalist.id = `${type}-list`;
-      options.forEach(opt => {
+      options.forEach((opt) => {
         const optionEl = document.createElement("option");
         optionEl.value = opt;
         datalist.appendChild(optionEl);
@@ -108,7 +99,7 @@ Używany w panelach tagów (np. TagsPanel) do renderowania pól kategorii.
       emptyOpt.textContent = "-- wybierz --";
       select.appendChild(emptyOpt);
 
-      options.forEach(opt => {
+      options.forEach((opt) => {
         const optionEl = document.createElement("option");
         optionEl.value = opt;
         optionEl.textContent = opt;
@@ -126,7 +117,7 @@ Używany w panelach tagów (np. TagsPanel) do renderowania pól kategorii.
       const datalist = document.createElement("datalist");
       datalist.id = `${name}-list`;
 
-      options.forEach(opt => {
+      options.forEach((opt) => {
         const optionEl = document.createElement("option");
         optionEl.value = opt;
         datalist.appendChild(optionEl);
@@ -142,6 +133,7 @@ Używany w panelach tagów (np. TagsPanel) do renderowania pól kategorii.
 ---
 
 ## Pełny kod klasy
+
 ```javascript
 class TagSelectorFactory {
   static labels = {
@@ -158,7 +150,7 @@ class TagSelectorFactory {
 
     if (Utils.isMobile()) {
       const select = document.createElement("select");
-      options.forEach(opt => {
+      options.forEach((opt) => {
         const optionEl = document.createElement("option");
         optionEl.value = opt;
         optionEl.textContent = opt;
@@ -170,7 +162,7 @@ class TagSelectorFactory {
       input.setAttribute("list", `${type}-list`);
       const datalist = document.createElement("datalist");
       datalist.id = `${type}-list`;
-      options.forEach(opt => {
+      options.forEach((opt) => {
         const optionEl = document.createElement("option");
         optionEl.value = opt;
         datalist.appendChild(optionEl);
@@ -196,7 +188,7 @@ class TagSelectorFactory {
       emptyOpt.textContent = "-- wybierz --";
       select.appendChild(emptyOpt);
 
-      options.forEach(opt => {
+      options.forEach((opt) => {
         const optionEl = document.createElement("option");
         optionEl.value = opt;
         optionEl.textContent = opt;
@@ -213,7 +205,7 @@ class TagSelectorFactory {
       const datalist = document.createElement("datalist");
       datalist.id = `${name}-list`;
 
-      options.forEach(opt => {
+      options.forEach((opt) => {
         const optionEl = document.createElement("option");
         optionEl.value = opt;
         datalist.appendChild(optionEl);

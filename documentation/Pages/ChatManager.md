@@ -1,32 +1,17 @@
 # ChatManager
 
-===========
 Główna warstwa logiki aplikacji — łączy widoki UI z backendem.
 Odpowiada za obsługę promptów, edycji i oceniania wiadomości.
 Integruje się z `ChatUIView`, `ChatEditView`, `BackendAPI`, `ImageResolver` i `LoggerService`.
-Zasady:
--------
-✅ Odpowiedzialność:
+## Zasady:
+- ✅ Dozwolone:
   - Obsługa promptów, edycji, oceniania
   - Przekazywanie danych między widokami a BackendAPI
   - Aktualizacja UI przez `ChatUIView` i `ChatEditView`
-❌ Niedozwolone:
+- ❌ Niedozwolone:
   - Renderowanie HTML bezpośrednio
   - Mutowanie danych poza `dataset`/`msgEl`
   - Logika domenowa (np. interpretacja tagów)
-API:
-----
-- `constructor({ dom })` — inicjalizuje widoki i podpina zdarzenia
-- `init()` — aktywuje widoki i podpina zdarzenia edycji/oceny
-- `sendPrompt(prompt: string)` — wysyła prompt do backendu i renderuje odpowiedź
-- `sendEdit(msgEl, editedText, tags, imageUrl, sessionId)` — przesyła edytowaną wiadomość
-- `sendRating({ messageId, sessionId, ratings })` — przesyła ocenę wiadomości
-Zależności:
- - `ChatUIView`: widok głównego czatu
- - `ChatEditView`: widok edycji wiadomości
- - `BackendAPI`: komunikacja z backendem
- - `ImageResolver`: rozwiązywanie ilustracji
- - `LoggerService`: logowanie błędów
 
 ---
 
@@ -206,8 +191,11 @@ Przesyła edytowaną wiadomość do backendu i aktualizuje UI.
 @param {string} [sessionId] - ID sesji (opcjonalne).
 
 **_@param_** *`{HTMLElement}`* _**msgEl**_  Element wiadomości.
+
 **_@param_** *`{string}`* _**editedText**_  Nowa treść.
+
 **_@param_** *`{Record<string, any>}`* _**tags**_  Tagowanie wiadomości.
+
 **_@param_** *`{string}`* _**imageUrl**_  URL ilustracji.
 
 **@returns** *`{Promise<void>}`*
@@ -267,6 +255,7 @@ Przesyła ocenę wiadomości do backendu.
 ---
 
 ## Pełny kod klasy
+
 ```javascript
 class ChatManager {
   constructor(context) {

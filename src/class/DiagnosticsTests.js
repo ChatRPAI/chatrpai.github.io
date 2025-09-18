@@ -1845,61 +1845,62 @@ document.addEventListener("DOMContentLoaded", () => {
   // =============================================================
 
   Diagnostics.describe("ChatUIView", () => {
-Diagnostics.it(
-  "init() wywołuje onPromptSubmit po submit formularza",
-  async () => {
-    const container = document.createElement("div");
-    const form = document.createElement("form");
-    const input = document.createElement("input");
-    form.appendChild(input);
+    Diagnostics.it(
+      "init() wywołuje onPromptSubmit po submit formularza",
+      async () => {
+        const container = document.createElement("div");
+        const form = document.createElement("form");
+        const input = document.createElement("input");
+        form.appendChild(input);
 
-    const view = new ChatUIView(container, form, input);
-    let calledPrompt = null;
-    view.onPromptSubmit = (t) => {
-      calledPrompt = t;
-      return true;
-    };
+        const view = new ChatUIView(container, form, input);
+        let calledPrompt = null;
+        view.onPromptSubmit = (t) => {
+          calledPrompt = t;
+          return true;
+        };
 
-    view.init();
-    input.value = "Test prompt";
-    form.dispatchEvent(new Event("submit", { bubbles: true, cancelable: true }));
+        view.init();
+        input.value = "Test prompt";
+        form.dispatchEvent(
+          new Event("submit", { bubbles: true, cancelable: true })
+        );
 
-    await Promise.resolve(); // pozwól wykonać się async handlerowi
+        await Promise.resolve(); // pozwól wykonać się async handlerowi
 
-    Diagnostics.expect(calledPrompt).toBe("Test prompt");
-    Diagnostics.expect(input.value).toBe("");
-  }
-);
+        Diagnostics.expect(calledPrompt).toBe("Test prompt");
+        Diagnostics.expect(input.value).toBe("");
+      }
+    );
 
-Diagnostics.it("init() wywołuje onPromptSubmit po Ctrl+Enter", async () => {
-  const container = document.createElement("div");
-  const form = document.createElement("form");
-  const input = document.createElement("textarea");
-  form.appendChild(input);
+    Diagnostics.it("init() wywołuje onPromptSubmit po Ctrl+Enter", async () => {
+      const container = document.createElement("div");
+      const form = document.createElement("form");
+      const input = document.createElement("textarea");
+      form.appendChild(input);
 
-  const view = new ChatUIView(container, form, input);
-  let calledPrompt = null;
-  view.onPromptSubmit = (t) => {
-    calledPrompt = t;
-    return true;
-  };
+      const view = new ChatUIView(container, form, input);
+      let calledPrompt = null;
+      view.onPromptSubmit = (t) => {
+        calledPrompt = t;
+        return true;
+      };
 
-  view.init();
-  input.value = "CtrlEnter test";
-  input.dispatchEvent(
-    new KeyboardEvent("keydown", {
-      key: "Enter",
-      ctrlKey: true,
-      bubbles: true,
-    })
-  );
+      view.init();
+      input.value = "CtrlEnter test";
+      input.dispatchEvent(
+        new KeyboardEvent("keydown", {
+          key: "Enter",
+          ctrlKey: true,
+          bubbles: true,
+        })
+      );
 
-  await Promise.resolve();
+      await Promise.resolve();
 
-  Diagnostics.expect(calledPrompt).toBe("CtrlEnter test");
-  Diagnostics.expect(input.value).toBe("");
-});
-
+      Diagnostics.expect(calledPrompt).toBe("CtrlEnter test");
+      Diagnostics.expect(input.value).toBe("");
+    });
 
     Diagnostics.it("addUserMessage() dodaje wiadomość użytkownika", () => {
       const container = document.createElement("div");

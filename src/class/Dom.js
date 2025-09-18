@@ -1,28 +1,18 @@
 /**
- * Dom
- * ===
+ *
  * Centralny punkt dostępu do elementów DOM aplikacji.
  * Wymusza strukturę opartą na <main id="app"> jako kontenerze bazowym.
  *
- * Zasady:
- * -------
- * ✅ Dozwolone:
+ * ## Zasady:
+ *
+ * - ✅ Dozwolone:
  *   - Przechowywanie i udostępnianie referencji do elementów
  *   - Wyszukiwanie elementów tylko wewnątrz <main id="app">
  *
- * ❌ Niedozwolone:
+ * - ❌ Niedozwolone:
  *   - Operacje poza <main id="app">
  *   - Modyfikowanie struktury DOM globalnie
  *
- * TODO:
- *   - refresh()
- *   - observeMissing()
- *   - expose(selector)
- *
- * Refaktoryzacja?:
- *   - DomRefs → inicjalizacja i buforowanie
- *   - DomQuery → metody wyszukiwania
- *   - DomDiagnostics → logowanie braków
  */
 class Dom {
   /**
@@ -40,26 +30,35 @@ class Dom {
    * @param {Record<string, string>} refMap - mapa nazw do selektorów
    */
   init(refMap) {
-    const rootCandidate = typeof this.rootSelector === "string"
-      ? document.querySelector(this.rootSelector)
-      : this.rootSelector;
+    const rootCandidate =
+      typeof this.rootSelector === "string"
+        ? document.querySelector(this.rootSelector)
+        : this.rootSelector;
 
     if (!(rootCandidate instanceof HTMLElement)) {
-      LoggerService.record("error", "[Dom] Nie znaleziono <main id=\"app\">. Wymagana struktura HTML.");
+      LoggerService.record(
+        "error",
+        '[Dom] Nie znaleziono <main id="app">. Wymagana struktura HTML.'
+      );
       return;
     }
 
     if (rootCandidate.tagName !== "MAIN" || rootCandidate.id !== "app") {
-      LoggerService.record("error", "[Dom] Kontener bazowy musi być <main id=\"app\">. Otrzymano:", rootCandidate);
+      LoggerService.record(
+        "error",
+        '[Dom] Kontener bazowy musi być <main id="app">. Otrzymano:',
+        rootCandidate
+      );
       return;
     }
 
     this.root = rootCandidate;
 
     Object.entries(refMap).forEach(([name, selector]) => {
-      const el = selector === this.rootSelector
-        ? this.root
-        : this.root.querySelector(selector);
+      const el =
+        selector === this.rootSelector
+          ? this.root
+          : this.root.querySelector(selector);
 
       if (!el) {
         LoggerService.record("warn", `[Dom] Brak elementu: ${selector}`);

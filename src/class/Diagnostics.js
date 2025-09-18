@@ -1,22 +1,51 @@
 /**
- * Diagnostics.runAll();         // wszystko, grupy rozwinięte
- * Diagnostics.runEachGroup();   // każda grupa osobno
- * Diagnostics.runGroup("Utils"); // tylko grupa "Utils"
- * Diagnostics.runSummary();     // tylko zbiorcze podsumowanie
- * Diagnostics.getGroups();      // ["Utils", "BackendAPI", "ChatManager", ...]
+ *
+ * Służy do definiowania, uruchamiania i raportowania testów jednostkowych
+ * w aplikacji. Obsługuje grupowanie testów, asercje, tryb wizualny oraz raportowanie wyników
+ * w konsoli.
+ *
+ * Przykłady użycia:
+ * - Diagnostics.runAll();           // uruchamia wszystkie testy
+ * - Diagnostics.runEachGroup();     // uruchamia każdą grupę osobno
+ * - Diagnostics.runGroup("Utils");  // uruchamia tylko grupę "Utils"
+ * - Diagnostics.runSummary();       // pokazuje zbiorcze podsumowanie
+ * - Diagnostics.getGroups();        // zwraca listę nazw grup
  */
 
 class Diagnostics {
+  /**
+   * Blokada wielokrotnego uruchomienia testów.
+   * @type {boolean}
+   */
   static onlyOneRun = false; // Blokada wielokrotnego uruchomienia
+  /**
+   * Lista zarejestrowanych testów.
+   * @type {Array<{ name: string, fn: Function, group: string }>}
+   */
   static tests = [];
+
+  /**
+   * Aktualnie aktywna grupa testowa.
+   * @type {string}
+   */
   static currentGroup = "default";
 
+  /**
+   * Definiuje grupę testów.
+   * @param {string} groupName - Nazwa grupy
+   * @param {Function} fn - Funkcja zawierająca testy
+   */
   static describe(groupName, fn) {
     this.currentGroup = groupName;
     fn();
     this.currentGroup = "default";
   }
 
+  /**
+   * Rejestruje pojedynczy test w bieżącej grupie.
+   * @param {string} name - Nazwa testu
+   * @param {Function} fn - Funkcja testowa
+   */
   static it(name, fn) {
     this.register(name, fn, this.currentGroup);
   }
@@ -24,14 +53,13 @@ class Diagnostics {
   /**
    * Fluent API do asercji w testach.
    * Przykład użycia:
-   * ```
-   * Diagnostics.expect(value).toBe(expected);
-   * Diagnostics.expect(value).toBeType("string");
-   * Diagnostics.expect(array).toInclude(item);
-   * Diagnostics.expect(value).toBeTruthy();
-   * Diagnostics.expect(value).toBeFalsy();
-   * Diagnostics.expect(value).toBeGreaterThan(min);
-   * ```
+   * - Diagnostics.expect(value).toBe(expected);
+   * - Diagnostics.expect(value).toBeType("string");
+   * - Diagnostics.expect(array).toInclude(item);
+   * - Diagnostics.expect(value).toBeTruthy();
+   * - Diagnostics.expect(value).toBeFalsy();
+   * - Diagnostics.expect(value).toBeGreaterThan(min);
+   *
    * @param {*} value - Wartość do testowania
    * @returns {object} - Obiekt z metodami asercji
    */
@@ -66,26 +94,47 @@ class Diagnostics {
       },
     };
   }
-
+  /**
+   * Sprawdza, czy tablica zawiera daną wartość.
+   * @param {Array} arr - Tablica
+   * @param {*} val - Wartość oczekiwana
+   * @throws {Error} Jeśli tablica nie zawiera wartości
+   */
   static assertArrayIncludes(arr, val) {
     if (!Array.isArray(arr)) throw new Error("Wartość nie jest tablicą");
     if (!arr.includes(val)) throw new Error(`Tablica nie zawiera: ${val}`);
   }
-
+  /**
+   * Sprawdza, czy obiekt zawiera dany klucz.
+   * @param {object} obj - Obiekt
+   * @param {string} key - Klucz
+   * @throws {Error} Jeśli klucz nie istnieje
+   */
   static assertObjectHasKey(obj, key) {
     if (typeof obj !== "object" || obj === null)
       throw new Error("Wartość nie jest obiektem");
     if (!(key in obj)) throw new Error(`Brak klucza: ${key}`);
   }
-
+  /**
+   * Rejestruje test w systemie.
+   * @param {string} name - Nazwa testu
+   * @param {Function} fn - Funkcja testowa
+   * @param {string} [group="default"] - Nazwa grupy
+   */
   static register(name, fn, group = "default") {
     this.tests.push({ name, fn, group });
   }
-
+  /**
+   * Zwraca listę unikalnych nazw grup testowych.
+   * @returns {string[]} Lista nazw grup
+   */
   static getGroups() {
     return [...new Set(this.tests.map((t) => t.group))];
   }
-
+  /**
+   * Pokazuje tryb testowy na stronie (overlay).
+   * @param {boolean} [isStarted=true] - Czy testy są aktywne
+   */
   static testsMode(isStarted = true) {
     const existing = document.querySelector("#diagnostics-mode");
     if (existing) existing.remove();
@@ -113,11 +162,17 @@ class Diagnostics {
       document.body.appendChild(div);
     }
   }
-
+  /**
+   * Przechowuje wyniki testów pogrupowane według grup.
+   * @type {Record<string, Array<{ name: string, status: string, error: string }>>}
+   */
   static grouped = {};
+
+  /**
+   * Pokazuje wyniki wszystkich testów w konsoli.
+   */
   static showResultsAll() {
     if (Object.keys(this.grouped).length === 0) {
-      // kolorowe przedstawienie komend
       // Kolorowe przedstawienie komend
       const styleAll = "color: #51a088ff; font-weight: bold; font-size: 1.2em;";
       const styleGroup =
@@ -152,7 +207,10 @@ class Diagnostics {
     }
     this.summary();
   }
-
+  /**
+   * Renderuje tabelę wyników testów w konsoli.
+   * @param {Array<{ name: string, status: string, error: string }>} results
+   */
   static renderConsoleTableTestResults(results) {
     console.table(
       results.map((r) => ({
@@ -162,7 +220,10 @@ class Diagnostics {
       }))
     );
   }
-
+  /**
+   * Uruchamia wszystkie grupy testów.
+   * @returns {Promise<void>}
+   */
   static async runAll() {
     if (this.onlyOneRun) {
       console.warn(
@@ -181,31 +242,31 @@ class Diagnostics {
 
       if (originalBodyHTML) {
         document.body.innerHTML = originalBodyHTML;
-       const dom = new Dom();
-  dom.init(htmlElements);
+        const dom = new Dom();
+        dom.init(htmlElements);
 
-  // b) Context – rejestrujesz dokładnie to, czego chcesz użyć (instancje, nie klasy!)
-  const context = new Context({
-    diagnostics: Diagnostics,
-    userManager: UserManager,
-    dom,
-    utils: Utils,
-    backendAPI: BackendAPI,
-  });
+        // b) Context – rejestrujesz dokładnie to, czego chcesz użyć (instancje, nie klasy!)
+        const context = new Context({
+          diagnostics: Diagnostics,
+          userManager: UserManager,
+          dom,
+          utils: Utils,
+          backendAPI: BackendAPI,
+        });
 
-  // c) Skład modułów (to jest w 100% konfigurowalne per strona)
-  const modules = [
-    UserManagerModule(),
-    VirtualKeyboardDockModule(dom),
-    PanelsControllerModule(dom),
-    ChatManagerModule(context),       // tylko na stronie czatu
-    ClearImageCacheButtonModule(),    // feature
-  ];
+        // c) Skład modułów (to jest w 100% konfigurowalne per strona)
+        const modules = [
+          UserManagerModule(),
+          VirtualKeyboardDockModule(dom),
+          PanelsControllerModule(dom),
+          ChatManagerModule(context), // tylko na stronie czatu
+          ClearImageCacheButtonModule(), // feature
+        ];
 
-  // d) App dostaje Context + listę modułów, i tylko je odpala
-  const app = new App(context, modules);
+        // d) App dostaje Context + listę modułów, i tylko je odpala
+        const app = new App(context, modules);
 
-  await app.init();
+        await app.init();
       }
     }
 
@@ -220,7 +281,9 @@ class Diagnostics {
     this.onlyOneRun = true;
     this.testsMode(false);
   }
-
+  /**
+   * Pokazuje podsumowanie wyników testów.
+   */
   static summary() {
     const summary = [];
     for (const [groupName, results] of Object.entries(this.grouped)) {
@@ -240,7 +303,11 @@ class Diagnostics {
       await this.runGroup(group);
     }
   }
-
+  /**
+   * Uruchamia testy tylko dla wybranej grupy.
+   * @param {string} groupName - Nazwa grupy
+   * @returns {Promise<void>}
+   */
   static async runGroup(groupName) {
     if (this.onlyOneRun) {
       console.warn(
@@ -268,7 +335,12 @@ class Diagnostics {
     this.onlyOneRun = true;
     this.testsMode(false);
   }
-
+  /**
+   * Przechwytuje błąd z testu i zwraca wynik.
+   * @param {Function} fn - Funkcja testowa
+   * @param {string} name - Nazwa testu
+   * @returns {Promise<{ status: string, name: string, error: string }>}
+   */
   static async captureError(fn, name) {
     try {
       await fn();
@@ -277,20 +349,36 @@ class Diagnostics {
       return { status: "❌", name, error: e.message || String(e) };
     }
   }
-
+  /**
+   * Sprawdza równość dwóch wartości.
+   * @param {*} a
+   * @param {*} b
+   * @throws {Error} Jeśli wartości są różne
+   */
   static assertEqual(a, b) {
     if (a !== b) throw new Error(`Oczekiwano ${b}, otrzymano ${a}`);
   }
-
+  /**
+   * Sprawdza typ wartości.
+   * @param {*} value
+   * @param {string} type
+   * @throws {Error} Jeśli typ jest niezgodny
+   */
   static assertType(value, type) {
     if (typeof value !== type)
       throw new Error(`Typ ${typeof value}, oczekiwano ${type}`);
   }
-
+  /**
+   * Zwraca promisa, który rozwiązuje się po zadanym czasie.
+   * @param {number} ms - Czas w milisekundach
+   * @returns {Promise<void>}
+   */
   static wait(ms) {
     return new Promise((resolve) => setTimeout(resolve, ms));
   }
-
+  /**
+   * Czyści środowisko testowe (localStorage, cookies).
+   */
   static resetEnv() {
     localStorage.clear();
     document.cookie.split(";").forEach((c) => {
@@ -299,7 +387,10 @@ class Diagnostics {
         .replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/");
     });
   }
-
+  /**
+   * Filtruje tylko nieudane testy.
+   * @returns {Record<string, Array<{ name: string, status: string, error: string }>>}
+   */
   static filterFailed() {
     const failed = {};
     for (const [groupName, results] of Object.entries(this.grouped)) {
@@ -310,7 +401,9 @@ class Diagnostics {
     }
     return failed;
   }
-
+  /**
+   * Pokazuje tylko nieudane testy w konsoli.
+   */
   static showFailedAll() {
     const failed = this.filterFailed();
 

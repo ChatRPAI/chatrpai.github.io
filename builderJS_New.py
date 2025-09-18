@@ -125,7 +125,6 @@ def generate_docs(symbol, code):
     md = []
     lines = code.splitlines()
 
-    # 1. Parsowanie JSDoc bloków
     i = 0
     while i < len(lines):
         line = lines[i]
@@ -136,39 +135,64 @@ def generate_docs(symbol, code):
                 block.append(lines[j])
                 j += 1
 
-            doc_text = "\n".join(block)
-            doc_text = re.sub(r"^\s*\*\s?", "", doc_text, flags=re.MULTILINE)
-            doc_text = "\n".join(l for l in doc_text.split("\n") if l.strip() != "/").strip()
+            doc_lines = []
+            for raw in block:
+                if raw.strip() in ("/", "*"):
+                    continue
+                cleaned = re.sub(r"^\s*\*\s?", "", raw.rstrip())
+                doc_lines.append(cleaned)
+            doc_text = "\n".join(doc_lines)
 
             k = j + 1
             while k < len(lines) and not lines[k].strip():
                 k += 1
             decl = lines[k].strip() if k < len(lines) else ""
 
+            # Obsługa pola instancji: /** @type {...} */ + this.nazwa = ...
+            if decl.startswith("this.") and "@type" in doc_text:
+                field_line = lines[k].rstrip()
+                desc_lines = []
+                tag_lines = []
+                for l in doc_text.split("\n"):
+                    if l.strip().startswith("@"):
+                        tag_lines.append(l)
+                    else:
+                        desc_lines.append(l)
+                for line in desc_lines:
+                    md.append(_inline_sanitize(line))
+                md.append("")
+                md.extend(format_jsdoc_block("\n".join(tag_lines)))
+                md.append("```javascript")
+                md.append(field_line)
+                md.append("```")
+                md.append("")
+                md.append("---")
+                md.append("")
+                i = j + 1
+                continue
+
             if decl.startswith("class "):
-                md.append(f"# {symbol}\n")
-                md.append(_cleanup_class_doc(symbol, doc_text))
-                md.append("\n---\n")
+                md.append(f"# {symbol}")
+                md.append("")
+                md.extend(_cleanup_class_doc(symbol, doc_text))
+                md.append("")
+                md.append("---")
+                md.append("")
             else:
                 kind, name, sig, body = match_declaration_and_extract(lines, k)
 
-                if kind == "ctor":
-                    md.append("## constructor\n")
+                if kind in ("ctor", "method"):
+                    md.append(f"## {name}()" if kind == "method" else "## constructor")
+                    md.append("")
                     md.extend(format_jsdoc_block(doc_text))
                     md.append("```javascript")
                     md.append(body)
                     md.append("```")
-                    md.append("\n---\n")
+                    md.append("")
+                    md.append("---")
+                    md.append("")
 
-                elif kind == "method":
-                    md.append(f"## {name}()\n")
-                    md.extend(format_jsdoc_block(doc_text))
-                    md.append("```javascript")
-                    md.append(body)
-                    md.append("```")
-                    md.append("\n---\n")
-
-                elif kind == "field":
+                elif kind in ("field", "instance"):
                     desc_lines = []
                     tag_lines = []
                     for l in doc_text.split("\n"):
@@ -176,23 +200,29 @@ def generate_docs(symbol, code):
                             tag_lines.append(l)
                         else:
                             desc_lines.append(l)
-                    md.append(_inline_sanitize("\n".join(desc_lines).strip()))
+                    for line in desc_lines:
+                        md.append(_inline_sanitize(line))
                     md.append("")
                     md.extend(format_jsdoc_block("\n".join(tag_lines)))
                     md.append("```javascript")
                     md.append(body)
                     md.append("```")
-                    md.append("\n---\n")
+                    md.append("")
+                    md.append("---")
+                    md.append("")
 
                 else:
-                    md.append(doc_text)
-                    md.append("\n---\n")
+                    for line in doc_text.split("\n"):
+                        md.append(_inline_sanitize(line))
+                    md.append("")
+                    md.append("---")
+                    md.append("")
 
             i = j + 1
         else:
             i += 1
 
-    # 2. Dodanie pełnego kodu klasy bez komentarzy
+    # Dodaj pełny kod klasy bez komentarzy
     stripped = []
     for line in lines:
         if line.strip().startswith("//"):
@@ -203,6 +233,7 @@ def generate_docs(symbol, code):
             continue
         stripped.append(line)
     md.append("## Pełny kod klasy")
+    md.append("")
     md.append("```javascript")
     md.extend(stripped)
     md.append("```")
@@ -310,11 +341,13 @@ def format_jsdoc_block(doc_text):
             desc.append(_inline_sanitize(raw))
 
     if desc:
-        out.append("\n".join(desc).strip())
-        out.append("")
+        for line in desc:
+            out.append(line.rstrip())
+        out.append("")  # pusta linia po opisie
     if params:
-        out.extend(params)
-        out.append("")
+        for p in params:
+            out.append(p)
+            out.append("")
     if returns:
         out.append(returns)
         out.append("")
@@ -330,18 +363,24 @@ def _inline_sanitize(text):
 
 
 def _cleanup_class_doc(symbol, doc_text):
-    rows = [_inline_sanitize(l) for l in doc_text.split("\n")]
+    lines = doc_text.split("\n")
     cleaned = []
-    skip_decoration = False
-    for idx, l in enumerate(rows):
-        if idx == 0 and l.strip() == symbol:
-            skip_decoration = True
+    skip_title = False
+
+    for idx, line in enumerate(lines):
+        raw = line.rstrip()
+        if idx == 0 and raw.strip() == symbol:
+            skip_title = True
             continue
-        if skip_decoration and l.strip() in ("===", "---"):
-            skip_decoration = False
+        if skip_title and raw.strip() in ("===", "---"):
+            skip_title = False
             continue
-        cleaned.append(l)
-    return "\n".join(cleaned).strip()
+        cleaned.append(_inline_sanitize(raw))
+
+    # Zwróć jako lista linii, nie jako jeden string
+    return cleaned
+
+
 
 # ========================
 # DOKUMENTACJA

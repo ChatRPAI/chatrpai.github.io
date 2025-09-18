@@ -1,19 +1,18 @@
 /**
- * AppStorageManager
- * ==============
+ *
  * Uniwersalny mediator przechowywania danych z automatycznym fallbackiem
  * z `localStorage` do `cookie` w przypadku braku dostępu lub błędu.
  * Obsługuje TTL w sekundach, czyszczenie wpisów z prefiksem,
  * oraz mechanizmy obronne przy przekroczeniu limitu pamięci (`QuotaExceededError`).
  *
- * Zasady:
- * -------
- * ✅ Odpowiedzialność:
+ * ## Zasady:
+ *
+ * - ✅ Dozwolone:
  *   - Zapisywanie, odczytywanie i usuwanie danych w `localStorage` lub `cookie`
  *   - Obsługa TTL i czyszczenie danych tymczasowych
  *   - Reakcja na błędy pamięci i komunikacja z użytkownikiem
  *
- * ❌ Niedozwolone:
+ * - ❌ Niedozwolone:
  *   - Wymuszanie prefiksów
  *   - Logika aplikacyjna (np. interpretacja danych)
  */
@@ -46,16 +45,14 @@ class AppStorageManager {
    * Zapisuje wartość pod wskazanym kluczem z opcjonalnym TTL.
    * TTL wyrażony w sekundach. Domyślnie 30 dni (2592000 sekund).
    * Wartość jest serializowana do JSON.
-   * 
+   *
    * @param {string} key - Klucz pod którym zapisywana jest wartość.
    * @param {any} value - Dowolna wartość do zapisania.
    * @param {number} [ttl=2592000] - Czas życia w sekundach.
    */
   static set(key, value, ttl = 2592000) {
     const now = Date.now();
-    const payload = ttl
-      ? { value, ts: now, ttl: ttl * 1000 }
-      : value;
+    const payload = ttl ? { value, ts: now, ttl: ttl * 1000 } : value;
 
     const serialized = JSON.stringify(payload);
 
@@ -75,7 +72,9 @@ class AppStorageManager {
         }
       }
     } else {
-      let cookie = `${encodeURIComponent(key)}=${encodeURIComponent(serialized)}; path=/`;
+      let cookie = `${encodeURIComponent(key)}=${encodeURIComponent(
+        serialized
+      )}; path=/`;
       if (ttl) {
         cookie += `; max-age=${ttl}`;
       }
@@ -99,7 +98,9 @@ class AppStorageManager {
     if (this._hasLocalStorage()) {
       raw = localStorage.getItem(key);
     } else {
-      const match = document.cookie.match(new RegExp(`(?:^|; )${encodeURIComponent(key)}=([^;]*)`));
+      const match = document.cookie.match(
+        new RegExp(`(?:^|; )${encodeURIComponent(key)}=([^;]*)`)
+      );
       raw = match ? decodeURIComponent(match[1]) : null;
     }
     try {
@@ -170,7 +171,11 @@ class AppStorageManager {
    * @param {Error} [error] - Opcjonalny obiekt błędu.
    */
   static _handleStorageFailure(type, key, error) {
-    LoggerService?.record("warn", `[AppStorageManager] ${type} niedostępny lub pełny przy zapisie ${key}`, error);
+    LoggerService?.record(
+      "warn",
+      `[AppStorageManager] ${type} niedostępny lub pełny przy zapisie ${key}`,
+      error
+    );
 
     const confirmed = window.confirm(
       `Pamięć ${type} jest pełna lub niedostępna. Czy chcesz ją wyczyścić, aby kontynuować?`
@@ -182,12 +187,21 @@ class AppStorageManager {
         document.cookie.split(";").forEach((c) => {
           document.cookie = c
             .replace(/^ +/, "")
-            .replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/");
+            .replace(
+              /=.*/,
+              "=;expires=" + new Date().toUTCString() + ";path=/"
+            );
         });
       }
-      LoggerService?.record("info", `[AppStorageManager] ${type} wyczyszczony przez użytkownika.`);
+      LoggerService?.record(
+        "info",
+        `[AppStorageManager] ${type} wyczyszczony przez użytkownika.`
+      );
     } else {
-      LoggerService?.record("info", `[AppStorageManager] Użytkownik odmówił czyszczenia ${type}.`);
+      LoggerService?.record(
+        "info",
+        `[AppStorageManager] Użytkownik odmówił czyszczenia ${type}.`
+      );
     }
   }
 }

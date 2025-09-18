@@ -1,6 +1,5 @@
 # ChatUIView
 
-==========
 Widok głównego interfejsu czatu.
 Odpowiada za:
  - Obsługę formularza promptu (wysyłanie wiadomości użytkownika)
@@ -9,37 +8,23 @@ Odpowiada za:
  - Hydratację wiadomości AI danymi z backendu
  - Obsługę przycisku edycji i panelu ocen
  - Aktualizację treści wiadomości po edycji
-Zasady:
--------
-✅ Odpowiedzialność:
+## Zasady:
+- ✅ Dozwolone:
   - Manipulacja DOM w obrębie kontenera czatu
   - Obsługa zdarzeń UI (submit, ctrl+enter, kliknięcia)
   - Integracja z `UserManager`, `SenderRegistry`, `ChatRatingView`
-❌ Niedozwolone:
+- ❌ Niedozwolone:
   - Logika backendowa (wysyłanie żądań HTTP)
   - Walidacja treści (poza prostym sprawdzeniem pustego promptu)
-API:
-----
-- `constructor(container, promptForm, promptInput)` — inicjalizuje widok
-- `init()` — podpina obsługę formularza i skrótów klawiszowych
-- `addUserMessage(text)` — dodaje wiadomość użytkownika do czatu
-- `addLoadingMessage()` — dodaje placeholder ładowania odpowiedzi AI
-- `hydrateAIMessage(msgEl, data, isEdited)` — renderuje wiadomość AI z danymi
-- `showError(msgEl)` — pokazuje komunikat błędu w wiadomości AI
-- `scrollToBottom()` — przewija czat na dół
-- `updateMessage(msgEl, editedText, tags, imageUrl)` — aktualizuje treść wiadomości
-Callbacki:
-----------
-- `onPromptSubmit(prompt: string)` — wywoływany po wysłaniu promptu
-- `onEditRequested(msgEl, originalText, id, timestamp, sessionId)` — po kliknięciu "Edytuj"
-- `onRatingSubmit(payload)` — po wysłaniu oceny wiadomości
 
 ---
 
 ## constructor
 
 **_@param_** *`{HTMLElement}`* _**container**_  Kontener wiadomości czatu
+
 **_@param_** *`{HTMLFormElement}`* _**promptForm**_  Formularz promptu
+
 **_@param_** *`{HTMLInputElement|HTMLTextAreaElement}`* _**promptInput**_  Pole wprowadzania promptu
 
 ```javascript
@@ -61,13 +46,14 @@ Callbacki:
 
 ---
 
-this.onPromptSubmit = null;
+    this.onPromptSubmit = null;
+
 
 ---
 
 ## init()
 
-this.onRatingSubmit = null;
+    this.onRatingSubmit = null;
   }
 
   /**
@@ -162,11 +148,11 @@ Renderuje wiadomość AI z danymi.
 @param {boolean} [isEdited=false] - Czy wiadomość jest edytowana
 
 **_@param_** *`{HTMLElement}`* _**msgEl**_  Element wiadomości
+
 **_@param_** *`{object}`* _**data**_  Dane wiadomości
 
 ```javascript
   hydrateAIMessage(msgEl, data, isEdited = false) {
-
     msgEl.classList.add("msg-fading-out");
 
     const sessionId = data.sessionId || "sess-unknown";
@@ -245,8 +231,8 @@ Renderuje wiadomość AI z danymi.
 
     new ChatRatingView(msgEl, (payload) => this.onRatingSubmit?.(payload));
 
-      msgEl.classList.remove("msg-fading-out");
-      msgEl.classList.add("msg-fading-in");
+    msgEl.classList.remove("msg-fading-out");
+    msgEl.classList.add("msg-fading-in");
     this.scrollToBottom();
   }
 ```
@@ -287,6 +273,7 @@ Aktualizuje treść wiadomości po edycji.
 @param {string} [imageUrl=""] - URL ilustracji powiązanej z wiadomością
 
 **_@param_** *`{HTMLElement}`* _**msgEl**_  Element wiadomości do zaktualizowania
+
 **_@param_** *`{string}`* _**editedText**_  Nowa treść wiadomości
 
 ```javascript
@@ -322,6 +309,7 @@ Aktualizuje treść wiadomości po edycji.
 ---
 
 ## Pełny kod klasy
+
 ```javascript
 class ChatUIView {
   constructor(container, promptForm, promptInput) {
@@ -396,7 +384,6 @@ class ChatUIView {
   }
 
   hydrateAIMessage(msgEl, data, isEdited = false) {
-
     msgEl.classList.add("msg-fading-out");
 
     const sessionId = data.sessionId || "sess-unknown";
@@ -475,8 +462,8 @@ class ChatUIView {
 
     new ChatRatingView(msgEl, (payload) => this.onRatingSubmit?.(payload));
 
-      msgEl.classList.remove("msg-fading-out");
-      msgEl.classList.add("msg-fading-in");
+    msgEl.classList.remove("msg-fading-out");
+    msgEl.classList.add("msg-fading-in");
     this.scrollToBottom();
   }
 

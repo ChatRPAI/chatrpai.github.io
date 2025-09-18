@@ -1,29 +1,19 @@
 # ChatEditView
 
-============
 Widok edycji wiadomości AI w czacie.
 Odpowiada za:
  - Wyświetlenie formularza edycji (textarea + panel tagów + galeria obrazów)
  - Walidację treści i tagów
  - Obsługę zapisu i anulowania edycji
-Zasady:
--------
-✅ Odpowiedzialność:
+## Zasady:
+- ✅ Dozwolone:
   - Renderowanie UI edycji w miejscu wiadomości
   - Integracja z TagsPanel i GalleryLoader
   - Walidacja danych przed wysłaniem
   - Wywołanie callbacków `onEditSubmit` i `onEditCancel`
-❌ Niedozwolone:
+- ❌ Niedozwolone:
   - Bezpośrednia komunikacja z backendem (poza pobraniem listy tagów)
   - Mutowanie innych elementów UI poza edytowaną wiadomością
-API:
-----
-- `constructor(dom)` — inicjalizuje widok z referencjami do DOM
-- `enableEdit(msgElement, originalText, messageId, sessionId)` — uruchamia tryb edycji
-Wydarzenia (callbacki):
------------------------
-- `onEditSubmit(msgEl, editedText, tags, imageUrl, sessionId)` — wywoływane po kliknięciu "Zapisz"
-- `onEditCancel(msgEl, data)` — wywoływane po kliknięciu "Anuluj"
 
 ---
 
@@ -43,7 +33,7 @@ Wydarzenia (callbacki):
 
 ---
 
-this.onEditSubmit = null;
+    this.onEditSubmit = null;
 
 ---
 
@@ -53,7 +43,9 @@ Uruchamia tryb edycji dla wiadomości AI.
 @param {string} [sessionId] - ID sesji
 
 **_@param_** *`{HTMLElement}`* _**msgElement**_  Element wiadomości do edycji
+
 **_@param_** *`{string}`* _**originalText**_  Oryginalny tekst wiadomości
+
 **_@param_** *`{string}`* _**messageId**_  ID wiadomości
 
 ```javascript
@@ -105,7 +97,9 @@ Uruchamia tryb edycji dla wiadomości AI.
 
       // Preferuj wybór z galerii; fallback do resolvera
       let imageUrl = "";
-      const chosen = tagPanel.querySelector('input[name="gallery-choice"]:checked');
+      const chosen = tagPanel.querySelector(
+        'input[name="gallery-choice"]:checked'
+      );
       if (chosen && chosen.value) {
         imageUrl = chosen.value;
       } else {
@@ -150,6 +144,7 @@ Uruchamia tryb edycji dla wiadomości AI.
 ---
 
 ## Pełny kod klasy
+
 ```javascript
 class ChatEditView {
   constructor(dom) {
@@ -201,7 +196,9 @@ class ChatEditView {
       }
 
       let imageUrl = "";
-      const chosen = tagPanel.querySelector('input[name="gallery-choice"]:checked');
+      const chosen = tagPanel.querySelector(
+        'input[name="gallery-choice"]:checked'
+      );
       if (chosen && chosen.value) {
         imageUrl = chosen.value;
       } else {

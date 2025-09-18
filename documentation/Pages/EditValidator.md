@@ -1,14 +1,12 @@
 # EditValidator
 
-=============
 Walidator tekstu edytowanego przez AI oraz przypisanych tagów.
 Sprawdza długość tekstu i tagów oraz obecność treści.
-Zasady:
--------
-✅ Dozwolone:
+## Zasady:
+- ✅ Dozwolone:
   - Stałe limitów: maxTextLength, maxTagLength
   - Metoda: validate(text, tags)
-❌ Niedozwolone:
+- ❌ Niedozwolone:
   - Operacje na DOM
   - Zlecenia sieciowe (fetch, localStorage)
   - Logika aplikacyjna (np. renderowanie, wysyłka)
@@ -46,6 +44,7 @@ Waliduje tekst i tagi pod kątem pustki i długości.
 - Każdy tag musi być typu string i nie może przekraczać maxTagLength.
 
 **_@param_** *`{string}`* _**text**_  Edytowany tekst AI
+
 **_@param_** *`{string[]}`* _**tags**_  Lista tagów
 
 **@returns** *`{{ valid: boolean, errors: string[] }`*  } - Obiekt z informacją o poprawności i listą błędów
@@ -87,6 +86,7 @@ Waliduje tekst i tagi pod kątem pustki i długości.
 ---
 
 ## Pełny kod klasy
+
 ```javascript
 class EditValidator {
   static maxTextLength = 5000;

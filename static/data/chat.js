@@ -1,22 +1,51 @@
 /**
- * Diagnostics.runAll();         // wszystko, grupy rozwinięte
- * Diagnostics.runEachGroup();   // każda grupa osobno
- * Diagnostics.runGroup("Utils"); // tylko grupa "Utils"
- * Diagnostics.runSummary();     // tylko zbiorcze podsumowanie
- * Diagnostics.getGroups();      // ["Utils", "BackendAPI", "ChatManager", ...]
+ *
+ * Służy do definiowania, uruchamiania i raportowania testów jednostkowych
+ * w aplikacji. Obsługuje grupowanie testów, asercje, tryb wizualny oraz raportowanie wyników
+ * w konsoli.
+ *
+ * Przykłady użycia:
+ * - Diagnostics.runAll();           // uruchamia wszystkie testy
+ * - Diagnostics.runEachGroup();     // uruchamia każdą grupę osobno
+ * - Diagnostics.runGroup("Utils");  // uruchamia tylko grupę "Utils"
+ * - Diagnostics.runSummary();       // pokazuje zbiorcze podsumowanie
+ * - Diagnostics.getGroups();        // zwraca listę nazw grup
  */
 
 class Diagnostics {
+  /**
+   * Blokada wielokrotnego uruchomienia testów.
+   * @type {boolean}
+   */
   static onlyOneRun = false; // Blokada wielokrotnego uruchomienia
+  /**
+   * Lista zarejestrowanych testów.
+   * @type {Array<{ name: string, fn: Function, group: string }>}
+   */
   static tests = [];
+
+  /**
+   * Aktualnie aktywna grupa testowa.
+   * @type {string}
+   */
   static currentGroup = "default";
 
+  /**
+   * Definiuje grupę testów.
+   * @param {string} groupName - Nazwa grupy
+   * @param {Function} fn - Funkcja zawierająca testy
+   */
   static describe(groupName, fn) {
     this.currentGroup = groupName;
     fn();
     this.currentGroup = "default";
   }
 
+  /**
+   * Rejestruje pojedynczy test w bieżącej grupie.
+   * @param {string} name - Nazwa testu
+   * @param {Function} fn - Funkcja testowa
+   */
   static it(name, fn) {
     this.register(name, fn, this.currentGroup);
   }
@@ -24,14 +53,13 @@ class Diagnostics {
   /**
    * Fluent API do asercji w testach.
    * Przykład użycia:
-   * ```
-   * Diagnostics.expect(value).toBe(expected);
-   * Diagnostics.expect(value).toBeType("string");
-   * Diagnostics.expect(array).toInclude(item);
-   * Diagnostics.expect(value).toBeTruthy();
-   * Diagnostics.expect(value).toBeFalsy();
-   * Diagnostics.expect(value).toBeGreaterThan(min);
-   * ```
+   * - Diagnostics.expect(value).toBe(expected);
+   * - Diagnostics.expect(value).toBeType("string");
+   * - Diagnostics.expect(array).toInclude(item);
+   * - Diagnostics.expect(value).toBeTruthy();
+   * - Diagnostics.expect(value).toBeFalsy();
+   * - Diagnostics.expect(value).toBeGreaterThan(min);
+   *
    * @param {*} value - Wartość do testowania
    * @returns {object} - Obiekt z metodami asercji
    */
@@ -66,26 +94,47 @@ class Diagnostics {
       },
     };
   }
-
+  /**
+   * Sprawdza, czy tablica zawiera daną wartość.
+   * @param {Array} arr - Tablica
+   * @param {*} val - Wartość oczekiwana
+   * @throws {Error} Jeśli tablica nie zawiera wartości
+   */
   static assertArrayIncludes(arr, val) {
     if (!Array.isArray(arr)) throw new Error("Wartość nie jest tablicą");
     if (!arr.includes(val)) throw new Error(`Tablica nie zawiera: ${val}`);
   }
-
+  /**
+   * Sprawdza, czy obiekt zawiera dany klucz.
+   * @param {object} obj - Obiekt
+   * @param {string} key - Klucz
+   * @throws {Error} Jeśli klucz nie istnieje
+   */
   static assertObjectHasKey(obj, key) {
     if (typeof obj !== "object" || obj === null)
       throw new Error("Wartość nie jest obiektem");
     if (!(key in obj)) throw new Error(`Brak klucza: ${key}`);
   }
-
+  /**
+   * Rejestruje test w systemie.
+   * @param {string} name - Nazwa testu
+   * @param {Function} fn - Funkcja testowa
+   * @param {string} [group="default"] - Nazwa grupy
+   */
   static register(name, fn, group = "default") {
     this.tests.push({ name, fn, group });
   }
-
+  /**
+   * Zwraca listę unikalnych nazw grup testowych.
+   * @returns {string[]} Lista nazw grup
+   */
   static getGroups() {
     return [...new Set(this.tests.map((t) => t.group))];
   }
-
+  /**
+   * Pokazuje tryb testowy na stronie (overlay).
+   * @param {boolean} [isStarted=true] - Czy testy są aktywne
+   */
   static testsMode(isStarted = true) {
     const existing = document.querySelector("#diagnostics-mode");
     if (existing) existing.remove();
@@ -113,11 +162,17 @@ class Diagnostics {
       document.body.appendChild(div);
     }
   }
-
+  /**
+   * Przechowuje wyniki testów pogrupowane według grup.
+   * @type {Record<string, Array<{ name: string, status: string, error: string }>>}
+   */
   static grouped = {};
+
+  /**
+   * Pokazuje wyniki wszystkich testów w konsoli.
+   */
   static showResultsAll() {
     if (Object.keys(this.grouped).length === 0) {
-      // kolorowe przedstawienie komend
       // Kolorowe przedstawienie komend
       const styleAll = "color: #51a088ff; font-weight: bold; font-size: 1.2em;";
       const styleGroup =
@@ -152,7 +207,10 @@ class Diagnostics {
     }
     this.summary();
   }
-
+  /**
+   * Renderuje tabelę wyników testów w konsoli.
+   * @param {Array<{ name: string, status: string, error: string }>} results
+   */
   static renderConsoleTableTestResults(results) {
     console.table(
       results.map((r) => ({
@@ -162,7 +220,10 @@ class Diagnostics {
       }))
     );
   }
-
+  /**
+   * Uruchamia wszystkie grupy testów.
+   * @returns {Promise<void>}
+   */
   static async runAll() {
     if (this.onlyOneRun) {
       console.warn(
@@ -181,31 +242,31 @@ class Diagnostics {
 
       if (originalBodyHTML) {
         document.body.innerHTML = originalBodyHTML;
-       const dom = new Dom();
-  dom.init(htmlElements);
+        const dom = new Dom();
+        dom.init(htmlElements);
 
-  // b) Context – rejestrujesz dokładnie to, czego chcesz użyć (instancje, nie klasy!)
-  const context = new Context({
-    diagnostics: Diagnostics,
-    userManager: UserManager,
-    dom,
-    utils: Utils,
-    backendAPI: BackendAPI,
-  });
+        // b) Context – rejestrujesz dokładnie to, czego chcesz użyć (instancje, nie klasy!)
+        const context = new Context({
+          diagnostics: Diagnostics,
+          userManager: UserManager,
+          dom,
+          utils: Utils,
+          backendAPI: BackendAPI,
+        });
 
-  // c) Skład modułów (to jest w 100% konfigurowalne per strona)
-  const modules = [
-    UserManagerModule(),
-    VirtualKeyboardDockModule(dom),
-    PanelsControllerModule(dom),
-    ChatManagerModule(context),       // tylko na stronie czatu
-    ClearImageCacheButtonModule(),    // feature
-  ];
+        // c) Skład modułów (to jest w 100% konfigurowalne per strona)
+        const modules = [
+          UserManagerModule(),
+          VirtualKeyboardDockModule(dom),
+          PanelsControllerModule(dom),
+          ChatManagerModule(context), // tylko na stronie czatu
+          ClearImageCacheButtonModule(), // feature
+        ];
 
-  // d) App dostaje Context + listę modułów, i tylko je odpala
-  const app = new App(context, modules);
+        // d) App dostaje Context + listę modułów, i tylko je odpala
+        const app = new App(context, modules);
 
-  await app.init();
+        await app.init();
       }
     }
 
@@ -220,7 +281,9 @@ class Diagnostics {
     this.onlyOneRun = true;
     this.testsMode(false);
   }
-
+  /**
+   * Pokazuje podsumowanie wyników testów.
+   */
   static summary() {
     const summary = [];
     for (const [groupName, results] of Object.entries(this.grouped)) {
@@ -240,7 +303,11 @@ class Diagnostics {
       await this.runGroup(group);
     }
   }
-
+  /**
+   * Uruchamia testy tylko dla wybranej grupy.
+   * @param {string} groupName - Nazwa grupy
+   * @returns {Promise<void>}
+   */
   static async runGroup(groupName) {
     if (this.onlyOneRun) {
       console.warn(
@@ -268,7 +335,12 @@ class Diagnostics {
     this.onlyOneRun = true;
     this.testsMode(false);
   }
-
+  /**
+   * Przechwytuje błąd z testu i zwraca wynik.
+   * @param {Function} fn - Funkcja testowa
+   * @param {string} name - Nazwa testu
+   * @returns {Promise<{ status: string, name: string, error: string }>}
+   */
   static async captureError(fn, name) {
     try {
       await fn();
@@ -277,20 +349,36 @@ class Diagnostics {
       return { status: "❌", name, error: e.message || String(e) };
     }
   }
-
+  /**
+   * Sprawdza równość dwóch wartości.
+   * @param {*} a
+   * @param {*} b
+   * @throws {Error} Jeśli wartości są różne
+   */
   static assertEqual(a, b) {
     if (a !== b) throw new Error(`Oczekiwano ${b}, otrzymano ${a}`);
   }
-
+  /**
+   * Sprawdza typ wartości.
+   * @param {*} value
+   * @param {string} type
+   * @throws {Error} Jeśli typ jest niezgodny
+   */
   static assertType(value, type) {
     if (typeof value !== type)
       throw new Error(`Typ ${typeof value}, oczekiwano ${type}`);
   }
-
+  /**
+   * Zwraca promisa, który rozwiązuje się po zadanym czasie.
+   * @param {number} ms - Czas w milisekundach
+   * @returns {Promise<void>}
+   */
   static wait(ms) {
     return new Promise((resolve) => setTimeout(resolve, ms));
   }
-
+  /**
+   * Czyści środowisko testowe (localStorage, cookies).
+   */
   static resetEnv() {
     localStorage.clear();
     document.cookie.split(";").forEach((c) => {
@@ -299,7 +387,10 @@ class Diagnostics {
         .replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/");
     });
   }
-
+  /**
+   * Filtruje tylko nieudane testy.
+   * @returns {Record<string, Array<{ name: string, status: string, error: string }>>}
+   */
   static filterFailed() {
     const failed = {};
     for (const [groupName, results] of Object.entries(this.grouped)) {
@@ -310,7 +401,9 @@ class Diagnostics {
     }
     return failed;
   }
-
+  /**
+   * Pokazuje tylko nieudane testy w konsoli.
+   */
   static showFailedAll() {
     const failed = this.filterFailed();
 
@@ -337,205 +430,294 @@ class Diagnostics {
 }
 
 /**
- * # VirtualKeyboardDock
- * Komponent odpowiedzialny za dostosowanie położenia elementu docka (np. paska narzędzi, przycisków)
- * w momencie pojawienia się lub zniknięcia wirtualnej klawiatury na urządzeniach mobilnych.
  *
- * ## Funkcje:
- *
- *  - Nasłuchuje zdarzeń `focus` i `blur` na polach tekstowych, aby wykryć aktywację klawiatury.
- *  - Reaguje na zdarzenia `resize`/`visualViewport`/`keyboardchange` w celu aktualizacji pozycji docka.
- *  - Ustawia odpowiedni `bottom` docka tak, aby nie był zasłaniany przez klawiaturę.
- *  - Ukrywa dock, gdy klawiatura jest schowana (opcjonalnie).
+ * Warstwa komunikacji z backendem HTTP — odporna na błędy sieciowe, spójna i centralnie konfigurowalna.
+ * Umożliwia wysyłanie żądań POST/GET z automatycznym retry i backoffem.
+ * Integruje się z `RequestRetryManager` i zarządza tokenem autoryzacyjnym.
  *
  * ## Zasady:
- * 
- * ✅ Odpowiedzialność:
- *   - Manipulacja stylem docka w reakcji na zmiany widoczności klawiatury.
- *   - Obsługa zdarzeń wejściowych i zmian rozmiaru widoku.
  *
- * ❌ Niedozwolone:
- *   - Modyfikowanie innych elementów UI poza dockiem.
- *   - Wysyłanie żądań sieciowych.
+ * - ✅ Dozwolone:
+ *   - Budowanie żądań HTTP (URL, headers, body)
+ *   - Dekodowanie odpowiedzi JSON
+ *   - Obsługa błędów sieciowych i retry
+ *   - Centralne zarządzanie baseURL i tokenem
  *
- * API:
- * ----
- * - `constructor(dockEl)` — inicjalizuje obiekt z referencją do elementu docka.
- * - `init()` — podpina nasłuchy zdarzeń i ustawia początkowy stan.
- * - `updatePosition()` — oblicza i ustawia pozycję docka względem dolnej krawędzi okna/viewportu.
- * - `show()` — pokazuje dock.
- * - `hide()` — ukrywa dock.
+ * - ❌ Niedozwolone:
+ *   - Logika UI
+ *   - Cache’owanie domenowe
+ *   - Mutowanie danych biznesowych
  */
-class VirtualKeyboardDock {
-  /**
-   * @param {HTMLElement} dockEl - Element docka, który ma być pozycjonowany.
-   */
-  constructor(dockEl, forceEnable = false) {
-    this.dock = dockEl;
-    this.isVisible = false;
-    this.boundUpdate = this.updatePosition.bind(this);
-    this.forceEnable = forceEnable;
-  }
-  /**
-   * Podpina nasłuchy zdarzeń i ustawia początkową pozycję docka.
-   */
-  init() {
-    if (!this.forceEnable && Utils.isMobile() === false) return;
-    document.addEventListener("focusin", (e) => {
-      if (e.target.tagName === "INPUT" || e.target.tagName === "TEXTAREA") {
-        this.show();
-      }
-    });
-    document.addEventListener("focusout", (e) => {
-      if (e.target.tagName === "INPUT" || e.target.tagName === "TEXTAREA") {
-        this.hide();
-      }
-    });
+class BackendAPI {
+  /** 
+   * Bazowy adres backendu
+   * @type {string} (bez końcowego slasha, pusty = względny)
+  */
+  static baseURL = "";
 
-    window.addEventListener("resize", this.boundUpdate);
-    if (window.visualViewport) {
-      window.visualViewport.addEventListener("resize", this.boundUpdate);
+  /** 
+   * Token autoryzacyjny Bearer 
+   * @type {string|null}
+  */
+  static authToken = null;
+
+  /**
+   * Ustawia bazowy adres względny backendu.
+   * @param {string} url - Adres URL bez końcowego slasha.
+   */
+  static setBaseURL(url) {
+    if (!url || url === "/") {
+      // tryb względny — używamy hosta, z którego załadowano front
+      this.baseURL = "";
+    } else {
+      // czyścimy końcowe slashe
+      this.baseURL = url.replace(/\/+$/, "");
     }
   }
 
   /**
-   * Aktualizuje pozycję docka względem dolnej krawędzi okna.
+   * Ustawia lub usuwa token autoryzacyjny.
+   * @param {string|null} token - Token Bearer lub null.
    */
-  updatePosition() {
-    if (!this.isVisible) return;
-    const offset = window.visualViewport
-      ? window.innerHeight - window.visualViewport.height
-      : 0;
-    this.dock.style.bottom = `${offset}px`;
+  static setAuthToken(token) {
+    this.authToken = token || null;
   }
 
   /**
-   * Pokazuje dock i aktualizuje jego pozycję.
+   * Składa pełny URL względem baseURL.
+   * @param {string} path - Ścieżka względna (np. "/generate").
+   * @returns {string} Pełny URL.
+   * @private
    */
-  show() {
-    this.isVisible = true;
-    this.dock.style.display = "block";
-    this.updatePosition();
+  static _url(path) {
+    if (!this.baseURL) return path;
+    return `${this.baseURL}${path.startsWith("/") ? "" : "/"}${path}`;
   }
 
   /**
-   * Ukrywa dock.
+   * Buduje nagłówki HTTP z Content-Type, Accept i Authorization.
+   * @param {Record<string,string>} [extra] - Dodatkowe nagłówki.
+   * @returns {HeadersInit} Nagłówki HTTP.
+   * @private
    */
-  hide() {
-    this.isVisible = false;
-    this.dock.style.display = "none";
-    this.dock.style.bottom = "0px";
-  }
-}
-
-/**
- * PromptValidator
- * ===============
- * Walidator promptów użytkownika przed wysłaniem do AI.
- * Sprawdza typ, długość i obecność niedozwolonych znaków.
- *
- * Zasady:
- * -------
- * ✅ Dozwolone:
- *   - Stałe limitów: minLength, maxLength
- *   - Wzorzec niedozwolonych znaków: forbidden
- *   - Metoda: validate(prompt)
- *
- * ❌ Niedozwolone:
- *   - Operacje na DOM
- *   - Zlecenia sieciowe (fetch, localStorage)
- *   - Logika aplikacyjna (np. renderowanie, wysyłka)
- *   - Efekty uboczne (np. console.log, mutacje zewnętrznych obiektów)
- *
- * TODO:
- *   - setLimits()
- *   - addForbiddenPattern()
- *   - validateStrict()
- *   - getErrorSummary()
- */
-class PromptValidator {
-  /**
-   * Minimalna długość promptu po przycięciu.
-   * Prompt krótszy niż ta wartość zostanie uznany za niepoprawny.
-   * @type {number}
-   */
-  static minLength = 1;
-
-  /**
-   * Maksymalna długość promptu po przycięciu.
-   * Prompt dłuższy niż ta wartość zostanie uznany za niepoprawny.
-   * @type {number}
-   */
-  static maxLength = 300;
-
-  /**
-   * Wzorzec niedozwolonych znaków w promptach.
-   * Domyślnie: < oraz >
-   * @type {RegExp}
-   */
-  static forbidden = /[<>]/;
-
-  /**
-   * Waliduje prompt użytkownika.
-   * Sprawdza:
-   * - czy jest typu string
-   * - czy nie jest pusty po przycięciu
-   * - czy mieści się w limicie długości
-   * - czy nie zawiera niedozwolonych znaków
-   *
-   * @param {string} prompt - Tekst promptu od użytkownika
-   * @returns {{ valid: boolean, errors: string[] }} - Obiekt z informacją o poprawności i listą błędów
-   */
-  static validate(prompt) {
-    const errors = [];
-
-    // Typ musi być string
-    if (typeof prompt !== "string") {
-      errors.push("Prompt musi być typu string.");
-      return { valid: false, errors };
-    }
-
-    // Przycięcie spacji
-    const trimmed = prompt.trim();
-    const len = trimmed.length;
-
-    // Walidacja długości
-    if (len < this.minLength) {
-      errors.push("Prompt nie może być pusty.");
-    } else if (len > this.maxLength) {
-      errors.push(
-        `Maksymalna długość promptu to ${this.maxLength} znaków, otrzymano ${len}.`
-      );
-    }
-
-    // Walidacja znaków
-    if (this.forbidden.test(trimmed)) {
-      errors.push("Prompt zawiera niedozwolone znaki: < lub >.");
-    }
-
-    return {
-      valid: errors.length === 0,
-      errors,
+  static _headers(extra = {}) {
+    const h = {
+      Accept: "application/json",
+      ...extra,
     };
+    if (!("Content-Type" in h)) h["Content-Type"] = "application/json";
+    if (this.authToken) h["Authorization"] = `Bearer ${this.authToken}`;
+    return h;
+  }
+
+  /**
+   * Wysyła żądanie POST z JSON i odbiera JSON z retry.
+   * @param {string} path - Ścieżka żądania.
+   * @param {any} body - Treść żądania.
+   * @param {RequestInit} [init] - Dodatkowe opcje fetch.
+   * @returns {Promise<any>} Odpowiedź z backendu.
+   * @private
+   */
+  static async _postJson(path, body, init = {}) {
+    const res = await RequestRetryManager.fetchWithRetry(
+      this._url(path),
+      {
+        method: "POST",
+        headers: this._headers(init.headers || {}),
+        body: JSON.stringify(body),
+        ...init,
+      },
+      3, // liczba prób
+      800, // opóźnienie początkowe
+      { maxTotalTime: 15_000 }
+    );
+    if (!res.ok) {
+      const text = await BackendAPI._safeText(res);
+      throw new Error(`POST ${path} -> HTTP ${res.status}: ${text}`);
+    }
+    return BackendAPI._safeJson(res);
+  }
+
+  /**
+   * Wysyła żądanie GET i odbiera JSON z retry.
+   * @param {string} path - Ścieżka żądania.
+   * @param {RequestInit} [init] - Dodatkowe opcje fetch.
+   * @returns {Promise<any>} Odpowiedź z backendu.
+   * @private
+   */
+  static async _getJson(path, init = {}) {
+    const res = await RequestRetryManager.fetchWithRetry(
+      this._url(path),
+      {
+        method: "GET",
+        headers: this._headers(init.headers || {}),
+        ...init,
+      },
+      3,
+      800,
+      { maxTotalTime: 15_000 }
+    );
+    if (!res.ok) {
+      const text = await BackendAPI._safeText(res);
+      throw new Error(`GET ${path} -> HTTP ${res.status}: ${text}`);
+    }
+    return BackendAPI._safeJson(res);
+  }
+
+  /**
+   * Bezpieczny parser JSON — zwraca pusty obiekt przy błędzie.
+   * @param {Response} res - Odpowiedź HTTP.
+   * @returns {Promise<any>} Parsowany JSON lub pusty obiekt.
+   * @private
+   */
+  static async _safeJson(res) {
+    try {
+      return await res.json();
+    } catch {
+      return {};
+    }
+  }
+
+  /**
+   * Bezpieczny odczyt tekstu — zwraca pusty string przy błędzie.
+   * @param {Response} res - Odpowiedź HTTP.
+   * @returns {Promise<string>} Tekst odpowiedzi.
+   * @private
+   */
+  static async _safeText(res) {
+    try {
+      return await res.text();
+    } catch {
+      return "";
+    }
+  }
+
+  // ── Publiczne metody API ───────────────────────────────────────────────────
+
+  /**
+   * Wysyła prompt użytkownika do backendu.
+   * @param {string} prompt - Treść promptu.
+   * @returns {Promise<any>} Odpowiedź z backendu.
+   */
+  static async generate(prompt) {
+    return this._postJson("/generate", { prompt });
+  }
+
+  /**
+   * Przesyła oceny odpowiedzi AI.
+   * @param {Record<string, any>} ratings - Obiekt ocen.
+   * @returns {Promise<any>} Odpowiedź z backendu.
+   */
+  static async rate(ratings) {
+    return this._postJson("/rate", ratings);
+  }
+
+  /**
+   * Przesyła edytowaną odpowiedź z tagami.
+   * @param {string} editedText - Nowa treść.
+   * @param {Record<string, any>} tags - Obiekt tagów.
+   * @param {string} sessionId - ID sesji.
+   * @param {string} msgId - ID wiadomości.
+   * @returns {Promise<any>} Odpowiedź z backendu.
+   */
+  static async edit(editedText, tags, sessionId, msgId) {
+    return this._postJson("/edit", { editedText, tags, sessionId, msgId });
+  }
+
+  /**
+   * Przesyła wiadomość użytkownika do backendu.
+   * @param {{ sender: string, text: string }} message - Nadawca i treść.
+   * @returns {Promise<any>} Odpowiedź z backendu.
+   */
+  static async postMessage({ sender, text }) {
+    return this._postJson("/messages", { sender, text });
+  }
+
+  /**
+   * Pobiera słownik tagów z backendu.
+   * @returns {Promise<any>} Lista tagów.
+   */
+  static async getTags() {
+    return this._getJson("/tags");
   }
 }
 
 /**
- * AppStorageManager
- * ==============
+ *
+ * Kontener zależności aplikacji. Przechowuje i udostępnia instancje usług oraz
+ * zapewnia wygodne gettery do najczęściej używanych komponentów.
+ *
+ * - ✅ Dozwolone:
+ *   - Rejestracja instancji usług i komponentów (np. Dom, Utils, UserManager)
+ *   - Pobieranie zależności po nazwie lub przez getter
+ *   - Dynamiczne dodawanie nowych zależności w trakcie działania
+ *
+ * - ❌ Niedozwolone:
+ *   - Tworzenie instancji usług na sztywno (to robi warstwa inicjalizacyjna)
+ *   - Logika biznesowa lub UI
+ *   - Operacje sieciowe
+ */
+class Context {
+  /**
+   * Tworzy nowy kontekst z początkowym zestawem usług.
+   * @param {Record<string, any>} services - mapa nazw → instancji
+   */
+  constructor(services = {}) {
+    /** @private @type {Map<string, any>} */
+    this._registry = new Map(Object.entries(services));
+  }
+
+  /**
+   * Rejestruje nową lub nadpisuje istniejącą zależność.
+   * @param {string} name - unikalna nazwa zależności
+   * @param {any} instance - instancja lub obiekt usługi
+   */
+  register(name, instance) {
+    this._registry.set(name, instance);
+  }
+
+  /**
+   * Pobiera zarejestrowaną zależność po nazwie.
+   * @param {string} name - nazwa zależności
+   * @returns {any} - instancja lub undefined
+   */
+  get(name) {
+    return this._registry.get(name);
+  }
+
+  // Wygodne gettery (opcjonalne)
+  get dom() {
+    return this.get("dom");
+  }
+  get utils() {
+    return this.get("utils");
+  }
+  get userManager() {
+    return this.get("userManager");
+  }
+  get diagnostics() {
+    return this.get("diagnostics");
+  }
+  get backendAPI() {
+    return this.get("backendAPI");
+  }
+}
+
+/**
+ *
  * Uniwersalny mediator przechowywania danych z automatycznym fallbackiem
  * z `localStorage` do `cookie` w przypadku braku dostępu lub błędu.
  * Obsługuje TTL w sekundach, czyszczenie wpisów z prefiksem,
  * oraz mechanizmy obronne przy przekroczeniu limitu pamięci (`QuotaExceededError`).
  *
- * Zasady:
- * -------
- * ✅ Odpowiedzialność:
+ * ## Zasady:
+ *
+ * - ✅ Dozwolone:
  *   - Zapisywanie, odczytywanie i usuwanie danych w `localStorage` lub `cookie`
  *   - Obsługa TTL i czyszczenie danych tymczasowych
  *   - Reakcja na błędy pamięci i komunikacja z użytkownikiem
  *
- * ❌ Niedozwolone:
+ * - ❌ Niedozwolone:
  *   - Wymuszanie prefiksów
  *   - Logika aplikacyjna (np. interpretacja danych)
  */
@@ -568,16 +750,14 @@ class AppStorageManager {
    * Zapisuje wartość pod wskazanym kluczem z opcjonalnym TTL.
    * TTL wyrażony w sekundach. Domyślnie 30 dni (2592000 sekund).
    * Wartość jest serializowana do JSON.
-   * 
+   *
    * @param {string} key - Klucz pod którym zapisywana jest wartość.
    * @param {any} value - Dowolna wartość do zapisania.
    * @param {number} [ttl=2592000] - Czas życia w sekundach.
    */
   static set(key, value, ttl = 2592000) {
     const now = Date.now();
-    const payload = ttl
-      ? { value, ts: now, ttl: ttl * 1000 }
-      : value;
+    const payload = ttl ? { value, ts: now, ttl: ttl * 1000 } : value;
 
     const serialized = JSON.stringify(payload);
 
@@ -597,7 +777,9 @@ class AppStorageManager {
         }
       }
     } else {
-      let cookie = `${encodeURIComponent(key)}=${encodeURIComponent(serialized)}; path=/`;
+      let cookie = `${encodeURIComponent(key)}=${encodeURIComponent(
+        serialized
+      )}; path=/`;
       if (ttl) {
         cookie += `; max-age=${ttl}`;
       }
@@ -621,7 +803,9 @@ class AppStorageManager {
     if (this._hasLocalStorage()) {
       raw = localStorage.getItem(key);
     } else {
-      const match = document.cookie.match(new RegExp(`(?:^|; )${encodeURIComponent(key)}=([^;]*)`));
+      const match = document.cookie.match(
+        new RegExp(`(?:^|; )${encodeURIComponent(key)}=([^;]*)`)
+      );
       raw = match ? decodeURIComponent(match[1]) : null;
     }
     try {
@@ -692,7 +876,11 @@ class AppStorageManager {
    * @param {Error} [error] - Opcjonalny obiekt błędu.
    */
   static _handleStorageFailure(type, key, error) {
-    LoggerService?.record("warn", `[AppStorageManager] ${type} niedostępny lub pełny przy zapisie ${key}`, error);
+    LoggerService?.record(
+      "warn",
+      `[AppStorageManager] ${type} niedostępny lub pełny przy zapisie ${key}`,
+      error
+    );
 
     const confirmed = window.confirm(
       `Pamięć ${type} jest pełna lub niedostępna. Czy chcesz ją wyczyścić, aby kontynuować?`
@@ -704,57 +892,512 @@ class AppStorageManager {
         document.cookie.split(";").forEach((c) => {
           document.cookie = c
             .replace(/^ +/, "")
-            .replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/");
+            .replace(
+              /=.*/,
+              "=;expires=" + new Date().toUTCString() + ";path=/"
+            );
         });
       }
-      LoggerService?.record("info", `[AppStorageManager] ${type} wyczyszczony przez użytkownika.`);
+      LoggerService?.record(
+        "info",
+        `[AppStorageManager] ${type} wyczyszczony przez użytkownika.`
+      );
     } else {
-      LoggerService?.record("info", `[AppStorageManager] Użytkownik odmówił czyszczenia ${type}.`);
+      LoggerService?.record(
+        "info",
+        `[AppStorageManager] Użytkownik odmówił czyszczenia ${type}.`
+      );
     }
   }
 }
 
 /**
- * # UserManager
+ *
+ * Główna warstwa logiki aplikacji — łączy widoki UI z backendem.
+ * Odpowiada za obsługę promptów, edycji i oceniania wiadomości.
+ * Integruje się z `ChatUIView`, `ChatEditView`, `BackendAPI`, `ImageResolver` i `LoggerService`.
+ *
+ * ## Zasady:
+ *
+ * - ✅ Dozwolone:
+ *   - Obsługa promptów, edycji, oceniania
+ *   - Przekazywanie danych między widokami a BackendAPI
+ *   - Aktualizacja UI przez `ChatUIView` i `ChatEditView`
+ *
+ * - ❌ Niedozwolone:
+ *   - Renderowanie HTML bezpośrednio
+ *   - Mutowanie danych poza `dataset`/`msgEl`
+ *   - Logika domenowa (np. interpretacja tagów)
+ */
+class ChatManager {
+  /**
+   * Inicjalizuje widoki UI i podpina zdarzenia.
+   * @param {{ dom: Dom }} context - Kontekst aplikacji z referencjami DOM.
+   */
+  constructor(context) {
+    const { dom } = context;
+    this.chatView = new ChatUIView(
+      dom.chatContainer,
+      dom.inputArea,
+      dom.prompt
+    );
+
+    this.promptVal = {
+      promptEl: dom.prompt,
+      errorEl: dom.promptError,
+      warningEl: dom.promptWarning,
+    };
+
+    this.editView = new ChatEditView(dom);
+
+    this.chatView.onEditRequested = (msgEl, text, id, ts, sessionId) =>
+      this.editView.enableEdit(msgEl, text, id, ts, sessionId);
+
+    this.chatView.onRatingSubmit = (msgEl) => this.ratingView.open(msgEl);
+  }
+
+  /**
+   * Inicjalizuje widoki i podpina zdarzenia walidacji promptu oraz edycji i oceny.
+   */
+  init() {
+    const { promptEl, errorEl, warningEl } = this.promptVal;
+    let hadInput = false;
+
+    const syncUI = (text) => {
+      const raw = typeof text === "string" ? text : promptEl.value;
+      const trimmed = raw.trim();
+      const len = raw.length;
+
+      // licznik znaków
+      warningEl.textContent = `${len}/${PromptValidator.maxLength} znaków`;
+
+      // klasa długości
+      if (len > PromptValidator.maxLength) {
+        warningEl.classList.add("error-text-length");
+      } else {
+        warningEl.classList.remove("error-text-length");
+      }
+
+      // walidacja
+      const { valid, errors } = PromptValidator.validate(raw);
+
+      // filtr błędów
+      const isEmpty = trimmed.length === 0;
+      const filteredErrors = errors.filter((msg) => {
+        const isEmptyError = msg.startsWith("Prompt nie może być pusty");
+        if (isEmptyError) return hadInput && isEmpty;
+        return true;
+      });
+
+      errorEl.textContent = filteredErrors.join(" ");
+      return { valid, filteredErrors };
+    };
+
+    // startowa synchronizacja
+    const initialText = promptEl.value || "";
+    if (initialText.length > 0) hadInput = true;
+    syncUI(initialText);
+
+    // live feedback
+    promptEl.addEventListener("input", () => {
+      const len = promptEl.value.length;
+      if (len > 0) hadInput = true;
+
+      const { filteredErrors } = syncUI();
+      if (len > 0) {
+        const keep = filteredErrors.filter(
+          (e) => !e.startsWith("Prompt nie może być pusty")
+        );
+        errorEl.textContent = keep.join(" ");
+      }
+    });
+
+    // walidacja na submit – zwraca true/false
+    this.chatView.onPromptSubmit = (text) => {
+      const raw = text;
+      const trimmed = raw.trim();
+      const len = raw.length;
+      const { valid } = PromptValidator.validate(raw);
+      const { filteredErrors } = syncUI(raw);
+
+      if (!valid) {
+        const empty = trimmed.length === 0;
+        const onlyEmptyError =
+          filteredErrors.length === 1 &&
+          filteredErrors[0].startsWith("Prompt nie może być pusty");
+
+        if (empty && !hadInput) {
+          return false; // odrzucone – brak wcześniejszego inputu
+        }
+
+        errorEl.textContent = filteredErrors.join(" ");
+        if (len > PromptValidator.maxLength) {
+          warningEl.classList.add("error-text-length");
+        }
+        return false; // odrzucone – błędy walidacji
+      }
+
+      warningEl.classList.remove("error-text-length");
+      errorEl.textContent = "";
+      this.sendPrompt(raw);
+      return true; // zaakceptowane – ChatUIView wyczyści pole
+    };
+
+    this.chatView.init();
+
+    this.editView.onEditSubmit = (msgEl, txt, tags, imageUrl) =>
+      this.sendEdit(msgEl, txt, tags, imageUrl);
+
+    this.editView.onEditCancel = (msgEl, data) => {
+      this.chatView.hydrateAIMessage(msgEl, data);
+    };
+
+    this.chatView.onRatingSubmit = (payload) => {
+      this.sendRating(payload);
+    };
+  }
+
+  /**
+   * Wysyła prompt użytkownika do backendu i renderuje odpowiedź.
+   * @param {string} prompt - Treść promptu.
+   * @returns {Promise<void>}
+   */
+  async sendPrompt(prompt) {
+    this.chatView.addUserMessage(prompt);
+    const { msgEl, timer } = this.chatView.addLoadingMessage();
+    try {
+      const data = await BackendAPI.generate(prompt);
+
+      // Rozwiąż URL ilustracji
+      const urls = await ImageResolver.resolve(data.tags);
+      data.imageUrl = urls[0] || "";
+
+      // Renderuj odpowiedź AI
+      this.chatView.hydrateAIMessage(msgEl, data);
+    } catch (err) {
+      this.chatView.showError(msgEl);
+      LoggerService.record("error", "[ChatManager] sendPrompt", err);
+    } finally {
+      clearInterval(timer);
+    }
+  }
+
+  /**
+   * Przesyła edytowaną wiadomość do backendu i aktualizuje UI.
+   * @param {HTMLElement} msgEl - Element wiadomości.
+   * @param {string} editedText - Nowa treść.
+   * @param {Record<string, any>} tags - Tagowanie wiadomości.
+   * @param {string} imageUrl - URL ilustracji.
+   * @param {string} [sessionId] - ID sesji (opcjonalne).
+   * @returns {Promise<void>}
+   */
+  async sendEdit(msgEl, editedText, tags, imageUrl, sessionId) {
+    this.chatView.hydrateAIMessage(
+      msgEl,
+      {
+        id: msgEl.dataset.msgId,
+        sessionId: sessionId || msgEl.dataset.sessionId,
+        tags,
+        timestamp: msgEl.dataset.timestamp,
+        originalText: editedText,
+        text: editedText,
+        sender: msgEl.dataset.sender,
+        avatarUrl: msgEl.dataset.avatarUrl,
+        generation_time: Number.isFinite(
+          parseFloat(msgEl.dataset.generation_time)
+        )
+          ? parseFloat(msgEl.dataset.generation_time)
+          : 0,
+
+        imageUrl,
+      },
+      true
+    );
+
+    try {
+      await BackendAPI.edit(editedText, tags, sessionId, msgEl.dataset.msgId);
+    } catch (err) {
+      LoggerService.record("error", "[ChatManager] sendEdit", err);
+    }
+  }
+
+  /**
+   * Przesyła ocenę wiadomości do backendu.
+   * @param {{ messageId: string, sessionId: string, ratings: Record<string, any> }} payload
+   * @returns {Promise<void>}
+   */
+  async sendRating({ messageId, sessionId, ratings }) {
+    try {
+      await BackendAPI.rate({ messageId, sessionId, ratings });
+    } catch (err) {
+      LoggerService.record("error", "[ChatManager] sendRating", err);
+    }
+  }
+}
+
+/**
+ * Walidator promptów użytkownika przed wysłaniem do AI.
+ * Sprawdza typ, długość i obecność niedozwolonych znaków.
+ *
+ * ## Zasady:
+ *
+ * - ✅ Dozwolone:
+ *   - Stałe limitów: minLength, maxLength
+ *   - Wzorzec niedozwolonych znaków: forbidden
+ *   - Metoda: validate(prompt)
+ *
+ * - ❌ Niedozwolone:
+ *   - Operacje na DOM
+ *   - Zlecenia sieciowe (fetch, localStorage)
+ *   - Logika aplikacyjna (np. renderowanie, wysyłka)
+ *   - Efekty uboczne (np. console.log, mutacje zewnętrznych obiektów)
+ */
+class PromptValidator {
+  /**
+   * Minimalna długość promptu po przycięciu.
+   * Prompt krótszy niż ta wartość zostanie uznany za niepoprawny.
+   * @type {number}
+   */
+  static minLength = 1;
+
+  /**
+   * Maksymalna długość promptu po przycięciu.
+   * Prompt dłuższy niż ta wartość zostanie uznany za niepoprawny.
+   * @type {number}
+   */
+  static maxLength = 300;
+
+  /**
+   * Wzorzec niedozwolonych znaków w promptach.
+   * Domyślnie: < oraz >
+   * @type {RegExp}
+   */
+  static forbidden = /[<>]/;
+
+  /**
+   * Waliduje prompt użytkownika.
+   * Sprawdza:
+   * - czy jest typu string
+   * - czy nie jest pusty po przycięciu
+   * - czy mieści się w limicie długości
+   * - czy nie zawiera niedozwolonych znaków
+   *
+   * @param {string} prompt - Tekst promptu od użytkownika
+   * @returns {{ valid: boolean, errors: string[] }} - Obiekt z informacją o poprawności i listą błędów
+   */
+  static validate(prompt) {
+    const errors = [];
+
+    // Typ musi być string
+    if (typeof prompt !== "string") {
+      errors.push("Prompt musi być typu string.");
+      return { valid: false, errors };
+    }
+
+    // Przycięcie spacji
+    const trimmed = prompt.trim();
+    const len = trimmed.length;
+
+    // Walidacja długości
+    if (len < this.minLength) {
+      errors.push("Prompt nie może być pusty.");
+    } else if (len > this.maxLength) {
+      errors.push(
+        `Maksymalna długość promptu to ${this.maxLength} znaków, otrzymano ${len}.`
+      );
+    }
+
+    // Walidacja znaków
+    if (this.forbidden.test(trimmed)) {
+      errors.push("Prompt zawiera niedozwolone znaki: < lub >.");
+    }
+
+    return {
+      valid: errors.length === 0,
+      errors,
+    };
+  }
+}
+
+/**
+ *
+ * Walidator tekstu edytowanego przez AI oraz przypisanych tagów.
+ * Sprawdza długość tekstu i tagów oraz obecność treści.
+ *
+ * ## Zasady:
+ *
+ * - ✅ Dozwolone:
+ *   - Stałe limitów: maxTextLength, maxTagLength
+ *   - Metoda: validate(text, tags)
+ *
+ * - ❌ Niedozwolone:
+ *   - Operacje na DOM
+ *   - Zlecenia sieciowe (fetch, localStorage)
+ *   - Logika aplikacyjna (np. renderowanie, wysyłka)
+ *   - Efekty uboczne (np. console.log, mutacje zewnętrznych obiektów)
+ */
+class EditValidator {
+  /**
+   * Maksymalna długość tekstu edycji.
+   * Tekst dłuższy niż ta wartość zostanie uznany za niepoprawny.
+   * @type {number}
+   */
+  static maxTextLength = 5000;
+
+  /**
+   * Maksymalna długość pojedynczego tagu.
+   * Tag dłuższy niż ta wartość zostanie uznany za niepoprawny.
+   * @type {number}
+   */
+  static maxTagLength = 300;
+
+  /**
+   * Waliduje tekst i tagi pod kątem pustki i długości.
+   * - Tekst musi być niepusty po przycięciu.
+   * - Tekst nie może przekraczać maxTextLength.
+   * - Każdy tag musi być typu string i nie może przekraczać maxTagLength.
+   *
+   * @param {string} text - Edytowany tekst AI
+   * @param {string[]} tags - Lista tagów
+   * @returns {{ valid: boolean, errors: string[] }} - Obiekt z informacją o poprawności i listą błędów
+   */
+  static validate(text, tags) {
+    const errors = [];
+
+    // Przycięcie tekstu z obu stron
+    const trimmedText = text.trim();
+    const textLength = trimmedText.length;
+
+    // Walidacja tekstu
+    if (!textLength) {
+      errors.push("Tekst edycji nie może być pusty.");
+    } else if (textLength > this.maxTextLength) {
+      errors.push(
+        `Maksymalna długość tekstu to ${this.maxTextLength} znaków, otrzymano ${textLength}.`
+      );
+    }
+
+    // Walidacja tagów
+    for (const tag of tags) {
+      if (typeof tag !== "string") continue; // ignoruj błędne typy
+      if (tag.length > this.maxTagLength) {
+        errors.push(
+          `Tag "${tag}" przekracza limit ${this.maxTagLength} znaków (ma ${tag.length}).`
+        );
+      }
+    }
+
+    return {
+      valid: errors.length === 0,
+      errors,
+    };
+  }
+}
+
+/**
+ *
+ * Komponent odpowiedzialny za dostosowanie położenia elementu docka (np. paska narzędzi, przycisków)
+ * w momencie pojawienia się lub zniknięcia wirtualnej klawiatury na urządzeniach mobilnych.
+ * Funkcje:
+ *  - Nasłuchuje zdarzeń `focus` i `blur` na polach tekstowych, aby wykryć aktywację klawiatury.
+ *  - Reaguje na zdarzenia `resize`/`visualViewport`/`keyboardchange` w celu aktualizacji pozycji docka.
+ *  - Ustawia odpowiedni `bottom` docka tak, aby nie był zasłaniany przez klawiaturę.
+ *  - Ukrywa dock, gdy klawiatura jest schowana (opcjonalnie).
+ *
+ * ## Zasady:
+ *
+ * - ✅ Dozwolone:
+ *   - Manipulacja stylem docka w reakcji na zmiany widoczności klawiatury.
+ *   - Obsługa zdarzeń wejściowych i zmian rozmiaru widoku.
+ *
+ * - ❌ Niedozwolone:
+ *   - Modyfikowanie innych elementów UI poza dockiem.
+ *   - Wysyłanie żądań sieciowych.
+ */
+class VirtualKeyboardDock {
+  /**
+   * @param {HTMLElement} dockEl - Element docka, który ma być pozycjonowany.
+   */
+  constructor(dockEl, forceEnable = false) {
+    this.dock = dockEl;
+    this.isVisible = false;
+    this.boundUpdate = this.updatePosition.bind(this);
+    this.forceEnable = forceEnable;
+  }
+  /**
+   * Podpina nasłuchy zdarzeń i ustawia początkową pozycję docka.
+   */
+  init() {
+    if (!this.forceEnable && Utils.isMobile() === false) return;
+    document.addEventListener("focusin", (e) => {
+      if (e.target.tagName === "INPUT" || e.target.tagName === "TEXTAREA") {
+        this.show();
+      }
+    });
+    document.addEventListener("focusout", (e) => {
+      if (e.target.tagName === "INPUT" || e.target.tagName === "TEXTAREA") {
+        this.hide();
+      }
+    });
+
+    window.addEventListener("resize", this.boundUpdate);
+    if (window.visualViewport) {
+      window.visualViewport.addEventListener("resize", this.boundUpdate);
+    }
+  }
+
+  /**
+   * Aktualizuje pozycję docka względem dolnej krawędzi okna.
+   */
+  updatePosition() {
+    if (!this.isVisible) return;
+    const offset = window.visualViewport
+      ? window.innerHeight - window.visualViewport.height
+      : 0;
+    this.dock.style.bottom = `${offset}px`;
+  }
+
+  /**
+   * Pokazuje dock i aktualizuje jego pozycję.
+   */
+  show() {
+    this.isVisible = true;
+    this.dock.style.display = "block";
+    this.updatePosition();
+  }
+
+  /**
+   * Ukrywa dock.
+   */
+  hide() {
+    this.isVisible = false;
+    this.dock.style.display = "none";
+    this.dock.style.bottom = "0px";
+  }
+}
+
+/**
+ *
  * Statyczna klasa do zarządzania nazwą użytkownika w aplikacji.
  * Umożliwia zapis, odczyt i czyszczenie imienia użytkownika oraz dynamiczną podmianę placeholderów w tekstach.
  * Integruje się z polem input `#user_name`, umożliwiając automatyczny zapis zmian.
  *
  * ## Zasady:
- *   
- * ✅ Odpowiedzialność:
+ *
+ * - ✅ Dozwolone:
  *   - Przechowywanie i odczytywanie imienia użytkownika z AppStorageManager
  *   - Obsługa pola input `#user_name` (wypełnianie i nasłuchiwanie zmian)
  *   - Podmiana placeholderów w tekstach (np. `{{user}}`)
- *  
- * ❌ Niedozwolone:
+ *
+ * - ❌ Niedozwolone:
  *   - Przechowywanie innych danych użytkownika niż imię
  *   - Logika niezwiązana z nazwą użytkownika
  *   - Modyfikacja innych pól formularza
- *  
- * API:
- * ----
- * - `setName(name: string)` — zapisuje imię użytkownika
- * - `getName(): string` — odczytuje imię użytkownika
- * - `hasName(): boolean` — sprawdza, czy imię jest ustawione
- * - `clearName()` — usuwa zapisane imię
- * - `getStorageType(): "localStorage"|"cookie"` — zwraca typ użytej pamięci
- * - `init(dom: Dom)` — podłącza pole `#user_name` do automatycznego zapisu
- * - `replacePlaceholders(text: string, map?: Record<string,string>): string` — podmienia `{{user}}` i inne placeholdery
- *    
- * Zależności:
- *  - `AppStorageManager`: zapis i odczyt danych
- *  - `Dom`: dostęp do pola input `#user_name`
- *  
- * TODO:
- *  - Obsługa walidacji imienia (np. długość, znaki)
- *  - Integracja z systemem profili (jeśli powstanie)
- *  - Obsługa wielu pól z placeholderami w DOM
  */
 class UserManager {
   /**
-   * @type {string} Klucz używany w AppStorageManager 
-  */
+   * @type {string} Klucz używany w AppStorageManager
+   */
   static storageKey = "user_name";
 
   /**
@@ -830,273 +1473,379 @@ class UserManager {
 }
 
 /**
- * GalleryLoader
- * =============
- * Komponent odpowiedzialny za renderowanie galerii obrazów w przekazanym kontenerze.
- * Współpracuje z ImageResolver w celu wyszukiwania obrazów na podstawie tagów.
- * Umożliwia wybór obrazu przez użytkownika (radio name="gallery-choice").
  *
- * Zasady:
- * -------
- * ✅ Dozwolone:
- *   - Renderowanie obrazów w kontenerze
- *   - Współpraca z ImageResolver
- *   - Obsługa wyboru obrazu przez użytkownika
- *   - Pobieranie obrazów z API (GET)
+ * Zestaw funkcji pomocniczych wykorzystywanych w całej aplikacji.
+ * Nie wymaga instancjonowania — wszystkie metody są dostępne statycznie.
  *
- * ❌ Niedozwolone:
- *   - Logika promptów, edycji, ocen
- *   - Połączenia z BackendAPI poza prostym GET
+ * ## Zasady:
+ *
+ * - ✅ Dozwolone:
+ *   - Funkcje czyste: throttle, debounce, clamp, formatDate, randomId
+ *   - Operacje na DOM: safeQuery, createButton
+ *   - Detekcja środowiska: isMobile
+ *   - Sprawdzenie dostępności zasobów: checkImageExists
+ *
+ * - ❌ Niedozwolone:
+ *   - Logika aplikacyjna (np. renderowanie wiadomości)
+ *   - Zależności od klas domenowych (ChatManager, BackendAPI itd.)
  *   - Mutacje globalnego stanu
- *
- * TODO:
- *   - setMaxImages(n)
- *   - disableSelection()
- *   - exposeSelected(): string | null
- *   - support multi-select mode
- *
- * Refaktoryzacja?:
- *   - Rozdzielenie na podkomponenty:
- *     - GalleryRenderer → renderowanie i czyszczenie
- *     - GallerySelector → obsługa wyboru i podświetlenia
- *     - GalleryFetcher → integracja z ImageResolver i API
+ *   - Efekty uboczne poza LoggerService
  */
-class GalleryLoader {
+const Utils = {
   /**
-   * @param {HTMLElement|{galleryContainer?:HTMLElement}} [root] - Kontener lub obiekt z polem galleryContainer.
+   * Ogranicza wywołanie funkcji do max raz na `limit` ms.
+   * @param {Function} fn - Funkcja do ograniczenia
+   * @param {number} limit - Minimalny odstęp między wywołaniami (ms)
+   * @returns {Function} - Funkcja z throttlingiem
    */
-  constructor(root) {
-    /** @type {HTMLElement|null} */
-    this.container = null;
-    /** @type {HTMLElement|null} */
-    this.gallery = null;
-    if (root) this.setContainer(root.galleryContainer || root);
-  }
+  throttle(fn, limit) {
+    let lastCall = 0;
+    return function (...args) {
+      const now = Date.now();
+      if (now - lastCall >= limit) {
+        lastCall = now;
+        fn.apply(this, args);
+      }
+    };
+  },
 
   /**
-   * Ustawia kontener galerii. Obsługuje:
-   * - <div id="image-gallery"> jako bezpośrednią galerię,
-   * - dowolny <div> (galeria = ten div),
-   * - wrapper zawierający element #image-gallery.
-   *
-   * @param {HTMLElement} el - Element kontenera
+   * Opóźnia wywołanie funkcji do momentu, gdy przestanie być wywoływana przez `delay` ms.
+   * @param {Function} fn - Funkcja do opóźnienia
+   * @param {number} delay - Czas oczekiwania po ostatnim wywołaniu (ms)
+   * @returns {Function} - Funkcja z debounce
    */
-  setContainer(el) {
-    if (!(el instanceof HTMLElement)) {
-      LoggerService.record("error", "[GalleryLoader] setContainer: brak HTMLElement", el);
-      return;
+  debounce(fn, delay) {
+    let timer = null;
+    return function (...args) {
+      clearTimeout(timer);
+      timer = setTimeout(() => fn.apply(this, args), delay);
+    };
+  },
+
+  /**
+   * Ogranicza wartość do zakresu [min, max].
+   * @param {number} val - Wartość wejściowa
+   * @param {number} min - Minimalna wartość
+   * @param {number} max - Maksymalna wartość
+   * @returns {number} - Wartość ograniczona do zakresu
+   */
+  clamp(val, min, max) {
+    return Math.min(Math.max(val, min), max);
+  },
+
+  /**
+   * Formatuje datę jako string HH:MM:SS (bez AM/PM).
+   * @param {Date} date - Obiekt daty
+   * @returns {string} - Sformatowany czas
+   */
+  formatDate(date) {
+    return date.toLocaleTimeString("pl-PL", { hour12: false });
+  },
+
+  /**
+   * Generuje losowy identyfikator (np. do elementów DOM, wiadomości).
+   * @returns {string} - Losowy identyfikator
+   */
+  randomId() {
+    return Math.random().toString(36).substr(2, 9);
+  },
+
+  /**
+   * Bezpieczne pobranie elementu DOM.
+   * Jeśli element nie istnieje, loguje ostrzeżenie.
+   * @param {string} selector - CSS selektor
+   * @returns {HTMLElement|null} - Znaleziony element lub null
+   */
+  safeQuery(selector) {
+    const el = document.querySelector(selector);
+    if (!el) {
+      LoggerService.record("warn", `Brak elementu dla selektora: ${selector}`);
     }
-    this.container = el;
-    this.gallery = el.querySelector?.("#image-gallery") || el;
-  }
+    return el;
+  },
 
   /**
-   * Czyści zawartość galerii.
+   * Tworzy przycisk z tekstem i handlerem kliknięcia.
+   * @param {string} label - Tekst przycisku
+   * @param {Function} onClick - Funkcja obsługująca kliknięcie
+   * @returns {HTMLButtonElement} - Gotowy element przycisku
    */
-  clearGallery() {
-    if (this.gallery) this.gallery.innerHTML = "";
-  }
+  createButton(label, onClick) {
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.textContent = label;
+    btn.className = "form-element";
+    btn.addEventListener("click", onClick);
+    return btn;
+  },
 
   /**
-   * Pokazuje komunikat w galerii, czyszcząc poprzednią zawartość.
+   * Detekcja urządzenia mobilnego na podstawie user-agenta i szerokości okna.
+   * @returns {boolean} - Czy urządzenie jest mobilne
+   */
+  isMobile() {
+    const uaMobile = /Android|iPhone|iPad|iPod|Opera Mini|IEMobile/i.test(
+      navigator.userAgent
+    );
+    const narrow = window.innerWidth < 768;
+    const mobile = uaMobile && narrow;
+    LoggerService.record("log", "Detekcja urządzenia mobilnego:", mobile);
+    return mobile;
+  },
+};
+
+/**
+ *
+ * Fabryka elementów UI do wyboru tagów.
+ * Tworzy pola wyboru w dwóch wariantach w zależności od środowiska:
+ *  - Mobile → <select> z listą opcji
+ *  - Desktop → <input> z przypisanym <datalist>
+ *
+ * ## Zasady:
+ *
+ * - ✅ Dozwolone:
+ *   - Generowanie elementów formularza dla tagów
+ *   - Nadawanie etykiet polom na podstawie słownika
+ *   - Obsługa wariantu mobilnego i desktopowego
+ *
+ * - ❌ Niedozwolone:
+ *   - Walidacja wybranych tagów
+ *   - Operacje sieciowe
+ *   - Bezpośrednia integracja z backendem
+ */
+class TagSelectorFactory {
+  /**
+   * Słownik etykiet dla pól tagów.
+   * Klucze odpowiadają nazwom pól, wartości to etykiety wyświetlane w UI.
+   * @type {Record<string,string>}
+   */
+  static labels = {
+    location: "Lokalizacja",
+    character: "Postać",
+    action: "Czynność",
+    nsfw: "NSFW",
+    emotion: "Emocja",
+  };
+
+  /**
+   * Tworzy prosty element wyboru tagów (bez dodatkowych klas/stylów).
+   * Używany do generowania pojedynczych selektorów w UI.
    *
-   * @param {string} message - Treść komunikatu
+   * @param {string} type - Typ pola (np. 'location', 'character').
+   * @param {string[]} [options=[]] - Lista dostępnych opcji.
+   * @returns {HTMLLabelElement} - Element <label> zawierający kontrolkę wyboru.
    */
-  showMessage(message) {
-    if (!this.gallery) return;
-    this.clearGallery();
-    const msg = document.createElement("div");
-    msg.classList.add("gallery-message");
-    msg.textContent = message;
-    this.gallery.appendChild(msg);
+  static create(type, options = []) {
+    const labelEl = document.createElement("label");
+    labelEl.textContent = this.labels[type] || type;
+
+    if (Utils.isMobile()) {
+      // Mobile: <select> z opcjami
+      const select = document.createElement("select");
+      options.forEach((opt) => {
+        const optionEl = document.createElement("option");
+        optionEl.value = opt;
+        optionEl.textContent = opt;
+        select.appendChild(optionEl);
+      });
+      labelEl.appendChild(select);
+    } else {
+      // Desktop: <input> + <datalist>
+      const input = document.createElement("input");
+      input.setAttribute("list", `${type}-list`);
+      const datalist = document.createElement("datalist");
+      datalist.id = `${type}-list`;
+      options.forEach((opt) => {
+        const optionEl = document.createElement("option");
+        optionEl.value = opt;
+        datalist.appendChild(optionEl);
+      });
+      labelEl.append(input, datalist);
+    }
+
+    return labelEl;
   }
 
   /**
-   * Renderuje obrazy jako label z ukrytym input[type=radio] name="gallery-choice".
-   * Dzięki temu EditManager może odczytać wybór.
+   * Tworzy kompletny element pola tagu z etykietą i kontrolką wyboru.
+   * Używany w panelach tagów (np. TagsPanel) do renderowania pól kategorii.
    *
-   * @param {string[]} urls - Lista URL-i obrazów
+   * @param {string} name - Nazwa pola (np. "location", "character").
+   * @param {string[]} [options=[]] - Lista opcji do wyboru.
+   * @returns {HTMLLabelElement} - Gotowy element <label> z kontrolką.
    */
-  renderImages(urls) {
-    if (!this.gallery) return;
-    this.clearGallery();
-    urls.forEach((url, idx) => {
-      const label = document.createElement("label");
-      label.className = "image-option";
+  static createTagField(name, options = []) {
+    const labelEl = document.createElement("label");
+    labelEl.className = "tag-field";
+    labelEl.textContent = this.labels?.[name] || name;
+
+    if (Utils.isMobile()) {
+      // Mobile: <select> z pustą opcją na start
+      const select = document.createElement("select");
+      select.id = `tag-${name}`;
+      select.name = name;
+
+      const emptyOpt = document.createElement("option");
+      emptyOpt.value = "";
+      emptyOpt.textContent = "-- wybierz --";
+      select.appendChild(emptyOpt);
+
+      options.forEach((opt) => {
+        const optionEl = document.createElement("option");
+        optionEl.value = opt;
+        optionEl.textContent = opt;
+        select.appendChild(optionEl);
+      });
+
+      labelEl.appendChild(select);
+    } else {
+      // Desktop: <input> + <datalist>
+      const input = document.createElement("input");
+      input.id = `tag-${name}`;
+      input.name = name;
+      input.setAttribute("list", `${name}-list`);
+
+      const datalist = document.createElement("datalist");
+      datalist.id = `${name}-list`;
+
+      options.forEach((opt) => {
+        const optionEl = document.createElement("option");
+        optionEl.value = opt;
+        datalist.appendChild(optionEl);
+      });
+
+      labelEl.append(input, datalist);
+    }
+
+    return labelEl;
+  }
+}
+
+/**
+ *
+ * Komponent UI odpowiedzialny za wyświetlanie i obsługę panelu ocen wiadomości AI.
+ * Funkcje:
+ *  - Renderuje panel ocen w formie <details> z listą kryteriów i suwakami (range input)
+ *  - Obsługuje zmianę wartości suwaków (aktualizacja widocznej wartości)
+ *  - Po kliknięciu "Wyślij ocenę" zbiera wszystkie wartości i przekazuje je w callbacku `onSubmit`
+ *  - Zapobiega duplikowaniu panelu ocen w tej samej wiadomości
+ *
+ * ## Zasady:
+ *
+ * - ✅ Dozwolone:
+ *   - Tworzenie i osadzanie elementów DOM panelu ocen
+ *   - Obsługa interakcji użytkownika (zmiana wartości, wysyłka oceny)
+ *
+ * - ❌ Niedozwolone:
+ *   - Samodzielne wysyłanie ocen do backendu (od tego jest logika wyżej)
+ *   - Modyfikowanie innych elementów wiadomości poza panelem ocen
+ */
+class ChatRatingView {
+  /**
+   * @param {HTMLElement} msgEl - Element wiadomości, do którego ma zostać dodany panel ocen
+   * @param {function(object):void} [onSubmit] - Callback wywoływany po wysłaniu oceny
+   */
+  constructor(msgEl, onSubmit) {
+    if (!(msgEl instanceof HTMLElement)) return;
+    this.onSubmit = onSubmit || null;
+
+    /**
+     * Lista kryteriów oceniania
+     * @type {{key: string, label: string}[]}
+     */
+    this.criteria = [
+      { key: "Narrative", label: "Narracja" },
+      { key: "Style", label: "Styl" },
+      { key: "Logic", label: "Logika" },
+      { key: "Quality", label: "Jakość" },
+      { key: "Emotions", label: "Emocje" },
+    ];
+
+    this.render(msgEl);
+  }
+
+  /**
+   * Renderuje panel ocen w wiadomości.
+   * @param {HTMLElement} msgEl - Element wiadomości
+   */
+  render(msgEl) {
+    // Unikamy duplikatów panelu ocen
+    if (msgEl.querySelector("details.rating-form")) return;
+
+    const details = document.createElement("details");
+    details.className = "rating-form";
+    details.open = false;
+
+    const summary = document.createElement("summary");
+    summary.textContent = "Oceń odpowiedź ⭐";
+    details.appendChild(summary);
+
+    const header = document.createElement("h3");
+    header.textContent = "Twoja ocena:";
+    details.appendChild(header);
+
+    // Tworzenie wierszy z suwakami dla każdego kryterium
+    this.criteria.forEach(({ key, label }) => {
+      const row = document.createElement("label");
+      row.className = "rating-row";
+
+      const labelSpan = document.createElement("span");
+      labelSpan.textContent = `${label}: `;
+      row.appendChild(labelSpan);
 
       const input = document.createElement("input");
-      input.type = "radio";
-      input.name = "gallery-choice";
-      input.value = url;
-      input.style.display = "none";
+      input.type = "range";
+      input.min = "1";
+      input.max = "5";
+      input.value = "3";
+      input.name = key;
 
-      const img = document.createElement("img");
-      img.src = url;
-      img.alt = `Obraz ${idx + 1}`;
-      img.loading = "lazy";
+      const val = document.createElement("span");
+      val.textContent = input.value;
+      input.addEventListener("input", () => (val.textContent = input.value));
 
-      label.append(input, img);
-      this.gallery.appendChild(label);
-      label.addEventListener("click", () => this._highlight(label));
+      row.append(input, val);
+      details.appendChild(row);
     });
-  }
 
-  /**
-   * Renderuje obrazy na podstawie tagów, używając ImageResolver.resolve().
-   *
-   * @param {string[]} tags - Lista tagów
-   * @returns {Promise<void>}
-   */
-  async renderFromTags(tags) {
-    if (!this.gallery) {
-      LoggerService.record("error", "[GalleryLoader] Brak container w renderFromTags");
-      return;
-    }
-    try {
-      const urls = await ImageResolver.resolve(tags, { maxResults: 6 });
-      if (urls.length === 0) {
-        this.showMessage("❌ Brak obrazu dla tych tagów");
-        return;
-      }
-      this.renderImages(urls);
-      await this.highlightSelected(tags);
-    } catch (err) {
-      LoggerService.record("error", "[GalleryLoader] renderFromTags error", err);
-      this.showMessage("❌ Błąd renderowania galerii.");
-    }
-  }
-
-  /**
-   * Podświetla obraz dopasowany do aktualnych tagów (pierwszy pasujący).
-   * Ustawia również stan zaznaczenia radio.
-   *
-   * @param {string[]} tags - Lista tagów
-   * @returns {Promise<void>}
-   */
-  async highlightSelected(tags) {
-    if (!this.gallery) return;
-    const target = await ImageResolver.resolveBest(tags);
-    if (!target) return;
-    const items = this.gallery.querySelectorAll(".image-option");
-    items.forEach((label) => {
-      const img = label.querySelector("img");
-      const match = img && (img.src.endsWith(target) || img.src.includes(target));
-      label.classList.toggle("selected", !!match);
-      const radio = label.querySelector('input[type="radio"]');
-      if (radio) radio.checked = !!match;
+    // Przycisk wysyłki oceny
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.textContent = "Wyślij ocenę";
+    btn.addEventListener("click", () => {
+      const ratings = {};
+      this.criteria.forEach(({ key }) => {
+        ratings[key] = Number(details.querySelector(`[name="${key}"]`).value);
+      });
+      const payload = {
+        messageId: msgEl.dataset.msgId,
+        sessionId: msgEl.dataset.sessionId,
+        ratings,
+      };
+      this.onSubmit?.(payload);
     });
-  }
+    details.appendChild(btn);
 
-  /**
-   * Ładuje obrazy z API i renderuje listę URL-i.
-   * Endpoint może zwrócić: string[] lub { images: string[] }.
-   *
-   * @param {string} endpoint - URL endpointu API
-   * @param {Record<string,string>} [params] - Parametry zapytania
-   * @returns {Promise<void>}
-   */
-  async loadFromAPI(endpoint, params = {}) {
-    if (!this.gallery) return;
-    try {
-      this.showMessage("Ładowanie...");
-      const url = new URL(endpoint, window.location.origin);
-      Object.entries(params).forEach(([k, v]) => v && url.searchParams.append(k, v));
-      const res = await fetch(url);
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      const data = await res.json();
-      const images = Array.isArray(data) ? data : (Array.isArray(data.images) ? data.images : []);
-      if (!images.length) return this.showMessage("Brak wyników.");
-      this.renderImages(images);
-    } catch (err) {
-      LoggerService.record("error", "[GalleryLoader] Błąd ładowania obrazów", err);
-      this.showMessage("❌ Błąd ładowania obrazów.");
-    }
-  }
-
-  /**
-   * Zaznacza wybraną opcję i odznacza pozostałe.
-   *
-   * @param {HTMLElement} selected - Element label z klasą .image-option
-   * @private
-   */
-  _highlight(selected) {
-    if (!this.gallery) return;
-    this.gallery.querySelectorAll(".image-option").forEach((el) => el.classList.remove("selected"));
-    selected.classList.add("selected");
-    const radio = selected.querySelector('input[type="radio"]');
-    if (radio) radio.checked = true;
+    // Panel trafia do stopki wiadomości lub bezpośrednio do elementu
+    const footer = msgEl.querySelector(".msg-footer") || msgEl;
+    footer.appendChild(details);
   }
 }
 
 /**
- * Kontener zależności aplikacji. Przechowuje i udostępnia instancje usług oraz
- * zapewnia wygodne gettery do najczęściej używanych komponentów.
- *  
- * ✅ Dozwolone:
- *   - Rejestracja instancji usług i komponentów (np. Dom, Utils, UserManager)
- *   - Pobieranie zależności po nazwie lub przez getter
- *   - Dynamiczne dodawanie nowych zależności w trakcie działania
- *  
- * ❌ Niedozwolone:
- *   - Tworzenie instancji usług na sztywno (to robi warstwa inicjalizacyjna)
- *   - Logika biznesowa lub UI
- *   - Operacje sieciowe
- *  
- * TODO:
- *   - Walidacja typów rejestrowanych instancji
- *   - Obsługa usuwania zależności
- *   - Wstrzykiwanie konfiguracji środowiskowej
- *  
- * Refaktoryzacja?:
- *   - Rozszerzenie o mechanizm „scopes” dla izolacji modułów
- *   - Integracja z systemem eventów do powiadamiania o zmianach zależności
- */
-class Context {
-  /**
-   * Tworzy nowy kontekst z początkowym zestawem usług.
-   * @param {Record<string, any>} services - mapa nazw → instancji
-   */
-  constructor(services = {}) {
-    /** @private @type {Map<string, any>} */
-    this._registry = new Map(Object.entries(services));
-  }
-
-  /**
-   * Rejestruje nową lub nadpisuje istniejącą zależność.
-   * @param {string} name - unikalna nazwa zależności
-   * @param {any} instance - instancja lub obiekt usługi
-   */
-  register(name, instance) { this._registry.set(name, instance); }
-
-  /**
-   * Pobiera zarejestrowaną zależność po nazwie.
-   * @param {string} name - nazwa zależności
-   * @returns {any} - instancja lub undefined
-   */
-  get(name) { return this._registry.get(name); }
-
-  // Wygodne gettery (opcjonalne)
-  get dom() { return this.get("dom"); }
-  get utils() { return this.get("utils"); }
-  get userManager() { return this.get("userManager"); }
-  get diagnostics() { return this.get("diagnostics"); }
-  get backendAPI() { return this.get("backendAPI"); }
-}
-
-/**
- * SenderRegistry
- * ==============
+ *
  * Rejestr przypisujący klasę CSS (kolor) każdemu nadawcy wiadomości.
  * Umożliwia rotacyjne przypisywanie kolorów z palety oraz zarządzanie rejestrem.
  *
- * Zasady:
- * -------
- * ✅ Odpowiedzialność:
+ * ## Zasady:
+ *
+ * - ✅ Dozwolone:
  *   - Mapowanie nadawca → indeks → klasa CSS
  *   - Rotacja indeksów po przekroczeniu długości palety
  *   - Przechowywanie stanu w Map
  *
- * ❌ Niedozwolone:
+ * - ❌ Niedozwolone:
  *   - Operacje na DOM
  *   - Logika aplikacyjna (np. renderowanie wiadomości)
  *   - Zlecenia sieciowe, localStorage, fetch
@@ -1204,8 +1953,183 @@ class SenderRegistry {
 }
 
 /**
- * ChatUIView
- * ==========
+ *
+ * Buforowany logger do środowiska przeglądarkowego z ograniczeniem wieku wpisów.
+ * Obsługuje poziomy logowania: 'log', 'warn', 'error'.
+ * Wpisy są przechowywane w pamięci i mogą być filtrowane, czyszczone lub eksportowane.
+ *
+ * ## Zasady:
+ *
+ * - ✅ Dozwolone:
+ *   - record(level, msg, ...args)
+ *   - cleanup()
+ *   - getHistory({clone})
+ *   - clearHistory()
+ *   - setMaxAge(ms)
+ *   - filterByLevel(level)
+ *   - recordOnce(level, msg, ...args)
+ *
+ * - ❌ Niedozwolone:
+ *   - logika aplikacji (business logic)
+ *   - operacje sieciowe, DOM, storage
+ *
+ */
+class LoggerService {
+  /**
+   * Bufor wpisów logowania.
+   * Każdy wpis zawiera znacznik czasu, poziom, wiadomość i dodatkowe argumenty.
+   * @type {Array<{timestamp: number, level: 'log'|'warn'|'error', msg: string, args: any[]}>}
+   */
+  static buffer = [];
+
+  /**
+   * Maksymalny wiek wpisów w milisekundach.
+   * Wpisy starsze niż ta wartość są usuwane przy każdym logowaniu i odczycie.
+   * @type {number}
+   */
+  static maxAgeMs = 5 * 60 * 1000; // 5 minut
+
+  /**
+   * Ustawia nowy limit wieku wpisów i natychmiast czyści stare.
+   * @param {number} ms - nowy limit wieku w milisekundach
+   */
+  static setMaxAge(ms) {
+    this.maxAgeMs = ms;
+    this.cleanup();
+  }
+
+  /**
+   * Dodaje wpis do bufora i wypisuje go w konsoli z odpowiednim stylem.
+   * @param {'log'|'warn'|'error'} level - poziom logowania
+   * @param {string} msg - wiadomość do wyświetlenia
+   * @param {...any} args - dodatkowe dane (np. obiekty, błędy)
+   */
+  static record(level, msg, ...args) {
+    const emojiLevels = { log: "🌍", warn: "⚠️", error: "‼️" };
+    const timestamp = Date.now();
+
+    this.buffer.push({ timestamp, level, msg, args });
+    this.cleanup();
+
+    const styleMap = {
+      log: "color: #444",
+      warn: "color: orange",
+      error: "color: red; font-weight: bold",
+    };
+
+    const style = styleMap[level] || "";
+    const displayMsg = `${emojiLevels[level] || ""} ${msg}`;
+    console[level](
+      `%c[${new Date(timestamp).toLocaleTimeString()}] ${displayMsg}`,
+      style,
+      ...args
+    );
+  }
+
+  /**
+   * Usuwa wpisy starsze niż maxAgeMs.
+   * Jeśli maxAgeMs <= 0, czyści cały bufor.
+   */
+  static cleanup() {
+    if (this.maxAgeMs <= 0) {
+      this.buffer = [];
+      return;
+    }
+    const cutoff = Date.now() - this.maxAgeMs;
+    this.buffer = this.buffer.filter((e) => e.timestamp >= cutoff);
+  }
+
+  /**
+   * Zwraca wpisy danego poziomu logowania.
+   * @param {'log'|'warn'|'error'} level - poziom do filtrowania
+   * @returns {Array<{timestamp: number, msg: string, args: any[]}>}
+   */
+  static filterByLevel(level) {
+    this.cleanup();
+    return this.buffer
+      .filter((e) => e.level === level)
+      .map(({ timestamp, msg, args }) => ({ timestamp, msg, args }));
+  }
+
+  /**
+   * Zwraca całą historię wpisów.
+   * Jeśli clone = true, zwraca głęboką kopię wpisów.
+   * @param {boolean} [clone=false] - czy zwrócić kopię wpisów
+   * @returns {Array<{timestamp: number, level: string, msg: string, args: any[]}>}
+   */
+  static getHistory(clone = false) {
+    this.cleanup();
+    if (!clone) return [...this.buffer];
+    return this.buffer.map((entry) => structuredClone(entry));
+  }
+
+  /**
+   * Czyści cały bufor logów bez względu na wiek wpisów.
+   */
+  static clearHistory() {
+    this.buffer = [];
+  }
+
+  /**
+   * Dodaje wpis tylko jeśli nie istnieje już wpis o tym samym poziomie i wiadomości.
+   * @param {'log'|'warn'|'error'} level - poziom logowania
+   * @param {string} msg - wiadomość
+   * @param {...any} args - dodatkowe dane
+   */
+  static recordOnce(level, msg, ...args) {
+    if (!this.buffer.some((e) => e.level === level && e.msg === msg)) {
+      this.record(level, msg, ...args);
+    }
+  }
+}
+
+/**
+ *
+ * Główny koordynator cyklu życia aplikacji. Odpowiada za uruchamianie przekazanych modułów
+ * w ustalonej kolejności. Sam nie tworzy modułów – dostaje je z warstwy inicjalizacyjnej
+ * (np. init_chat.js) jako listę obiektów implementujących metodę `init(ctx)`.
+ *
+ * ## Zasady:
+ *
+ * - ✅ Dozwolone:
+ *   - Sekwencyjne uruchamianie modułów
+ *   - Przekazywanie kontekstu (`Context`) do modułów
+ *   - Obsługa modułów synchronicznych i asynchronicznych
+ *
+ * - ❌ Niedozwolone:
+ *   - Tworzenie instancji modułów na sztywno
+ *   - Logika biznesowa lub UI
+ *   - Bezpośrednia manipulacja DOM
+ */
+class App {
+  /**
+   * Tworzy instancję aplikacji.
+   * @param {Context} context - kontener zależności
+   * @param {Array<{ init: (ctx: Context) => void | Promise<void> }>} modules - lista modułów do uruchomienia
+   */
+  constructor(context, modules = []) {
+    this.ctx = context;
+    this.modules = modules;
+  }
+
+  /**
+   * Uruchamia wszystkie moduły w kolejności, przekazując im kontekst.
+   * Obsługuje moduły synchroniczne i asynchroniczne.
+   * @returns {Promise<void>}
+   */
+  async init() {
+    LoggerService.record("log", "[App] Inicjalizacja aplikacji...");
+    for (const m of this.modules) {
+      if (m && typeof m.init === "function") {
+        await m.init(this.ctx);
+      }
+    }
+    LoggerService.record("log", "[App] Aplikacja gotowa.");
+  }
+}
+
+/**
+ *
  * Widok głównego interfejsu czatu.
  * Odpowiada za:
  *  - Obsługę formularza promptu (wysyłanie wiadomości użytkownika)
@@ -1215,33 +2139,16 @@ class SenderRegistry {
  *  - Obsługę przycisku edycji i panelu ocen
  *  - Aktualizację treści wiadomości po edycji
  *
- * Zasady:
- * -------
- * ✅ Odpowiedzialność:
+ * ## Zasady:
+ *
+ * - ✅ Dozwolone:
  *   - Manipulacja DOM w obrębie kontenera czatu
  *   - Obsługa zdarzeń UI (submit, ctrl+enter, kliknięcia)
  *   - Integracja z `UserManager`, `SenderRegistry`, `ChatRatingView`
  *
- * ❌ Niedozwolone:
+ * - ❌ Niedozwolone:
  *   - Logika backendowa (wysyłanie żądań HTTP)
  *   - Walidacja treści (poza prostym sprawdzeniem pustego promptu)
- *
- * API:
- * ----
- * - `constructor(container, promptForm, promptInput)` — inicjalizuje widok
- * - `init()` — podpina obsługę formularza i skrótów klawiszowych
- * - `addUserMessage(text)` — dodaje wiadomość użytkownika do czatu
- * - `addLoadingMessage()` — dodaje placeholder ładowania odpowiedzi AI
- * - `hydrateAIMessage(msgEl, data, isEdited)` — renderuje wiadomość AI z danymi
- * - `showError(msgEl)` — pokazuje komunikat błędu w wiadomości AI
- * - `scrollToBottom()` — przewija czat na dół
- * - `updateMessage(msgEl, editedText, tags, imageUrl)` — aktualizuje treść wiadomości
- *
- * Callbacki:
- * ----------
- * - `onPromptSubmit(prompt: string)` — wywoływany po wysłaniu promptu
- * - `onEditRequested(msgEl, originalText, id, timestamp, sessionId)` — po kliknięciu "Edytuj"
- * - `onRatingSubmit(payload)` — po wysłaniu oceny wiadomości
  */
 class ChatUIView {
   /**
@@ -1341,7 +2248,6 @@ class ChatUIView {
    * @param {boolean} [isEdited=false] - Czy wiadomość jest edytowana
    */
   hydrateAIMessage(msgEl, data, isEdited = false) {
-
     msgEl.classList.add("msg-fading-out");
 
     const sessionId = data.sessionId || "sess-unknown";
@@ -1420,8 +2326,8 @@ class ChatUIView {
 
     new ChatRatingView(msgEl, (payload) => this.onRatingSubmit?.(payload));
 
-      msgEl.classList.remove("msg-fading-out");
-      msgEl.classList.add("msg-fading-in");
+    msgEl.classList.remove("msg-fading-out");
+    msgEl.classList.add("msg-fading-in");
     this.scrollToBottom();
   }
 
@@ -1478,255 +2384,20 @@ class ChatUIView {
 }
 
 /**
- * App
- * ===
- * Główny koordynator cyklu życia aplikacji. Odpowiada za uruchamianie przekazanych modułów
- * w ustalonej kolejności. Sam nie tworzy modułów – dostaje je z warstwy inicjalizacyjnej
- * (np. init_chat.js) jako listę obiektów implementujących metodę `init(ctx)`.
  *
- * Zasady:
- * -------
- * ✅ Dozwolone:
- *   - Sekwencyjne uruchamianie modułów
- *   - Przekazywanie kontekstu (`Context`) do modułów
- *   - Obsługa modułów synchronicznych i asynchronicznych
- *
- * ❌ Niedozwolone:
- *   - Tworzenie instancji modułów na sztywno
- *   - Logika biznesowa lub UI
- *   - Bezpośrednia manipulacja DOM
- *
- * TODO:
- *   - Obsługa zatrzymywania modułów (`destroy()`)
- *   - Równoległe uruchamianie niezależnych modułów
- *   - Obsługa wyjątków w pojedynczych modułach bez przerywania całej inicjalizacji
- *
- * Refaktoryzacja?:
- *   - Wprowadzenie systemu priorytetów modułów
- *   - Integracja z loggerem do raportowania czasu inicjalizacji
- */
-class App {
-  /**
-   * Tworzy instancję aplikacji.
-   * @param {Context} context - kontener zależności
-   * @param {Array<{ init: (ctx: Context) => void | Promise<void> }>} modules - lista modułów do uruchomienia
-   */
-  constructor(context, modules = []) {
-    /** @type {Context} */
-    this.ctx = context;
-    /** @type {Array<{ init: (ctx: Context) => any }>} */
-    this.modules = modules;
-  }
-
-  /**
-   * Uruchamia wszystkie moduły w kolejności, przekazując im kontekst.
-   * Obsługuje moduły synchroniczne i asynchroniczne.
-   * @returns {Promise<void>}
-   */
-  async init() {
-    LoggerService.record("log", "[App] Inicjalizacja aplikacji...");
-    for (const m of this.modules) {
-      if (m && typeof m.init === "function") {
-        await m.init(this.ctx);
-      }
-    }
-    LoggerService.record("log", "[App] Aplikacja gotowa.");
-  }
-}
-
-/**
- * Dom
- * ===
- * Centralny punkt dostępu do elementów DOM aplikacji.
- * Wymusza strukturę opartą na <main id="app"> jako kontenerze bazowym.
- *
- * Zasady:
- * -------
- * ✅ Dozwolone:
- *   - Przechowywanie i udostępnianie referencji do elementów
- *   - Wyszukiwanie elementów tylko wewnątrz <main id="app">
- *
- * ❌ Niedozwolone:
- *   - Operacje poza <main id="app">
- *   - Modyfikowanie struktury DOM globalnie
- *
- * TODO:
- *   - refresh()
- *   - observeMissing()
- *   - expose(selector)
- *
- * Refaktoryzacja?:
- *   - DomRefs → inicjalizacja i buforowanie
- *   - DomQuery → metody wyszukiwania
- *   - DomDiagnostics → logowanie braków
- */
-class Dom {
-  /**
-   * Inicjalizuje klasę Dom z wymuszeniem kontenera <main id="app">
-   * @param {string|HTMLElement} rootSelector - domyślnie "#app"
-   */
-  constructor(rootSelector = "#app") {
-    this.rootSelector = rootSelector;
-    this.root = null;
-    this.refs = {};
-  }
-
-  /**
-   * Inicjalizuje referencje do elementów wewnątrz <main id="app">
-   * @param {Record<string, string>} refMap - mapa nazw do selektorów
-   */
-  init(refMap) {
-    const rootCandidate = typeof this.rootSelector === "string"
-      ? document.querySelector(this.rootSelector)
-      : this.rootSelector;
-
-    if (!(rootCandidate instanceof HTMLElement)) {
-      LoggerService.record("error", "[Dom] Nie znaleziono <main id=\"app\">. Wymagana struktura HTML.");
-      return;
-    }
-
-    if (rootCandidate.tagName !== "MAIN" || rootCandidate.id !== "app") {
-      LoggerService.record("error", "[Dom] Kontener bazowy musi być <main id=\"app\">. Otrzymano:", rootCandidate);
-      return;
-    }
-
-    this.root = rootCandidate;
-
-    Object.entries(refMap).forEach(([name, selector]) => {
-      const el = selector === this.rootSelector
-        ? this.root
-        : this.root.querySelector(selector);
-
-      if (!el) {
-        LoggerService.record("warn", `[Dom] Brak elementu: ${selector}`);
-      }
-
-      this.refs[name] = el || null;
-      this[name] = el || null;
-    });
-  }
-
-  /**
-   * Wyszukuje element w obrębie <main id="app">
-   * @param {string} selector
-   * @returns {HTMLElement|null}
-   */
-  q(selector) {
-    return this.root?.querySelector(selector) || null;
-  }
-
-  /**
-   * Wyszukuje wszystkie elementy pasujące do selektora w obrębie <main id="app">
-   * @param {string} selector
-   * @returns {NodeListOf<HTMLElement>}
-   */
-  qa(selector) {
-    return this.root?.querySelectorAll(selector) || [];
-  }
-}
-
-/**
- * EditValidator
- * =============
- * Walidator tekstu edytowanego przez AI oraz przypisanych tagów.
- * Sprawdza długość tekstu i tagów oraz obecność treści.
- *
- * Zasady:
- * -------
- * ✅ Dozwolone:
- *   - Stałe limitów: maxTextLength, maxTagLength
- *   - Metoda: validate(text, tags)
- *
- * ❌ Niedozwolone:
- *   - Operacje na DOM
- *   - Zlecenia sieciowe (fetch, localStorage)
- *   - Logika aplikacyjna (np. renderowanie, wysyłka)
- *   - Efekty uboczne (np. console.log, mutacje zewnętrznych obiektów)
- */
-class EditValidator {
-  /**
-   * Maksymalna długość tekstu edycji.
-   * Tekst dłuższy niż ta wartość zostanie uznany za niepoprawny.
-   * @type {number}
-   */
-  static maxTextLength = 5000;
-
-  /**
-   * Maksymalna długość pojedynczego tagu.
-   * Tag dłuższy niż ta wartość zostanie uznany za niepoprawny.
-   * @type {number}
-   */
-  static maxTagLength = 300;
-
-  /**
-   * Waliduje tekst i tagi pod kątem pustki i długości.
-   * - Tekst musi być niepusty po przycięciu.
-   * - Tekst nie może przekraczać maxTextLength.
-   * - Każdy tag musi być typu string i nie może przekraczać maxTagLength.
-   *
-   * @param {string} text - Edytowany tekst AI
-   * @param {string[]} tags - Lista tagów
-   * @returns {{ valid: boolean, errors: string[] }} - Obiekt z informacją o poprawności i listą błędów
-   */
-  static validate(text, tags) {
-    const errors = [];
-
-    // Przycięcie tekstu z obu stron
-    const trimmedText = text.trim();
-    const textLength = trimmedText.length;
-
-    // Walidacja tekstu
-    if (!textLength) {
-      errors.push("Tekst edycji nie może być pusty.");
-    } else if (textLength > this.maxTextLength) {
-      errors.push(
-        `Maksymalna długość tekstu to ${this.maxTextLength} znaków, otrzymano ${textLength}.`
-      );
-    }
-
-    // Walidacja tagów
-    for (const tag of tags) {
-      if (typeof tag !== "string") continue; // ignoruj błędne typy
-      if (tag.length > this.maxTagLength) {
-        errors.push(
-          `Tag "${tag}" przekracza limit ${this.maxTagLength} znaków (ma ${tag.length}).`
-        );
-      }
-    }
-
-    return {
-      valid: errors.length === 0,
-      errors,
-    };
-  }
-}
-
-/**
  * Komponent odpowiedzialny za renderowanie i obsługę pól tagów oraz synchronizację z galerią.
  * Integruje się z TagSelectorFactory i GalleryLoader, umożliwiając wybór tagów i podgląd obrazów.
- *  
- * ✅ Dozwolone:
+ *
+ * - ✅ Dozwolone:
  *   - Tworzenie i aktualizacja pól tagów
  *   - Synchronizacja z galerią
  *   - Emisja zmian tagów do świata zewnętrznego
  *   - Obsługa wartości domyślnych z data-tags
- *  
- * ❌ Niedozwolone:
+ *
+ * - ❌ Niedozwolone:
  *   - Walidacja promptów/tekstu
  *   - Operacje sieciowe (np. pobieranie tagów z backendu)
  *   - Logika edycji, ocen, renderowania wiadomości
- *  
- * TODO:
- *   - setMaxTagsPerField(n)
- *   - disableFields()
- *   - exposeSelectedTags(): string[]
- *   - obsługa tagów wielokrotnego wyboru
- *  
- * Refaktoryzacja?:
- *   - Rozdzielenie na podkomponenty:
- *     - TagsFieldManager → tworzenie i aktualizacja pól
- *     - TagsSync → synchronizacja z galerią
- *     - TagsDefaults → obsługa data-tags i presetów
  */
 class TagsPanel {
   /**
@@ -1939,518 +2610,757 @@ class TagsPanel {
 }
 
 /**
- * # Utils
- * Zestaw funkcji pomocniczych wykorzystywanych w całej aplikacji.
- * Nie wymaga instancjonowania — wszystkie metody są dostępne statycznie.
+ *
+ * Widok edycji wiadomości AI w czacie.
+ * Odpowiada za:
+ *  - Wyświetlenie formularza edycji (textarea + panel tagów + galeria obrazów)
+ *  - Walidację treści i tagów
+ *  - Obsługę zapisu i anulowania edycji
  *
  * ## Zasady:
- * 
- * ✅ Dozwolone:
- *   - Funkcje czyste: throttle, debounce, clamp, formatDate, randomId
- *   - Operacje na DOM: safeQuery, createButton
- *   - Detekcja środowiska: isMobile
- *   - Sprawdzenie dostępności zasobów: checkImageExists
- *  
- * ❌ Niedozwolone:
- *   - Logika aplikacyjna (np. renderowanie wiadomości)
- *   - Zależności od klas domenowych (ChatManager, BackendAPI itd.)
- *   - Mutacje globalnego stanu
- *   - Efekty uboczne poza LoggerService
- *  
- * TODO:
- *   - once(fn)
- *   - retry(fn, attempts)
- *   - escapeHTML(str)
- *   - parseQueryParams(url)
- *   - wait(ms)
+ *
+ * - ✅ Dozwolone:
+ *   - Renderowanie UI edycji w miejscu wiadomości
+ *   - Integracja z TagsPanel i GalleryLoader
+ *   - Walidacja danych przed wysłaniem
+ *   - Wywołanie callbacków `onEditSubmit` i `onEditCancel`
+ *
+ * - ❌ Niedozwolone:
+ *   - Bezpośrednia komunikacja z backendem (poza pobraniem listy tagów)
+ *   - Mutowanie innych elementów UI poza edytowaną wiadomością
  */
-const Utils = {
+class ChatEditView {
   /**
-   * Ogranicza wywołanie funkcji do max raz na `limit` ms.
-   * @param {Function} fn - Funkcja do ograniczenia
-   * @param {number} limit - Minimalny odstęp między wywołaniami (ms)
-   * @returns {Function} - Funkcja z throttlingiem
+   * @param {object} dom - Obiekt z referencjami do elementów DOM aplikacji
    */
-  throttle(fn, limit) {
-    let lastCall = 0;
-    return function (...args) {
-      const now = Date.now();
-      if (now - lastCall >= limit) {
-        lastCall = now;
-        fn.apply(this, args);
+  constructor(dom) {
+    this.dom = dom;
+    /** @type {function(HTMLElement,string,string[],string,string):void|null} */
+    this.onEditSubmit = null;
+    /** @type {function(HTMLElement,object):void|null} */
+    this.onEditCancel = null;
+  }
+
+  /**
+   * Uruchamia tryb edycji dla wiadomości AI.
+   * @param {HTMLElement} msgElement - Element wiadomości do edycji
+   * @param {string} originalText - Oryginalny tekst wiadomości
+   * @param {string} messageId - ID wiadomości
+   * @param {string} [sessionId] - ID sesji
+   */
+  async enableEdit(msgElement, originalText, messageId, sessionId) {
+    // Zachowaj oryginalny HTML
+    msgElement.dataset.originalHTML = msgElement.innerHTML;
+    if (sessionId) {
+      msgElement.dataset.sessionId = sessionId;
+    }
+
+    // Wyczyść zawartość i dodaj textarea
+    msgElement.innerHTML = "";
+    const textarea = document.createElement("textarea");
+    textarea.value = originalText;
+    textarea.rows = 6;
+    textarea.className = "form-element textarea-base w-full mt-4";
+
+    const tagPanel = document.createElement("div");
+    tagPanel.className = "tag-panel";
+    msgElement.append(textarea, tagPanel);
+
+    // Panel tagów + galeria
+    const tagsPanel = new TagsPanel(tagPanel);
+    const galleryLoader = new GalleryLoader(tagPanel);
+
+    const rawTags = msgElement.dataset.tags || "";
+    const tagOptions = await BackendAPI.getTags();
+
+    tagsPanel.setTagOptions(tagOptions);
+    tagsPanel.applyDefaultsFromDataTags(rawTags, tagOptions);
+
+    let boot = true;
+    tagsPanel.init(() => {
+      if (!boot) galleryLoader.renderFromTags(tagsPanel.getTagList());
+    });
+    galleryLoader.renderFromTags(tagsPanel.getTagList());
+    boot = false;
+
+    // Przycisk zapisu
+    const saveBtn = Utils.createButton("💾 Zapisz", async () => {
+      const editedText = textarea.value.trim();
+      const tags = tagsPanel.getTagList();
+
+      const { valid, errors } = EditValidator.validate(editedText, tags);
+      if (!valid) {
+        LoggerService.record("warn", "[EditView] Błąd walidacji", errors);
+        return;
       }
-    };
-  },
 
-  /**
-   * Opóźnia wywołanie funkcji do momentu, gdy przestanie być wywoływana przez `delay` ms.
-   * @param {Function} fn - Funkcja do opóźnienia
-   * @param {number} delay - Czas oczekiwania po ostatnim wywołaniu (ms)
-   * @returns {Function} - Funkcja z debounce
-   */
-  debounce(fn, delay) {
-    let timer = null;
-    return function (...args) {
-      clearTimeout(timer);
-      timer = setTimeout(() => fn.apply(this, args), delay);
-    };
-  },
+      // Preferuj wybór z galerii; fallback do resolvera
+      let imageUrl = "";
+      const chosen = tagPanel.querySelector(
+        'input[name="gallery-choice"]:checked'
+      );
+      if (chosen && chosen.value) {
+        imageUrl = chosen.value;
+      } else {
+        const urls = await ImageResolver.resolve(tags, { maxResults: 1 });
+        imageUrl = urls[0] || "";
+      }
 
-  /**
-   * Ogranicza wartość do zakresu [min, max].
-   * @param {number} val - Wartość wejściowa
-   * @param {number} min - Minimalna wartość
-   * @param {number} max - Maksymalna wartość
-   * @returns {number} - Wartość ograniczona do zakresu
-   */
-  clamp(val, min, max) {
-    return Math.min(Math.max(val, min), max);
-  },
+      this.onEditSubmit?.(
+        msgElement,
+        editedText,
+        tags,
+        imageUrl,
+        msgElement.dataset.sessionId
+      );
+    });
+    saveBtn.classList.add("button-base");
 
-  /**
-   * Formatuje datę jako string HH:MM:SS (bez AM/PM).
-   * @param {Date} date - Obiekt daty
-   * @returns {string} - Sformatowany czas
-   */
-  formatDate(date) {
-    return date.toLocaleTimeString("pl-PL", { hour12: false });
-  },
+    // Przycisk anulowania
+    const cancelBtn = Utils.createButton("❌ Anuluj", () => {
+      const data = {
+        id: msgElement.dataset.msgId,
+        sessionId: msgElement.dataset.sessionId || "sess-unknown",
+        tags: (msgElement.dataset.tags || "").split("_").filter(Boolean),
+        timestamp: msgElement.dataset.timestamp,
+        originalText: msgElement.dataset.originalText,
+        text: msgElement.dataset.originalText,
+        sender: msgElement.dataset.sender || "AI",
+        avatarUrl:
+          msgElement.dataset.avatarUrl || "/static/NarrativeIMG/Avatars/AI.png",
+        generation_time: parseFloat(msgElement.dataset.generation_time) || 0,
+        imageUrl: msgElement.dataset.imageUrl || "",
+      };
 
-  /**
-   * Generuje losowy identyfikator (np. do elementów DOM, wiadomości).
-   * @returns {string} - Losowy identyfikator
-   */
-  randomId() {
-    return Math.random().toString(36).substr(2, 9);
-  },
+      this.onEditCancel?.(msgElement, data);
+    });
+    cancelBtn.classList.add("button-base");
 
-  /**
-   * Bezpieczne pobranie elementu DOM.
-   * Jeśli element nie istnieje, loguje ostrzeżenie.
-   * @param {string} selector - CSS selektor
-   * @returns {HTMLElement|null} - Znaleziony element lub null
-   */
-  safeQuery(selector) {
-    const el = document.querySelector(selector);
-    if (!el) {
-      LoggerService.record("warn", `Brak elementu dla selektora: ${selector}`);
-    }
-    return el;
-  },
-
-  /**
-   * Tworzy przycisk z tekstem i handlerem kliknięcia.
-   * @param {string} label - Tekst przycisku
-   * @param {Function} onClick - Funkcja obsługująca kliknięcie
-   * @returns {HTMLButtonElement} - Gotowy element przycisku
-   */
-  createButton(label, onClick) {
-    const btn = document.createElement("button");
-    btn.type = "button";
-    btn.textContent = label;
-    btn.className = "form-element";
-    btn.addEventListener("click", onClick);
-    return btn;
-  },
-
-  /**
-   * Detekcja urządzenia mobilnego na podstawie user-agenta i szerokości okna.
-   * @returns {boolean} - Czy urządzenie jest mobilne
-   */
-  isMobile() {
-    const uaMobile = /Android|iPhone|iPad|iPod|Opera Mini|IEMobile/i.test(
-      navigator.userAgent
-    );
-    const narrow = window.innerWidth < 768;
-    const mobile = uaMobile && narrow;
-    LoggerService.record("log", "Detekcja urządzenia mobilnego:", mobile);
-    return mobile;
-  },
-};
+    msgElement.append(saveBtn, cancelBtn);
+  }
+}
 
 /**
- * BackendAPI
- * ==========
- * Warstwa komunikacji z backendem HTTP — odporna na błędy sieciowe, spójna i centralnie konfigurowalna.
- * Umożliwia wysyłanie żądań POST/GET z automatycznym retry i backoffem.
- * Integruje się z `RequestRetryManager` i zarządza tokenem autoryzacyjnym.
  *
- * Zasady:
- * -------
- * ✅ Odpowiedzialność:
- *   - Budowanie żądań HTTP (URL, headers, body)
- *   - Dekodowanie odpowiedzi JSON
- *   - Obsługa błędów sieciowych i retry
- *   - Centralne zarządzanie baseURL i tokenem
+ * Centralny punkt dostępu do elementów DOM aplikacji.
+ * Wymusza strukturę opartą na <main id="app"> jako kontenerze bazowym.
  *
- * ❌ Niedozwolone:
- *   - Logika UI
- *   - Cache’owanie domenowe
- *   - Mutowanie danych biznesowych
+ * ## Zasady:
  *
- * API:
- * ----
- * - `setBaseURL(url: string)` — ustawia bazowy adres backendu
- * - `setAuthToken(token: string|null)` — ustawia lub usuwa token autoryzacyjny
- * - `generate(prompt: string)` — wysyła prompt użytkownika
- * - `rate(ratings: object)` — przesyła oceny odpowiedzi AI
- * - `edit(editedText: string, tags: object, sessionId: string, msgId: string)` — przesyła edytowaną odpowiedź
- * - `postMessage({sender,text})` — przesyła wiadomość użytkownika
- * - `getTags()` — pobiera słownik tagów
+ * - ✅ Dozwolone:
+ *   - Przechowywanie i udostępnianie referencji do elementów
+ *   - Wyszukiwanie elementów tylko wewnątrz <main id="app">
  *
- * Zależności:
- *  - `RequestRetryManager`: obsługuje retry i backoff
- *  - `LoggerService` (opcjonalnie): logowanie błędów
+ * - ❌ Niedozwolone:
+ *   - Operacje poza <main id="app">
+ *   - Modyfikowanie struktury DOM globalnie
+ *
  */
-class BackendAPI {
-  /** Bazowy adres backendu (np. "https://api.example.com") */
-  static baseURL = "";
-
-  /** Token autoryzacyjny Bearer */
-  static authToken = null;
-
+class Dom {
   /**
-   * Ustawia bazowy adres względny backendu.
-   * @param {string} url - Adres URL bez końcowego slasha.
+   * Inicjalizuje klasę Dom z wymuszeniem kontenera <main id="app">
+   * @param {string|HTMLElement} rootSelector - domyślnie "#app"
    */
-static setBaseURL(url) {
-  if (!url || url === "/") {
-    // tryb względny — używamy hosta, z którego załadowano front
-    this.baseURL = "";
-  } else {
-    // czyścimy końcowe slashe
-    this.baseURL = url.replace(/\/+$/, "");
-  }
-}
-
-
-  /**
-   * Ustawia lub usuwa token autoryzacyjny.
-   * @param {string|null} token - Token Bearer lub null.
-   */
-  static setAuthToken(token) {
-    this.authToken = token || null;
+  constructor(rootSelector = "#app") {
+    this.rootSelector = rootSelector;
+    this.root = null;
+    this.refs = {};
   }
 
   /**
-   * Składa pełny URL względem baseURL.
-   * @param {string} path - Ścieżka względna (np. "/generate").
-   * @returns {string} Pełny URL.
-   * @private
+   * Inicjalizuje referencje do elementów wewnątrz <main id="app">
+   * @param {Record<string, string>} refMap - mapa nazw do selektorów
    */
-  static _url(path) {
-    if (!this.baseURL) return path;
-    return `${this.baseURL}${path.startsWith("/") ? "" : "/"}${path}`;
-  }
+  init(refMap) {
+    const rootCandidate =
+      typeof this.rootSelector === "string"
+        ? document.querySelector(this.rootSelector)
+        : this.rootSelector;
 
-  /**
-   * Buduje nagłówki HTTP z Content-Type, Accept i Authorization.
-   * @param {Record<string,string>} [extra] - Dodatkowe nagłówki.
-   * @returns {HeadersInit} Nagłówki HTTP.
-   * @private
-   */
-  static _headers(extra = {}) {
-    const h = {
-      Accept: "application/json",
-      ...extra,
-    };
-    if (!("Content-Type" in h)) h["Content-Type"] = "application/json";
-    if (this.authToken) h["Authorization"] = `Bearer ${this.authToken}`;
-    return h;
-  }
-
-  /**
-   * Wysyła żądanie POST z JSON i odbiera JSON z retry.
-   * @param {string} path - Ścieżka żądania.
-   * @param {any} body - Treść żądania.
-   * @param {RequestInit} [init] - Dodatkowe opcje fetch.
-   * @returns {Promise<any>} Odpowiedź z backendu.
-   * @private
-   */
-  static async _postJson(path, body, init = {}) {
-    const res = await RequestRetryManager.fetchWithRetry(
-      this._url(path),
-      {
-        method: "POST",
-        headers: this._headers(init.headers || {}),
-        body: JSON.stringify(body),
-        ...init,
-      },
-      3, // liczba prób
-      800, // opóźnienie początkowe
-      { maxTotalTime: 15_000 }
-    );
-    if (!res.ok) {
-      const text = await BackendAPI._safeText(res);
-      throw new Error(`POST ${path} -> HTTP ${res.status}: ${text}`);
+    if (!(rootCandidate instanceof HTMLElement)) {
+      LoggerService.record(
+        "error",
+        '[Dom] Nie znaleziono <main id="app">. Wymagana struktura HTML.'
+      );
+      return;
     }
-    return BackendAPI._safeJson(res);
-  }
 
-  /**
-   * Wysyła żądanie GET i odbiera JSON z retry.
-   * @param {string} path - Ścieżka żądania.
-   * @param {RequestInit} [init] - Dodatkowe opcje fetch.
-   * @returns {Promise<any>} Odpowiedź z backendu.
-   * @private
-   */
-  static async _getJson(path, init = {}) {
-    const res = await RequestRetryManager.fetchWithRetry(
-      this._url(path),
-      {
-        method: "GET",
-        headers: this._headers(init.headers || {}),
-        ...init,
-      },
-      3,
-      800,
-      { maxTotalTime: 15_000 }
-    );
-    if (!res.ok) {
-      const text = await BackendAPI._safeText(res);
-      throw new Error(`GET ${path} -> HTTP ${res.status}: ${text}`);
+    if (rootCandidate.tagName !== "MAIN" || rootCandidate.id !== "app") {
+      LoggerService.record(
+        "error",
+        '[Dom] Kontener bazowy musi być <main id="app">. Otrzymano:',
+        rootCandidate
+      );
+      return;
     }
-    return BackendAPI._safeJson(res);
+
+    this.root = rootCandidate;
+
+    Object.entries(refMap).forEach(([name, selector]) => {
+      const el =
+        selector === this.rootSelector
+          ? this.root
+          : this.root.querySelector(selector);
+
+      if (!el) {
+        LoggerService.record("warn", `[Dom] Brak elementu: ${selector}`);
+      }
+
+      this.refs[name] = el || null;
+      this[name] = el || null;
+    });
   }
 
   /**
-   * Bezpieczny parser JSON — zwraca pusty obiekt przy błędzie.
-   * @param {Response} res - Odpowiedź HTTP.
-   * @returns {Promise<any>} Parsowany JSON lub pusty obiekt.
-   * @private
+   * Wyszukuje element w obrębie <main id="app">
+   * @param {string} selector
+   * @returns {HTMLElement|null}
    */
-  static async _safeJson(res) {
-    try {
-      return await res.json();
-    } catch {
-      return {};
-    }
+  q(selector) {
+    return this.root?.querySelector(selector) || null;
   }
 
   /**
-   * Bezpieczny odczyt tekstu — zwraca pusty string przy błędzie.
-   * @param {Response} res - Odpowiedź HTTP.
-   * @returns {Promise<string>} Tekst odpowiedzi.
-   * @private
+   * Wyszukuje wszystkie elementy pasujące do selektora w obrębie <main id="app">
+   * @param {string} selector
+   * @returns {NodeListOf<HTMLElement>}
    */
-  static async _safeText(res) {
-    try {
-      return await res.text();
-    } catch {
-      return "";
-    }
-  }
-
-  // ── Publiczne metody API ───────────────────────────────────────────────────
-
-  /**
-   * Wysyła prompt użytkownika do backendu.
-   * @param {string} prompt - Treść promptu.
-   * @returns {Promise<any>} Odpowiedź z backendu.
-   */
-  static async generate(prompt) {
-    return this._postJson("/generate", { prompt });
-  }
-
-  /**
-   * Przesyła oceny odpowiedzi AI.
-   * @param {Record<string, any>} ratings - Obiekt ocen.
-   * @returns {Promise<any>} Odpowiedź z backendu.
-   */
-  static async rate(ratings) {
-    return this._postJson("/rate", ratings);
-  }
-
-  /**
-   * Przesyła edytowaną odpowiedź z tagami.
-   * @param {string} editedText - Nowa treść.
-   * @param {Record<string, any>} tags - Obiekt tagów.
-   * @param {string} sessionId - ID sesji.
-   * @param {string} msgId - ID wiadomości.
-   * @returns {Promise<any>} Odpowiedź z backendu.
-   */
-  static async edit(editedText, tags, sessionId, msgId) {
-    return this._postJson("/edit", { editedText, tags, sessionId, msgId });
-  }
-
-  /**
-   * Przesyła wiadomość użytkownika do backendu.
-   * @param {{ sender: string, text: string }} message - Nadawca i treść.
-   * @returns {Promise<any>} Odpowiedź z backendu.
-   */
-  static async postMessage({ sender, text }) {
-    return this._postJson("/messages", { sender, text });
-  }
-
-  /**
-   * Pobiera słownik tagów z backendu.
-   * @returns {Promise<any>} Lista tagów.
-   */
-  static async getTags() {
-    return this._getJson("/tags");
+  qa(selector) {
+    return this.root?.querySelectorAll(selector) || [];
   }
 }
 
 /**
- * TagSelectorFactory
- * ==================
- * Fabryka elementów UI do wyboru tagów.
- * Tworzy pola wyboru w dwóch wariantach w zależności od środowiska:
- *  - Mobile → <select> z listą opcji
- *  - Desktop → <input> z przypisanym <datalist>
+ * Warstwa odpornościowa dla zapytań HTTP z kontrolą retry i backoffem.
+ * Zapewnia ponawianie zapytań w przypadku błędów sieciowych lub odpowiedzi serwera,
+ * które kwalifikują się do ponowienia (retryable), z kontrolą liczby prób, odstępów
+ * i maksymalnego czasu trwania operacji.
  *
- * Zasady:
- * -------
- * ✅ Dozwolone:
- *   - Generowanie elementów formularza dla tagów
- *   - Nadawanie etykiet polom na podstawie słownika
- *   - Obsługa wariantu mobilnego i desktopowego
+ * ## Zasady:
  *
- * ❌ Niedozwolone:
- *   - Walidacja wybranych tagów
- *   - Operacje sieciowe
- *   - Bezpośrednia integracja z backendem
+ * - ✅ Dozwolone:
+ *   - Wielokrotne próby `fetch` z kontrolą limitu, odstępu i łącznego czasu.
+ *   - Decyzja, czy błąd/odpowiedź jest retryowalna.
+ *   - Wywołanie zdarzenia `onRetry` (np. do telemetrii lub logowania).
+ *   - Parametryzacja backoffu (bazowe opóźnienie, mnożnik, jitter).
  *
- * TODO:
- *   - Obsługa pól wielokrotnego wyboru (multi-select)
- *   - Dodanie atrybutów dostępności (ARIA)
- *   - Możliwość ustawiania placeholderów w trybie desktop
- *
- * Refaktoryzacja?:
- *   - Ujednolicenie API metod `create` i `createTagField`
- *   - Wydzielenie generatora opcji do osobnej metody
+ * - ❌ Niedozwolone:
+ *   - Logika UI lub domenowa.
+ *   - Transformacje payloadu/JSON (to rola warstwy BackendAPI).
+ *   - Obsługa specyficznych formatów odpowiedzi.
  */
-class TagSelectorFactory {
+class RequestRetryManager {
   /**
-   * Słownik etykiet dla pól tagów.
-   * Klucze odpowiadają nazwom pól, wartości to etykiety wyświetlane w UI.
-   * @type {Record<string,string>}
-   */
-  static labels = {
-    location: "Lokalizacja",
-    character: "Postać",
-    action: "Czynność",
-    nsfw: "NSFW",
-    emotion: "Emocja",
-  };
-
-  /**
-   * Tworzy prosty element wyboru tagów (bez dodatkowych klas/stylów).
-   * Używany do generowania pojedynczych selektorów w UI.
+   * Sprawdza, czy błąd lub odpowiedź nadaje się do ponowienia.
    *
-   * @param {string} type - Typ pola (np. 'location', 'character').
-   * @param {string[]} [options=[]] - Lista dostępnych opcji.
-   * @returns {HTMLLabelElement} - Element <label> zawierający kontrolkę wyboru.
+   * ## Zasady:
+   *  - Retry przy błędach sieciowych (`TypeError` z `fetch`)
+   *  - Retry przy kodach HTTP 5xx i 429
+   *  - Brak retry przy kodach 4xx (poza 429) i odpowiedziach `ok === true`
+   *
+   * @param {any} errOrRes - Obiekt błędu lub odpowiedzi `Response`
+   * @returns {boolean} - true, jeśli można ponowić
    */
-  static create(type, options = []) {
-    const labelEl = document.createElement("label");
-    labelEl.textContent = this.labels[type] || type;
-
-    if (Utils.isMobile()) {
-      // Mobile: <select> z opcjami
-      const select = document.createElement("select");
-      options.forEach(opt => {
-        const optionEl = document.createElement("option");
-        optionEl.value = opt;
-        optionEl.textContent = opt;
-        select.appendChild(optionEl);
-      });
-      labelEl.appendChild(select);
-    } else {
-      // Desktop: <input> + <datalist>
-      const input = document.createElement("input");
-      input.setAttribute("list", `${type}-list`);
-      const datalist = document.createElement("datalist");
-      datalist.id = `${type}-list`;
-      options.forEach(opt => {
-        const optionEl = document.createElement("option");
-        optionEl.value = opt;
-        datalist.appendChild(optionEl);
-      });
-      labelEl.append(input, datalist);
+  static isRetryable(errOrRes) {
+    // Response
+    if (errOrRes && typeof errOrRes === "object" && "ok" in errOrRes) {
+      const res = /** @type {Response} */ (errOrRes);
+      if (res.ok) return false;
+      const s = res.status;
+      return s === 429 || (s >= 500 && s <= 599);
     }
-
-    return labelEl;
+    // Error
+    if (errOrRes instanceof Error) {
+      // Fetch w razie problemów sieciowych rzuca zwykle TypeError
+      return errOrRes.name === "TypeError";
+    }
+    return false;
   }
 
   /**
-   * Tworzy kompletny element pola tagu z etykietą i kontrolką wyboru.
-   * Używany w panelach tagów (np. TagsPanel) do renderowania pól kategorii.
+   * Wykonuje `fetch` z mechanizmem retry i backoffem z jitterem.
    *
-   * @param {string} name - Nazwa pola (np. "location", "character").
-   * @param {string[]} [options=[]] - Lista opcji do wyboru.
-   * @returns {HTMLLabelElement} - Gotowy element <label> z kontrolką.
+   * @param {string|Request} input - URL lub obiekt `Request`
+   * @param {RequestInit} [init={}] - Opcje `fetch` (method, headers, body itd.)
+   * @param {number} [retries=3] - Maksymalna liczba ponowień (bez pierwszej próby)
+   * @param {number} [baseDelay=800] - Bazowe opóźnienie (ms) dla backoffu
+   * @param {{
+   *   silent?: boolean,
+   *   maxTotalTime?: number,     // twardy limit łącznego czasu (ms)
+   *   onRetry?: (info:{
+   *     attempt:number,
+   *     retries:number,
+   *     delay:number,
+   *     reason:any,
+   *     input:string|Request
+   *   })=>void,
+   *   factor?: number,           // mnożnik backoffu, domyślnie 2
+   *   jitter?: number            // [0..1], odchylenie losowe, domyślnie 0.2
+   * } } [options={}] - Parametry dodatkowe
+   * @returns {Promise<Response>} - Odpowiedź `fetch`
+   *
+   * Przebieg:
+   *  1. Wykonuje pierwsze żądanie `fetch`.
+   *  2. Jeśli odpowiedź jest OK → zwraca ją.
+   *  3. Jeśli odpowiedź/błąd jest retryowalny → ponawia do `retries` razy.
+   *  4. Każde ponowienie ma opóźnienie wyliczone z backoffu + jitter.
+   *  5. Jeśli przekroczono `maxTotalTime` → rzuca błąd.
+   *  6. Wywołuje `onRetry` (jeśli podany) przy każdej próbie ponowienia.
    */
-  static createTagField(name, options = []) {
-    const labelEl = document.createElement("label");
-    labelEl.className = "tag-field";
-    labelEl.textContent = this.labels?.[name] || name;
+  static async fetchWithRetry(
+    input,
+    init = {},
+    retries = 3,
+    baseDelay = 800,
+    {
+      silent = false,
+      maxTotalTime = 15_000,
+      onRetry = null,
+      factor = 2,
+      jitter = 0.2,
+    } = {}
+  ) {
+    const start = Date.now();
+    let attempt = 0;
 
-    if (Utils.isMobile()) {
-      // Mobile: <select> z pustą opcją na start
-      const select = document.createElement("select");
-      select.id = `tag-${name}`;
-      select.name = name;
+    while (true) {
+      try {
+        const res = await fetch(input, init);
+        if (!res.ok) {
+          if (!this.isRetryable(res)) return res; // oddaj nie-OK bez retry — nie jest retryowalne
+          throw res; // wymuś retry
+        }
+        return res;
+      } catch (err) {
+        if (!this.isRetryable(err)) {
+          // Błąd nieretryowalny — rzucamy od razu
+          LoggerService.record(
+            "error",
+            "[RequestRetryManager] Non-retryable error",
+            err
+          );
+          throw err;
+        }
 
-      const emptyOpt = document.createElement("option");
-      emptyOpt.value = "";
-      emptyOpt.textContent = "-- wybierz --";
-      select.appendChild(emptyOpt);
+        if (attempt >= retries) {
+          LoggerService.record(
+            "error",
+            `[RequestRetryManager] Wyczerpane retry dla: ${
+              typeof input === "string" ? input : input.url
+            }`,
+            err
+          );
+          throw err;
+        }
 
-      options.forEach(opt => {
-        const optionEl = document.createElement("option");
-        optionEl.value = opt;
-        optionEl.textContent = opt;
-        select.appendChild(optionEl);
-      });
+        // Kolejna próba
+        attempt += 1;
 
-      labelEl.appendChild(select);
-    } else {
-      // Desktop: <input> + <datalist>
-      const input = document.createElement("input");
-      input.id = `tag-${name}`;
-      input.name = name;
-      input.setAttribute("list", `${name}-list`);
+        // Exponential backoff + jitter
+        const exp = baseDelay * Math.pow(factor, attempt - 1);
+        const delta = exp * jitter;
+        const delay = Math.max(0, exp + (Math.random() * 2 - 1) * delta);
 
-      const datalist = document.createElement("datalist");
-      datalist.id = `${name}-list`;
+        if (Date.now() + delay - start > maxTotalTime) {
+          LoggerService.record(
+            "error",
+            "[RequestRetryManager] Przekroczono maxTotalTime",
+            { maxTotalTime }
+          );
+          throw err;
+        }
 
-      options.forEach(opt => {
-        const optionEl = document.createElement("option");
-        optionEl.value = opt;
-        datalist.appendChild(optionEl);
-      });
+        const level = silent ? "log" : "warn";
+        LoggerService.record(
+          level,
+          `[RequestRetryManager] Retry ${attempt}/${retries} za ${Math.round(
+            delay
+          )}ms`,
+          err
+        );
 
-      labelEl.append(input, datalist);
+        if (typeof onRetry === "function") {
+          try {
+            onRetry({ attempt, retries, delay, reason: err, input });
+          } catch {
+            // Ignorujemy błędy w callbacku onRetry
+          }
+        }
+
+        // Odczekaj wyliczony czas przed kolejną próbą
+        await new Promise((r) => setTimeout(r, delay));
+      }
     }
-
-    return labelEl;
   }
 }
 
 /**
- * # ImageResolver
+ *
+ * Komponent odpowiedzialny za renderowanie galerii obrazów w przekazanym kontenerze.
+ * Współpracuje z ImageResolver w celu wyszukiwania obrazów na podstawie tagów.
+ * Umożliwia wybór obrazu przez użytkownika (radio name="gallery-choice").
+ *
+ * ## Zasady:
+ *
+ * - ✅ Dozwolone:
+ *   - Renderowanie obrazów w kontenerze
+ *   - Współpraca z ImageResolver
+ *   - Obsługa wyboru obrazu przez użytkownika
+ *   - Pobieranie obrazów z API (GET)
+ *
+ * - ❌ Niedozwolone:
+ *   - Logika promptów, edycji, ocen
+ *   - Połączenia z BackendAPI poza prostym GET
+ *   - Mutacje globalnego stanu
+ *
+ */
+class GalleryLoader {
+  /**
+   * @param {HTMLElement|{galleryContainer?:HTMLElement}} [root] - Kontener lub obiekt z polem galleryContainer.
+   */
+  constructor(root) {
+    /** @type {HTMLElement|null} */
+    this.container = null;
+    /** @type {HTMLElement|null} */
+    this.gallery = null;
+    if (root) this.setContainer(root.galleryContainer || root);
+  }
+
+  /**
+   * Ustawia kontener galerii. Obsługuje:
+   * - <div id="image-gallery"> jako bezpośrednią galerię,
+   * - dowolny <div> (galeria = ten div),
+   * - wrapper zawierający element #image-gallery.
+   *
+   * @param {HTMLElement} el - Element kontenera
+   */
+  setContainer(el) {
+    if (!(el instanceof HTMLElement)) {
+      LoggerService.record(
+        "error",
+        "[GalleryLoader] setContainer: brak HTMLElement",
+        el
+      );
+      return;
+    }
+    this.container = el;
+    this.gallery = el.querySelector?.("#image-gallery") || el;
+  }
+
+  /**
+   * Czyści zawartość galerii.
+   */
+  clearGallery() {
+    if (this.gallery) this.gallery.innerHTML = "";
+  }
+
+  /**
+   * Pokazuje komunikat w galerii, czyszcząc poprzednią zawartość.
+   *
+   * @param {string} message - Treść komunikatu
+   */
+  showMessage(message) {
+    if (!this.gallery) return;
+    this.clearGallery();
+    const msg = document.createElement("div");
+    msg.classList.add("gallery-message");
+    msg.textContent = message;
+    this.gallery.appendChild(msg);
+  }
+
+  /**
+   * Renderuje obrazy jako label z ukrytym input[type=radio] name="gallery-choice".
+   * Dzięki temu EditManager może odczytać wybór.
+   *
+   * @param {string[]} urls - Lista URL-i obrazów
+   */
+  renderImages(urls) {
+    if (!this.gallery) return;
+    this.clearGallery();
+    urls.forEach((url, idx) => {
+      const label = document.createElement("label");
+      label.className = "image-option";
+
+      const input = document.createElement("input");
+      input.type = "radio";
+      input.name = "gallery-choice";
+      input.value = url;
+      input.style.display = "none";
+
+      const img = document.createElement("img");
+      img.src = url;
+      img.alt = `Obraz ${idx + 1}`;
+      img.loading = "lazy";
+
+      label.append(input, img);
+      this.gallery.appendChild(label);
+      label.addEventListener("click", () => this._highlight(label));
+    });
+  }
+
+  /**
+   * Renderuje obrazy na podstawie tagów, używając ImageResolver.resolve().
+   *
+   * @param {string[]} tags - Lista tagów
+   * @returns {Promise<void>}
+   */
+  async renderFromTags(tags) {
+    if (!this.gallery) {
+      LoggerService.record(
+        "error",
+        "[GalleryLoader] Brak container w renderFromTags"
+      );
+      return;
+    }
+    try {
+      const urls = await ImageResolver.resolve(tags, { maxResults: 6 });
+      if (urls.length === 0) {
+        this.showMessage("❌ Brak obrazu dla tych tagów");
+        return;
+      }
+      this.renderImages(urls);
+      await this.highlightSelected(tags);
+    } catch (err) {
+      LoggerService.record(
+        "error",
+        "[GalleryLoader] renderFromTags error",
+        err
+      );
+      this.showMessage("❌ Błąd renderowania galerii.");
+    }
+  }
+
+  /**
+   * Podświetla obraz dopasowany do aktualnych tagów (pierwszy pasujący).
+   * Ustawia również stan zaznaczenia radio.
+   *
+   * @param {string[]} tags - Lista tagów
+   * @returns {Promise<void>}
+   */
+  async highlightSelected(tags) {
+    if (!this.gallery) return;
+    const target = await ImageResolver.resolveBest(tags);
+    if (!target) return;
+    const items = this.gallery.querySelectorAll(".image-option");
+    items.forEach((label) => {
+      const img = label.querySelector("img");
+      const match =
+        img && (img.src.endsWith(target) || img.src.includes(target));
+      label.classList.toggle("selected", !!match);
+      const radio = label.querySelector('input[type="radio"]');
+      if (radio) radio.checked = !!match;
+    });
+  }
+
+  /**
+   * Ładuje obrazy z API i renderuje listę URL-i.
+   * Endpoint może zwrócić: string[] lub { images: string[] }.
+   *
+   * @param {string} endpoint - URL endpointu API
+   * @param {Record<string,string>} [params] - Parametry zapytania
+   * @returns {Promise<void>}
+   */
+  async loadFromAPI(endpoint, params = {}) {
+    if (!this.gallery) return;
+    try {
+      this.showMessage("Ładowanie...");
+      const url = new URL(endpoint, window.location.origin);
+      Object.entries(params).forEach(
+        ([k, v]) => v && url.searchParams.append(k, v)
+      );
+      const res = await fetch(url);
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const data = await res.json();
+      const images = Array.isArray(data)
+        ? data
+        : Array.isArray(data.images)
+        ? data.images
+        : [];
+      if (!images.length) return this.showMessage("Brak wyników.");
+      this.renderImages(images);
+    } catch (err) {
+      LoggerService.record(
+        "error",
+        "[GalleryLoader] Błąd ładowania obrazów",
+        err
+      );
+      this.showMessage("❌ Błąd ładowania obrazów.");
+    }
+  }
+
+  /**
+   * Zaznacza wybraną opcję i odznacza pozostałe.
+   *
+   * @param {HTMLElement} selected - Element label z klasą .image-option
+   * @private
+   */
+  _highlight(selected) {
+    if (!this.gallery) return;
+    this.gallery
+      .querySelectorAll(".image-option")
+      .forEach((el) => el.classList.remove("selected"));
+    selected.classList.add("selected");
+    const radio = selected.querySelector('input[type="radio"]');
+    if (radio) radio.checked = true;
+  }
+}
+
+/**
+ *
+ * Menedżer widoczności paneli bocznych w aplikacji.
+ * Zapewnia kontrolę nad otwieraniem, zamykaniem i przełączaniem paneli w interfejsie użytkownika.
+ * Obsługuje tryb mobilny (wyłączność paneli) oraz desktopowy (współistnienie).
+ * Utrzymuje stan wybranych paneli w cookie — tylko na desktopie.
+ *
+ * ## Zasady:
+ *
+ * - ✅ Dozwolone:
+ *   - Rejestracja paneli i ich przycisków
+ *   - Obsługa zdarzeń kliknięcia
+ *   - Przełączanie widoczności paneli
+ *   - Zapisywanie stanu paneli w cookie (desktop only)
+ *
+ * - ❌ Niedozwolone:
+ *   - Deklaracja paneli statycznie
+ *   - Modyfikacja zawartości paneli
+ *   - Logika niezwiązana z UI paneli
+ *
+ */
+class PanelsController {
+  /**
+   * @param {Dom} dom - Instancja klasy Dom
+   * @param {Array<{button: HTMLElement, panel: HTMLElement, id: string}>} panels - lista paneli
+   * @param {string[]} persistentPanels - identyfikatory paneli, które mają być zapamiętywane (desktop only)
+   */
+  constructor(dom, panels = [], persistentPanels = []) {
+    this.dom = dom;
+    this.panels = panels;
+    this.cookiePanels = new Set(persistentPanels);
+    this._unbinders = new Map();
+  }
+
+  /**
+   * Inicjalizuje nasłuchiwacze kliknięć i przywraca stan z cookie (desktop only).
+   */
+  init() {
+    this.panels.forEach(({ button, panel, id }) => {
+      if (!button || !panel) return;
+
+      if (!Utils.isMobile() && this.cookiePanels.has(id)) {
+        const saved = AppStorageManager.getWithTTL(`panel:${id}`);
+        if (saved === true) panel.classList.add("open");
+      }
+
+      const handler = () => this.togglePanel(panel);
+      button.addEventListener("click", handler);
+      this._unbinders.set(button, () =>
+        button.removeEventListener("click", handler)
+      );
+    });
+  }
+
+  /**
+   * Otwiera panel. Na mobile zamyka inne.
+   * @param {HTMLElement} panel
+   */
+  openPanel(panel) {
+    if (Utils.isMobile()) {
+      this.closeAllPanels();
+    }
+    panel.classList.add("open");
+
+    if (!Utils.isMobile() && this.cookiePanels.has(panel.id)) {
+      AppStorageManager.set(`panel:${panel.id}`, true);
+    }
+  }
+
+  /**
+   * Zamyka panel.
+   * @param {HTMLElement} panel
+   */
+  closePanel(panel) {
+    panel.classList.remove("open");
+
+    if (!Utils.isMobile() && this.cookiePanels.has(panel.id)) {
+      AppStorageManager.set(`panel:${panel.id}`, false);
+    }
+  }
+
+  /**
+   * Przełącza widoczność panelu.
+   * @param {HTMLElement} panel
+   */
+  togglePanel(panel) {
+    if (!panel) return;
+    const isOpen = panel.classList.contains("open");
+    if (isOpen) {
+      this.closePanel(panel);
+    } else {
+      this.openPanel(panel);
+    }
+  }
+
+  /** Zamyka wszystkie panele. */
+  closeAllPanels() {
+    this.panels.forEach(({ panel }) => panel?.classList.remove("open"));
+  }
+
+  /**
+   * Sprawdza, czy panel jest otwarty.
+   * @param {HTMLElement} panel
+   * @returns {boolean}
+   */
+  isPanelOpen(panel) {
+    return !!panel?.classList.contains("open");
+  }
+
+  /**
+   * Zwraca pierwszy otwarty panel.
+   * @returns {HTMLElement|null}
+   */
+  getOpenPanel() {
+    const item = this.panels.find(({ panel }) =>
+      panel?.classList.contains("open")
+    );
+    return item?.panel || null;
+  }
+
+  /**
+   * Zwraca wszystkie otwarte panele.
+   * @returns {HTMLElement[]}
+   */
+  getOpenPanels() {
+    return this.panels
+      .map(({ panel }) => panel)
+      .filter((p) => p && p.classList.contains("open"));
+  }
+
+  /**
+   * Usuwa nasłuchiwacze i czyści zasoby.
+   */
+  destroy() {
+    this._unbinders.forEach((off) => off?.());
+    this._unbinders.clear();
+  }
+}
+
+/**
+ *
  * Narzędzie do wyszukiwania istniejących obrazów na podstawie tagów.
  * Obsługuje permutacje nazw plików, cache wyników oraz preload obrazów.
  *
  * # Zasady:
- *  
- * ✅ Dozwolone:
+ *
+ * - ✅ Dozwolone:
  *   - resolve(tags, opts?): Promise<string[]>
  *   - resolveBest(tags, opts?): Promise<string>
  *   - clearCache(): void
  *   - preload(url): void
- *  
- * ❌ Niedozwolone:
+ *
+ * - ❌ Niedozwolone:
  *   - Renderowanie DOM (poza preload <img>)
  *   - Logika UI lub biznesowa
  *   - Zależności od klas domenowych
- *  
- * TODO:
- *   - setBasePath(path: string)
- *   - setExtensions(exts: string[])
- *   - getCacheStats(): { hits: number, misses: number }
- *   - resolveAll(tags: string[]): Promise<{ found: string[], missing: string[] }>
  */
 class ImageResolver {
   /**
@@ -2625,1012 +3535,6 @@ class ImageResolver {
       }
     })(arr.slice(), 0);
     return res;
-  }
-}
-
-/**
- * PanelsController
- * ================
- * Menedżer widoczności paneli bocznych w aplikacji.
- * Zapewnia kontrolę nad otwieraniem, zamykaniem i przełączaniem paneli w interfejsie użytkownika.
- * Obsługuje tryb mobilny (wyłączność paneli) oraz desktopowy (współistnienie).
- * Utrzymuje stan wybranych paneli w cookie — tylko na desktopie.
- *
- * Zasady:
- * -------
- * ✅ Odpowiedzialność:
- *   - Rejestracja paneli i ich przycisków
- *   - Obsługa zdarzeń kliknięcia
- *   - Przełączanie widoczności paneli
- *   - Zapisywanie stanu paneli w cookie (desktop only)
- *
- * ❌ Niedozwolone:
- *   - Deklaracja paneli statycznie
- *   - Modyfikacja zawartości paneli
- *   - Logika niezwiązana z UI paneli
- *
- * API:
- * ----
- * - `constructor(dom, panels, persistentPanels)` — inicjalizacja z referencjami DOM
- * - `init()` — rejestruje nasłuchiwacze i przywraca stan (desktop only)
- * - `addPanel(button, panel, id)` — dodaje nową parę przycisk→panel
- * - `openPanel(panel)` — otwiera panel (z wyłącznością na mobile)
- * - `closePanel(panel)` — zamyka panel
- * - `togglePanel(panel)` — przełącza widoczność panelu
- * - `closeAllPanels()` — zamyka wszystkie panele
- * - `isPanelOpen(panel)` — sprawdza, czy panel jest otwarty
- * - `getOpenPanel()` — zwraca pierwszy otwarty panel
- * - `getOpenPanels()` — zwraca wszystkie otwarte panele
- * - `destroy()` — usuwa nasłuchiwacze i czyści zasoby
- *
- * Zależności:
- *  - `Dom`: dostarcza referencje do przycisków i paneli
- *  - `Utils.isMobile()`: wykrywa tryb mobilny
- *  - `AppStorageManager`: zapisuje i odczytuje stan paneli z cookie
- *  - `LoggerService`: loguje błędy i ostrzeżenia
- */
-class PanelsController {
-  /**
-   * @param {Dom} dom - Instancja klasy Dom
-   * @param {Array<{button: HTMLElement, panel: HTMLElement, id: string}>} panels - lista paneli
-   * @param {string[]} persistentPanels - identyfikatory paneli, które mają być zapamiętywane (desktop only)
-   */
-  constructor(dom, panels = [], persistentPanels = []) {
-    this.dom = dom;
-    this.panels = panels;
-    this.cookiePanels = new Set(persistentPanels);
-    this._unbinders = new Map();
-  }
-
-  /**
-   * Inicjalizuje nasłuchiwacze kliknięć i przywraca stan z cookie (desktop only).
-   */
-  init() {
-    this.panels.forEach(({ button, panel, id }) => {
-      if (!button || !panel) return;
-
-      if (!Utils.isMobile() && this.cookiePanels.has(id)) {
-        const saved = AppStorageManager.getWithTTL(`panel:${id}`);
-        if (saved === true) panel.classList.add("open");
-      }
-
-      const handler = () => this.togglePanel(panel);
-      button.addEventListener("click", handler);
-      this._unbinders.set(button, () =>
-        button.removeEventListener("click", handler)
-      );
-    });
-  }
-
-  /**
-   * Otwiera panel. Na mobile zamyka inne.
-   * @param {HTMLElement} panel
-   */
-  openPanel(panel) {
-    if (Utils.isMobile()) {
-      this.closeAllPanels();
-    }
-    panel.classList.add("open");
-
-    if (!Utils.isMobile() && this.cookiePanels.has(panel.id)) {
-      AppStorageManager.set(`panel:${panel.id}`, true);
-    }
-  }
-
-  /**
-   * Zamyka panel.
-   * @param {HTMLElement} panel
-   */
-  closePanel(panel) {
-    panel.classList.remove("open");
-
-    if (!Utils.isMobile() && this.cookiePanels.has(panel.id)) {
-      AppStorageManager.set(`panel:${panel.id}`, false);
-    }
-  }
-
-  /**
-   * Przełącza widoczność panelu.
-   * @param {HTMLElement} panel
-   */
-  togglePanel(panel) {
-    if (!panel) return;
-    const isOpen = panel.classList.contains("open");
-    if (isOpen) {
-      this.closePanel(panel);
-    } else {
-      this.openPanel(panel);
-    }
-  }
-
-  /** Zamyka wszystkie panele. */
-  closeAllPanels() {
-    this.panels.forEach(({ panel }) => panel?.classList.remove("open"));
-  }
-
-  /**
-   * Sprawdza, czy panel jest otwarty.
-   * @param {HTMLElement} panel
-   * @returns {boolean}
-   */
-  isPanelOpen(panel) {
-    return !!panel?.classList.contains("open");
-  }
-
-  /**
-   * Zwraca pierwszy otwarty panel.
-   * @returns {HTMLElement|null}
-   */
-  getOpenPanel() {
-    const item = this.panels.find(({ panel }) =>
-      panel?.classList.contains("open")
-    );
-    return item?.panel || null;
-  }
-
-  /**
-   * Zwraca wszystkie otwarte panele.
-   * @returns {HTMLElement[]}
-   */
-  getOpenPanels() {
-    return this.panels
-      .map(({ panel }) => panel)
-      .filter((p) => p && p.classList.contains("open"));
-  }
-
-  /**
-   * Usuwa nasłuchiwacze i czyści zasoby.
-   */
-  destroy() {
-    this._unbinders.forEach((off) => off?.());
-    this._unbinders.clear();
-  }
-}
-
-/**
- * RequestRetryManager
- * ===================
- * Warstwa odpornościowa dla zapytań HTTP z kontrolą retry i backoffem.
- * Zapewnia ponawianie zapytań w przypadku błędów sieciowych lub odpowiedzi serwera,
- * które kwalifikują się do ponowienia (retryable), z kontrolą liczby prób, odstępów
- * i maksymalnego czasu trwania operacji.
- *
- * Zasady:
- * -------
- * ✅ Dozwolone:
- *   - Wielokrotne próby `fetch` z kontrolą limitu, odstępu i łącznego czasu.
- *   - Decyzja, czy błąd/odpowiedź jest retryowalna.
- *   - Wywołanie zdarzenia `onRetry` (np. do telemetrii lub logowania).
- *   - Parametryzacja backoffu (bazowe opóźnienie, mnożnik, jitter).
- *
- * ❌ Niedozwolone:
- *   - Logika UI lub domenowa.
- *   - Transformacje payloadu/JSON (to rola warstwy BackendAPI).
- *   - Obsługa specyficznych formatów odpowiedzi.
- *
- * API:
- * ----
- * - `static isRetryable(errOrRes): boolean`
- *    - Sprawdza, czy błąd lub odpowiedź kwalifikuje się do ponowienia.
- *    - Retry przy:
- *        - Błędach sieciowych (`TypeError` z `fetch`)
- *        - Kodach HTTP 5xx
- *        - Kodzie HTTP 429 (Too Many Requests)
- *    - Brak retry przy:
- *        - Kodach HTTP 4xx (poza 429)
- *        - Odpowiedziach `ok === true`
- *
- * - `static async fetchWithRetry(input, init?, retries?, baseDelay?, options?): Promise<Response>`
- *    - Wykonuje `fetch` z mechanizmem retry i backoffem z jitterem.
- *    - Parametry:
- *        - `input` — URL lub obiekt `Request`
- *        - `init` — opcje `fetch` (method, headers, body itd.)
- *        - `retries` — maksymalna liczba ponowień (bez pierwszej próby)
- *        - `baseDelay` — bazowe opóźnienie (ms) dla backoffu
- *        - `options`:
- *            - `silent` — jeśli true, logowanie na poziomie `log` zamiast `warn`
- *            - `maxTotalTime` — twardy limit łącznego czasu (ms)
- *            - `onRetry(info)` — callback wywoływany przy każdej próbie ponowienia
- *            - `factor` — mnożnik backoffu (domyślnie 2)
- *            - `jitter` — odchylenie losowe [0..1] (domyślnie 0.2)
- *
- * Mechanizm backoffu:
- * -------------------
- *  - Opóźnienie = `baseDelay * factor^(attempt-1)` ± `jitter`
- *  - Jitter wprowadza losowe odchylenie, aby uniknąć skoków ruchu (thundering herd)
- *  - Przed każdą próbą sprawdzany jest limit `maxTotalTime`
- *
- * Obsługa błędów:
- * ---------------
- *  - Błąd nieretryowalny → natychmiastowe przerwanie i rzucenie wyjątku
- *  - Wyczerpanie liczby retry → rzucenie ostatniego błędu
- *  - Przekroczenie `maxTotalTime` → rzucenie ostatniego błędu
- *
- * Telemetria/logowanie:
- * ---------------------
- *  - Każdy retry logowany przez `LoggerService.record()` na poziomie `warn` lub `log` (silent)
- *  - Możliwość podpięcia własnego callbacka `onRetry` z informacjami o próbie
- */
-class RequestRetryManager {
-  /**
-   * Sprawdza, czy błąd lub odpowiedź nadaje się do ponowienia.
-   *
-   * Zasady:
-   *  - Retry przy błędach sieciowych (`TypeError` z `fetch`)
-   *  - Retry przy kodach HTTP 5xx i 429
-   *  - Brak retry przy kodach 4xx (poza 429) i odpowiedziach `ok === true`
-   *
-   * @param {any} errOrRes - Obiekt błędu lub odpowiedzi `Response`
-   * @returns {boolean} - true, jeśli można ponowić
-   */
-  static isRetryable(errOrRes) {
-    // Response
-    if (errOrRes && typeof errOrRes === "object" && "ok" in errOrRes) {
-      const res = /** @type {Response} */ (errOrRes);
-      if (res.ok) return false;
-      const s = res.status;
-      return s === 429 || (s >= 500 && s <= 599);
-    }
-    // Error
-    if (errOrRes instanceof Error) {
-      // Fetch w razie problemów sieciowych rzuca zwykle TypeError
-      return errOrRes.name === "TypeError";
-    }
-    return false;
-  }
-
-  /**
-   * Wykonuje `fetch` z mechanizmem retry i backoffem z jitterem.
-   *
-   * @param {string|Request} input - URL lub obiekt `Request`
-   * @param {RequestInit} [init={}] - Opcje `fetch` (method, headers, body itd.)
-   * @param {number} [retries=3] - Maksymalna liczba ponowień (bez pierwszej próby)
-   * @param {number} [baseDelay=800] - Bazowe opóźnienie (ms) dla backoffu
-   * @param {{
-   *   silent?: boolean,
-   *   maxTotalTime?: number,     // twardy limit łącznego czasu (ms)
-   *   onRetry?: (info:{
-   *     attempt:number,
-   *     retries:number,
-   *     delay:number,
-   *     reason:any,
-   *     input:string|Request
-   *   })=>void,
-   *   factor?: number,           // mnożnik backoffu, domyślnie 2
-   *   jitter?: number            // [0..1], odchylenie losowe, domyślnie 0.2
-   * } } [options={}] - Parametry dodatkowe
-   * @returns {Promise<Response>} - Odpowiedź `fetch`
-   *
-   * Przebieg:
-   *  1. Wykonuje pierwsze żądanie `fetch`.
-   *  2. Jeśli odpowiedź jest OK → zwraca ją.
-   *  3. Jeśli odpowiedź/błąd jest retryowalny → ponawia do `retries` razy.
-   *  4. Każde ponowienie ma opóźnienie wyliczone z backoffu + jitter.
-   *  5. Jeśli przekroczono `maxTotalTime` → rzuca błąd.
-   *  6. Wywołuje `onRetry` (jeśli podany) przy każdej próbie ponowienia.
-   */
-  static async fetchWithRetry(
-    input,
-    init = {},
-    retries = 3,
-    baseDelay = 800,
-    {
-      silent = false,
-      maxTotalTime = 15_000,
-      onRetry = null,
-      factor = 2,
-      jitter = 0.2,
-    } = {}
-  ) {
-    const start = Date.now();
-    let attempt = 0;
-
-    while (true) {
-      try {
-        const res = await fetch(input, init);
-        if (!res.ok) {
-          if (!this.isRetryable(res)) return res; // oddaj nie-OK bez retry — nie jest retryowalne
-          throw res; // wymuś retry
-        }
-        return res;
-      } catch (err) {
-        if (!this.isRetryable(err)) {
-          // Błąd nieretryowalny — rzucamy od razu
-          LoggerService.record(
-            "error",
-            "[RequestRetryManager] Non-retryable error",
-            err
-          );
-          throw err;
-        }
-
-        if (attempt >= retries) {
-          LoggerService.record(
-            "error",
-            `[RequestRetryManager] Wyczerpane retry dla: ${
-              typeof input === "string" ? input : input.url
-            }`,
-            err
-          );
-          throw err;
-        }
-
-        // Kolejna próba
-        attempt += 1;
-
-        // Exponential backoff + jitter
-        const exp = baseDelay * Math.pow(factor, attempt - 1);
-        const delta = exp * jitter;
-        const delay = Math.max(0, exp + (Math.random() * 2 - 1) * delta);
-
-        if (Date.now() + delay - start > maxTotalTime) {
-          LoggerService.record(
-            "error",
-            "[RequestRetryManager] Przekroczono maxTotalTime",
-            { maxTotalTime }
-          );
-          throw err;
-        }
-
-        const level = silent ? "log" : "warn";
-        LoggerService.record(
-          level,
-          `[RequestRetryManager] Retry ${attempt}/${retries} za ${Math.round(
-            delay
-          )}ms`,
-          err
-        );
-
-        if (typeof onRetry === "function") {
-          try {
-            onRetry({ attempt, retries, delay, reason: err, input });
-          } catch {
-            // Ignorujemy błędy w callbacku onRetry
-          }
-        }
-
-        // Odczekaj wyliczony czas przed kolejną próbą
-        await new Promise((r) => setTimeout(r, delay));
-      }
-    }
-  }
-}
-
-/**
- * ChatRatingView
- * ==============
- * Komponent UI odpowiedzialny za wyświetlanie i obsługę panelu ocen wiadomości AI.
- * 
- * Funkcje:
- * --------
- *  - Renderuje panel ocen w formie <details> z listą kryteriów i suwakami (range input)
- *  - Obsługuje zmianę wartości suwaków (aktualizacja widocznej wartości)
- *  - Po kliknięciu "Wyślij ocenę" zbiera wszystkie wartości i przekazuje je w callbacku `onSubmit`
- *  - Zapobiega duplikowaniu panelu ocen w tej samej wiadomości
- * 
- * Zasady:
- * -------
- * ✅ Odpowiedzialność:
- *   - Tworzenie i osadzanie elementów DOM panelu ocen
- *   - Obsługa interakcji użytkownika (zmiana wartości, wysyłka oceny)
- * 
- * ❌ Niedozwolone:
- *   - Samodzielne wysyłanie ocen do backendu (od tego jest logika wyżej)
- *   - Modyfikowanie innych elementów wiadomości poza panelem ocen
- * 
- * API:
- * ----
- * - `constructor(msgEl, onSubmit)` — tworzy panel ocen w podanym elemencie wiadomości
- * - `render(msgEl)` — renderuje panel ocen (wywoływane automatycznie w konstruktorze)
- * 
- * Callbacki:
- * ----------
- * - `onSubmit(payload)` — wywoływany po kliknięciu "Wyślij ocenę"
- *    - payload: {
- *        messageId: string,
- *        sessionId: string,
- *        ratings: { [kryterium]: number }
- *      }
- */
-class ChatRatingView {
-  /**
-   * @param {HTMLElement} msgEl - Element wiadomości, do którego ma zostać dodany panel ocen
-   * @param {function(object):void} [onSubmit] - Callback wywoływany po wysłaniu oceny
-   */
-  constructor(msgEl, onSubmit) {
-    if (!(msgEl instanceof HTMLElement)) return;
-    this.onSubmit = onSubmit || null;
-
-    /**
-     * Lista kryteriów oceniania
-     * @type {{key: string, label: string}[]}
-     */
-    this.criteria = [
-      { key: "Narrative", label: "Narracja" },
-      { key: "Style", label: "Styl" },
-      { key: "Logic", label: "Logika" },
-      { key: "Quality", label: "Jakość" },
-      { key: "Emotions", label: "Emocje" }
-    ];
-
-    this.render(msgEl);
-  }
-
-  /**
-   * Renderuje panel ocen w wiadomości.
-   * @param {HTMLElement} msgEl - Element wiadomości
-   */
-  render(msgEl) {
-    // Unikamy duplikatów panelu ocen
-    if (msgEl.querySelector("details.rating-form")) return;
-
-    const details = document.createElement("details");
-    details.className = "rating-form";
-    details.open = false;
-
-    const summary = document.createElement("summary");
-    summary.textContent = "Oceń odpowiedź ⭐";
-    details.appendChild(summary);
-
-    const header = document.createElement("h3");
-    header.textContent = "Twoja ocena:";
-    details.appendChild(header);
-
-    // Tworzenie wierszy z suwakami dla każdego kryterium
-    this.criteria.forEach(({ key, label }) => {
-      const row = document.createElement("label");
-      row.className = "rating-row";
-
-      const labelSpan = document.createElement("span");
-      labelSpan.textContent = `${label}: `;
-      row.appendChild(labelSpan);
-
-      const input = document.createElement("input");
-      input.type = "range";
-      input.min = "1";
-      input.max = "5";
-      input.value = "3";
-      input.name = key;
-
-      const val = document.createElement("span");
-      val.textContent = input.value;
-      input.addEventListener("input", () => (val.textContent = input.value));
-
-      row.append(input, val);
-      details.appendChild(row);
-    });
-
-    // Przycisk wysyłki oceny
-    const btn = document.createElement("button");
-    btn.type = "button";
-    btn.textContent = "Wyślij ocenę";
-    btn.addEventListener("click", () => {
-      const ratings = {};
-      this.criteria.forEach(({ key }) => {
-        ratings[key] = Number(details.querySelector(`[name="${key}"]`).value);
-      });
-      const payload = {
-        messageId: msgEl.dataset.msgId,
-        sessionId: msgEl.dataset.sessionId,
-        ratings
-      };
-      this.onSubmit?.(payload);
-    });
-    details.appendChild(btn);
-
-    // Panel trafia do stopki wiadomości lub bezpośrednio do elementu
-    const footer = msgEl.querySelector(".msg-footer") || msgEl;
-    footer.appendChild(details);
-  }
-}
-
-/**
- * ChatManager
- * ===========
- * Główna warstwa logiki aplikacji — łączy widoki UI z backendem.
- * Odpowiada za obsługę promptów, edycji i oceniania wiadomości.
- * Integruje się z `ChatUIView`, `ChatEditView`, `BackendAPI`, `ImageResolver` i `LoggerService`.
- *
- * Zasady:
- * -------
- * ✅ Odpowiedzialność:
- *   - Obsługa promptów, edycji, oceniania
- *   - Przekazywanie danych między widokami a BackendAPI
- *   - Aktualizacja UI przez `ChatUIView` i `ChatEditView`
- *
- * ❌ Niedozwolone:
- *   - Renderowanie HTML bezpośrednio
- *   - Mutowanie danych poza `dataset`/`msgEl`
- *   - Logika domenowa (np. interpretacja tagów)
- *
- * API:
- * ----
- * - `constructor({ dom })` — inicjalizuje widoki i podpina zdarzenia
- * - `init()` — aktywuje widoki i podpina zdarzenia edycji/oceny
- * - `sendPrompt(prompt: string)` — wysyła prompt do backendu i renderuje odpowiedź
- * - `sendEdit(msgEl, editedText, tags, imageUrl, sessionId)` — przesyła edytowaną wiadomość
- * - `sendRating({ messageId, sessionId, ratings })` — przesyła ocenę wiadomości
- *
- * Zależności:
- *  - `ChatUIView`: widok głównego czatu
- *  - `ChatEditView`: widok edycji wiadomości
- *  - `BackendAPI`: komunikacja z backendem
- *  - `ImageResolver`: rozwiązywanie ilustracji
- *  - `LoggerService`: logowanie błędów
- */
-class ChatManager {
-  /**
-   * Inicjalizuje widoki UI i podpina zdarzenia.
-   * @param {{ dom: Dom }} context - Kontekst aplikacji z referencjami DOM.
-   */
-  constructor(context) {
-    const { dom } = context;
-    this.chatView = new ChatUIView(
-      dom.chatContainer,
-      dom.inputArea,
-      dom.prompt
-    );
-
-    this.promptVal = {
-      promptEl: dom.prompt,
-      errorEl: dom.promptError,
-      warningEl: dom.promptWarning,
-    };
-
-    this.editView = new ChatEditView(dom);
-
-    this.chatView.onEditRequested = (msgEl, text, id, ts, sessionId) =>
-      this.editView.enableEdit(msgEl, text, id, ts, sessionId);
-
-    this.chatView.onRatingSubmit = (msgEl) => this.ratingView.open(msgEl);
-  }
-
-  /**
-   * Inicjalizuje widoki i podpina zdarzenia walidacji promptu oraz edycji i oceny.
-   */
-  init() {
-    const { promptEl, errorEl, warningEl } = this.promptVal;
-    let hadInput = false;
-
-    const syncUI = (text) => {
-      const raw = typeof text === "string" ? text : promptEl.value;
-      const trimmed = raw.trim();
-      const len = raw.length;
-
-      // licznik znaków
-      warningEl.textContent = `${len}/${PromptValidator.maxLength} znaków`;
-
-      // klasa długości
-      if (len > PromptValidator.maxLength) {
-        warningEl.classList.add("error-text-length");
-      } else {
-        warningEl.classList.remove("error-text-length");
-      }
-
-      // walidacja
-      const { valid, errors } = PromptValidator.validate(raw);
-
-      // filtr błędów
-      const isEmpty = trimmed.length === 0;
-      const filteredErrors = errors.filter((msg) => {
-        const isEmptyError = msg.startsWith("Prompt nie może być pusty");
-        if (isEmptyError) return hadInput && isEmpty;
-        return true;
-      });
-
-      errorEl.textContent = filteredErrors.join(" ");
-      return { valid, filteredErrors };
-    };
-
-    // startowa synchronizacja
-    const initialText = promptEl.value || "";
-    if (initialText.length > 0) hadInput = true;
-    syncUI(initialText);
-
-    // live feedback
-    promptEl.addEventListener("input", () => {
-      const len = promptEl.value.length;
-      if (len > 0) hadInput = true;
-
-      const { filteredErrors } = syncUI();
-      if (len > 0) {
-        const keep = filteredErrors.filter(
-          (e) => !e.startsWith("Prompt nie może być pusty")
-        );
-        errorEl.textContent = keep.join(" ");
-      }
-    });
-
-    // walidacja na submit – zwraca true/false
-    this.chatView.onPromptSubmit = (text) => {
-      const raw = text;
-      const trimmed = raw.trim();
-      const len = raw.length;
-      const { valid } = PromptValidator.validate(raw);
-      const { filteredErrors } = syncUI(raw);
-
-      if (!valid) {
-        const empty = trimmed.length === 0;
-        const onlyEmptyError =
-          filteredErrors.length === 1 &&
-          filteredErrors[0].startsWith("Prompt nie może być pusty");
-
-        if (empty && !hadInput) {
-          return false; // odrzucone – brak wcześniejszego inputu
-        }
-
-        errorEl.textContent = filteredErrors.join(" ");
-        if (len > PromptValidator.maxLength) {
-          warningEl.classList.add("error-text-length");
-        }
-        return false; // odrzucone – błędy walidacji
-      }
-
-      warningEl.classList.remove("error-text-length");
-      errorEl.textContent = "";
-      this.sendPrompt(raw);
-      return true; // zaakceptowane – ChatUIView wyczyści pole
-    };
-
-    this.chatView.init();
-
-    this.editView.onEditSubmit = (msgEl, txt, tags, imageUrl) =>
-      this.sendEdit(msgEl, txt, tags, imageUrl);
-
-    this.editView.onEditCancel = (msgEl, data) => {
-      this.chatView.hydrateAIMessage(msgEl, data);
-    };
-
-    this.chatView.onRatingSubmit = (payload) => {
-      this.sendRating(payload);
-    };
-  }
-
-  /**
-   * Wysyła prompt użytkownika do backendu i renderuje odpowiedź.
-   * @param {string} prompt - Treść promptu.
-   * @returns {Promise<void>}
-   */
-  async sendPrompt(prompt) {
-    this.chatView.addUserMessage(prompt);
-    const { msgEl, timer } = this.chatView.addLoadingMessage();
-    try {
-      const data = await BackendAPI.generate(prompt);
-
-      // Rozwiąż URL ilustracji
-      const urls = await ImageResolver.resolve(data.tags);
-      data.imageUrl = urls[0] || "";
-
-      // Renderuj odpowiedź AI
-      this.chatView.hydrateAIMessage(msgEl, data);
-    } catch (err) {
-      this.chatView.showError(msgEl);
-      LoggerService.record("error", "[ChatManager] sendPrompt", err);
-    } finally {
-      clearInterval(timer);
-    }
-  }
-
-  /**
-   * Przesyła edytowaną wiadomość do backendu i aktualizuje UI.
-   * @param {HTMLElement} msgEl - Element wiadomości.
-   * @param {string} editedText - Nowa treść.
-   * @param {Record<string, any>} tags - Tagowanie wiadomości.
-   * @param {string} imageUrl - URL ilustracji.
-   * @param {string} [sessionId] - ID sesji (opcjonalne).
-   * @returns {Promise<void>}
-   */
-  async sendEdit(msgEl, editedText, tags, imageUrl, sessionId) {
-    this.chatView.hydrateAIMessage(
-      msgEl,
-      {
-        id: msgEl.dataset.msgId,
-        sessionId: sessionId || msgEl.dataset.sessionId,
-        tags,
-        timestamp: msgEl.dataset.timestamp,
-        originalText: editedText,
-        text: editedText,
-        sender: msgEl.dataset.sender,
-        avatarUrl: msgEl.dataset.avatarUrl,
-        generation_time: Number.isFinite(
-          parseFloat(msgEl.dataset.generation_time)
-        )
-          ? parseFloat(msgEl.dataset.generation_time)
-          : 0,
-
-        imageUrl,
-      },
-      true
-    );
-
-    try {
-      await BackendAPI.edit(editedText, tags, sessionId, msgEl.dataset.msgId);
-    } catch (err) {
-      LoggerService.record("error", "[ChatManager] sendEdit", err);
-    }
-  }
-
-  /**
-   * Przesyła ocenę wiadomości do backendu.
-   * @param {{ messageId: string, sessionId: string, ratings: Record<string, any> }} payload
-   * @returns {Promise<void>}
-   */
-  async sendRating({ messageId, sessionId, ratings }) {
-    try {
-      await BackendAPI.rate({ messageId, sessionId, ratings });
-    } catch (err) {
-      LoggerService.record("error", "[ChatManager] sendRating", err);
-    }
-  }
-}
-
-/**
- * ChatEditView
- * ============
- * Widok edycji wiadomości AI w czacie.
- * Odpowiada za:
- *  - Wyświetlenie formularza edycji (textarea + panel tagów + galeria obrazów)
- *  - Walidację treści i tagów
- *  - Obsługę zapisu i anulowania edycji
- *
- * Zasady:
- * -------
- * ✅ Odpowiedzialność:
- *   - Renderowanie UI edycji w miejscu wiadomości
- *   - Integracja z TagsPanel i GalleryLoader
- *   - Walidacja danych przed wysłaniem
- *   - Wywołanie callbacków `onEditSubmit` i `onEditCancel`
- *
- * ❌ Niedozwolone:
- *   - Bezpośrednia komunikacja z backendem (poza pobraniem listy tagów)
- *   - Mutowanie innych elementów UI poza edytowaną wiadomością
- *
- * API:
- * ----
- * - `constructor(dom)` — inicjalizuje widok z referencjami do DOM
- * - `enableEdit(msgElement, originalText, messageId, sessionId)` — uruchamia tryb edycji
- *
- * Wydarzenia (callbacki):
- * -----------------------
- * - `onEditSubmit(msgEl, editedText, tags, imageUrl, sessionId)` — wywoływane po kliknięciu "Zapisz"
- * - `onEditCancel(msgEl, data)` — wywoływane po kliknięciu "Anuluj"
- */
-class ChatEditView {
-  /**
-   * @param {object} dom - Obiekt z referencjami do elementów DOM aplikacji
-   */
-  constructor(dom) {
-    this.dom = dom;
-    /** @type {function(HTMLElement,string,string[],string,string):void|null} */
-    this.onEditSubmit = null;
-    /** @type {function(HTMLElement,object):void|null} */
-    this.onEditCancel = null;
-  }
-
-  /**
-   * Uruchamia tryb edycji dla wiadomości AI.
-   * @param {HTMLElement} msgElement - Element wiadomości do edycji
-   * @param {string} originalText - Oryginalny tekst wiadomości
-   * @param {string} messageId - ID wiadomości
-   * @param {string} [sessionId] - ID sesji
-   */
-  async enableEdit(msgElement, originalText, messageId, sessionId) {
-    // Zachowaj oryginalny HTML
-    msgElement.dataset.originalHTML = msgElement.innerHTML;
-    if (sessionId) {
-      msgElement.dataset.sessionId = sessionId;
-    }
-
-    // Wyczyść zawartość i dodaj textarea
-    msgElement.innerHTML = "";
-    const textarea = document.createElement("textarea");
-    textarea.value = originalText;
-    textarea.rows = 6;
-    textarea.className = "form-element textarea-base w-full mt-4";
-
-    const tagPanel = document.createElement("div");
-    tagPanel.className = "tag-panel";
-    msgElement.append(textarea, tagPanel);
-
-    // Panel tagów + galeria
-    const tagsPanel = new TagsPanel(tagPanel);
-    const galleryLoader = new GalleryLoader(tagPanel);
-
-    const rawTags = msgElement.dataset.tags || "";
-    const tagOptions = await BackendAPI.getTags();
-
-    tagsPanel.setTagOptions(tagOptions);
-    tagsPanel.applyDefaultsFromDataTags(rawTags, tagOptions);
-
-    let boot = true;
-    tagsPanel.init(() => {
-      if (!boot) galleryLoader.renderFromTags(tagsPanel.getTagList());
-    });
-    galleryLoader.renderFromTags(tagsPanel.getTagList());
-    boot = false;
-
-    // Przycisk zapisu
-    const saveBtn = Utils.createButton("💾 Zapisz", async () => {
-      const editedText = textarea.value.trim();
-      const tags = tagsPanel.getTagList();
-
-      const { valid, errors } = EditValidator.validate(editedText, tags);
-      if (!valid) {
-        LoggerService.record("warn", "[EditView] Błąd walidacji", errors);
-        return;
-      }
-
-      // Preferuj wybór z galerii; fallback do resolvera
-      let imageUrl = "";
-      const chosen = tagPanel.querySelector('input[name="gallery-choice"]:checked');
-      if (chosen && chosen.value) {
-        imageUrl = chosen.value;
-      } else {
-        const urls = await ImageResolver.resolve(tags, { maxResults: 1 });
-        imageUrl = urls[0] || "";
-      }
-
-      this.onEditSubmit?.(
-        msgElement,
-        editedText,
-        tags,
-        imageUrl,
-        msgElement.dataset.sessionId
-      );
-    });
-    saveBtn.classList.add("button-base");
-
-    // Przycisk anulowania
-    const cancelBtn = Utils.createButton("❌ Anuluj", () => {
-      const data = {
-        id: msgElement.dataset.msgId,
-        sessionId: msgElement.dataset.sessionId || "sess-unknown",
-        tags: (msgElement.dataset.tags || "").split("_").filter(Boolean),
-        timestamp: msgElement.dataset.timestamp,
-        originalText: msgElement.dataset.originalText,
-        text: msgElement.dataset.originalText,
-        sender: msgElement.dataset.sender || "AI",
-        avatarUrl:
-          msgElement.dataset.avatarUrl || "/static/NarrativeIMG/Avatars/AI.png",
-        generation_time: parseFloat(msgElement.dataset.generation_time) || 0,
-        imageUrl: msgElement.dataset.imageUrl || "",
-      };
-
-      this.onEditCancel?.(msgElement, data);
-    });
-    cancelBtn.classList.add("button-base");
-
-    msgElement.append(saveBtn, cancelBtn);
-  }
-}
-
-/**
- * LoggerService
- * =============
- * Buforowany logger do środowiska przeglądarkowego z ograniczeniem wieku wpisów.
- * Obsługuje poziomy logowania: 'log', 'warn', 'error'.
- * Wpisy są przechowywane w pamięci i mogą być filtrowane, czyszczone lub eksportowane.
- *
- * Zasady:
- * -------
- * ✅ Dozwolone:
- *   - record(level, msg, ...args)
- *   - cleanup()
- *   - getHistory({clone})
- *   - clearHistory()
- *   - setMaxAge(ms)
- *   - filterByLevel(level)
- *   - recordOnce(level, msg, ...args)
- *
- * ❌ Niedozwolone:
- *   - logika aplikacji (business logic)
- *   - operacje sieciowe, DOM, storage
- *
- * TODO:
- *   - exportHistory(format)
- */
-class LoggerService {
-  /**
-   * Bufor wpisów logowania.
-   * Każdy wpis zawiera znacznik czasu, poziom, wiadomość i dodatkowe argumenty.
-   * @type {Array<{timestamp: number, level: 'log'|'warn'|'error', msg: string, args: any[]}>}
-   */
-  static buffer = [];
-
-  /**
-   * Maksymalny wiek wpisów w milisekundach.
-   * Wpisy starsze niż ta wartość są usuwane przy każdym logowaniu i odczycie.
-   * @type {number}
-   */
-  static maxAgeMs = 5 * 60 * 1000; // 5 minut
-
-  /**
-   * Ustawia nowy limit wieku wpisów i natychmiast czyści stare.
-   * @param {number} ms - nowy limit wieku w milisekundach
-   */
-  static setMaxAge(ms) {
-    this.maxAgeMs = ms;
-    this.cleanup();
-  }
-
-  /**
-   * Dodaje wpis do bufora i wypisuje go w konsoli z odpowiednim stylem.
-   * @param {'log'|'warn'|'error'} level - poziom logowania
-   * @param {string} msg - wiadomość do wyświetlenia
-   * @param {...any} args - dodatkowe dane (np. obiekty, błędy)
-   */
-  static record(level, msg, ...args) {
-    const emojiLevels = { log: "🌍", warn: "⚠️", error: "‼️" };
-    const timestamp = Date.now();
-
-    this.buffer.push({ timestamp, level, msg, args });
-    this.cleanup();
-
-    const styleMap = {
-      log: "color: #444",
-      warn: "color: orange",
-      error: "color: red; font-weight: bold",
-    };
-
-    const style = styleMap[level] || "";
-    const displayMsg = `${emojiLevels[level] || ""} ${msg}`;
-    console[level](`%c[${new Date(timestamp).toLocaleTimeString()}] ${displayMsg}`, style, ...args);
-  }
-
-  /**
-   * Usuwa wpisy starsze niż maxAgeMs.
-   * Jeśli maxAgeMs <= 0, czyści cały bufor.
-   */
-  static cleanup() {
-    if (this.maxAgeMs <= 0) {
-      this.buffer = [];
-      return;
-    }
-    const cutoff = Date.now() - this.maxAgeMs;
-    this.buffer = this.buffer.filter((e) => e.timestamp >= cutoff);
-  }
-
-  /**
-   * Zwraca wpisy danego poziomu logowania.
-   * @param {'log'|'warn'|'error'} level - poziom do filtrowania
-   * @returns {Array<{timestamp: number, msg: string, args: any[]}>}
-   */
-  static filterByLevel(level) {
-    this.cleanup();
-    return this.buffer
-      .filter((e) => e.level === level)
-      .map(({ timestamp, msg, args }) => ({ timestamp, msg, args }));
-  }
-
-  /**
-   * Zwraca całą historię wpisów.
-   * Jeśli clone = true, zwraca głęboką kopię wpisów.
-   * @param {boolean} [clone=false] - czy zwrócić kopię wpisów
-   * @returns {Array<{timestamp: number, level: string, msg: string, args: any[]}>}
-   */
-  static getHistory(clone = false) {
-    this.cleanup();
-    if (!clone) return [...this.buffer];
-    return this.buffer.map((entry) => structuredClone(entry));
-  }
-
-  /**
-   * Czyści cały bufor logów bez względu na wiek wpisów.
-   */
-  static clearHistory() {
-    this.buffer = [];
-  }
-
-  /**
-   * Dodaje wpis tylko jeśli nie istnieje już wpis o tym samym poziomie i wiadomości.
-   * @param {'log'|'warn'|'error'} level - poziom logowania
-   * @param {string} msg - wiadomość
-   * @param {...any} args - dodatkowe dane
-   */
-  static recordOnce(level, msg, ...args) {
-    if (!this.buffer.some((e) => e.level === level && e.msg === msg)) {
-      this.record(level, msg, ...args);
-    }
   }
 }
 
@@ -5609,61 +5513,62 @@ document.addEventListener("DOMContentLoaded", () => {
   // =============================================================
 
   Diagnostics.describe("ChatUIView", () => {
-Diagnostics.it(
-  "init() wywołuje onPromptSubmit po submit formularza",
-  async () => {
-    const container = document.createElement("div");
-    const form = document.createElement("form");
-    const input = document.createElement("input");
-    form.appendChild(input);
+    Diagnostics.it(
+      "init() wywołuje onPromptSubmit po submit formularza",
+      async () => {
+        const container = document.createElement("div");
+        const form = document.createElement("form");
+        const input = document.createElement("input");
+        form.appendChild(input);
 
-    const view = new ChatUIView(container, form, input);
-    let calledPrompt = null;
-    view.onPromptSubmit = (t) => {
-      calledPrompt = t;
-      return true;
-    };
+        const view = new ChatUIView(container, form, input);
+        let calledPrompt = null;
+        view.onPromptSubmit = (t) => {
+          calledPrompt = t;
+          return true;
+        };
 
-    view.init();
-    input.value = "Test prompt";
-    form.dispatchEvent(new Event("submit", { bubbles: true, cancelable: true }));
+        view.init();
+        input.value = "Test prompt";
+        form.dispatchEvent(
+          new Event("submit", { bubbles: true, cancelable: true })
+        );
 
-    await Promise.resolve(); // pozwól wykonać się async handlerowi
+        await Promise.resolve(); // pozwól wykonać się async handlerowi
 
-    Diagnostics.expect(calledPrompt).toBe("Test prompt");
-    Diagnostics.expect(input.value).toBe("");
-  }
-);
+        Diagnostics.expect(calledPrompt).toBe("Test prompt");
+        Diagnostics.expect(input.value).toBe("");
+      }
+    );
 
-Diagnostics.it("init() wywołuje onPromptSubmit po Ctrl+Enter", async () => {
-  const container = document.createElement("div");
-  const form = document.createElement("form");
-  const input = document.createElement("textarea");
-  form.appendChild(input);
+    Diagnostics.it("init() wywołuje onPromptSubmit po Ctrl+Enter", async () => {
+      const container = document.createElement("div");
+      const form = document.createElement("form");
+      const input = document.createElement("textarea");
+      form.appendChild(input);
 
-  const view = new ChatUIView(container, form, input);
-  let calledPrompt = null;
-  view.onPromptSubmit = (t) => {
-    calledPrompt = t;
-    return true;
-  };
+      const view = new ChatUIView(container, form, input);
+      let calledPrompt = null;
+      view.onPromptSubmit = (t) => {
+        calledPrompt = t;
+        return true;
+      };
 
-  view.init();
-  input.value = "CtrlEnter test";
-  input.dispatchEvent(
-    new KeyboardEvent("keydown", {
-      key: "Enter",
-      ctrlKey: true,
-      bubbles: true,
-    })
-  );
+      view.init();
+      input.value = "CtrlEnter test";
+      input.dispatchEvent(
+        new KeyboardEvent("keydown", {
+          key: "Enter",
+          ctrlKey: true,
+          bubbles: true,
+        })
+      );
 
-  await Promise.resolve();
+      await Promise.resolve();
 
-  Diagnostics.expect(calledPrompt).toBe("CtrlEnter test");
-  Diagnostics.expect(input.value).toBe("");
-});
-
+      Diagnostics.expect(calledPrompt).toBe("CtrlEnter test");
+      Diagnostics.expect(input.value).toBe("");
+    });
 
     Diagnostics.it("addUserMessage() dodaje wiadomość użytkownika", () => {
       const container = document.createElement("div");

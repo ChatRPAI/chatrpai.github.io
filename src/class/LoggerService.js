@@ -1,13 +1,12 @@
 /**
- * LoggerService
- * =============
+ *
  * Buforowany logger do środowiska przeglądarkowego z ograniczeniem wieku wpisów.
  * Obsługuje poziomy logowania: 'log', 'warn', 'error'.
  * Wpisy są przechowywane w pamięci i mogą być filtrowane, czyszczone lub eksportowane.
  *
- * Zasady:
- * -------
- * ✅ Dozwolone:
+ * ## Zasady:
+ *
+ * - ✅ Dozwolone:
  *   - record(level, msg, ...args)
  *   - cleanup()
  *   - getHistory({clone})
@@ -16,12 +15,10 @@
  *   - filterByLevel(level)
  *   - recordOnce(level, msg, ...args)
  *
- * ❌ Niedozwolone:
+ * - ❌ Niedozwolone:
  *   - logika aplikacji (business logic)
  *   - operacje sieciowe, DOM, storage
  *
- * TODO:
- *   - exportHistory(format)
  */
 class LoggerService {
   /**
@@ -68,7 +65,11 @@ class LoggerService {
 
     const style = styleMap[level] || "";
     const displayMsg = `${emojiLevels[level] || ""} ${msg}`;
-    console[level](`%c[${new Date(timestamp).toLocaleTimeString()}] ${displayMsg}`, style, ...args);
+    console[level](
+      `%c[${new Date(timestamp).toLocaleTimeString()}] ${displayMsg}`,
+      style,
+      ...args
+    );
   }
 
   /**

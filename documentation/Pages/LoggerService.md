@@ -1,12 +1,10 @@
 # LoggerService
 
-=============
 Buforowany logger do środowiska przeglądarkowego z ograniczeniem wieku wpisów.
 Obsługuje poziomy logowania: 'log', 'warn', 'error'.
 Wpisy są przechowywane w pamięci i mogą być filtrowane, czyszczone lub eksportowane.
-Zasady:
--------
-✅ Dozwolone:
+## Zasady:
+- ✅ Dozwolone:
   - record(level, msg, ...args)
   - cleanup()
   - getHistory({clone})
@@ -14,11 +12,9 @@ Zasady:
   - setMaxAge(ms)
   - filterByLevel(level)
   - recordOnce(level, msg, ...args)
-❌ Niedozwolone:
+- ❌ Niedozwolone:
   - logika aplikacji (business logic)
   - operacje sieciowe, DOM, storage
-TODO:
-  - exportHistory(format)
 
 ---
 
@@ -64,7 +60,9 @@ Ustawia nowy limit wieku wpisów i natychmiast czyści stare.
 Dodaje wpis do bufora i wypisuje go w konsoli z odpowiednim stylem.
 
 **_@param_** *`{'log'|'warn'|'error'}`* _**level**_  poziom logowania
+
 **_@param_** *`{string}`* _**msg**_  wiadomość do wyświetlenia
+
 **_@param_** *`{...any}`* _**args**_  dodatkowe dane (np. obiekty, błędy)
 
 ```javascript
@@ -83,7 +81,11 @@ Dodaje wpis do bufora i wypisuje go w konsoli z odpowiednim stylem.
 
     const style = styleMap[level] || "";
     const displayMsg = `${emojiLevels[level] || ""} ${msg}`;
-    console[level](`%c[${new Date(timestamp).toLocaleTimeString()}] ${displayMsg}`, style, ...args);
+    console[level](
+      `%c[${new Date(timestamp).toLocaleTimeString()}] ${displayMsg}`,
+      style,
+      ...args
+    );
   }
 ```
 
@@ -161,7 +163,9 @@ Czyści cały bufor logów bez względu na wiek wpisów.
 Dodaje wpis tylko jeśli nie istnieje już wpis o tym samym poziomie i wiadomości.
 
 **_@param_** *`{'log'|'warn'|'error'}`* _**level**_  poziom logowania
+
 **_@param_** *`{string}`* _**msg**_  wiadomość
+
 **_@param_** *`{...any}`* _**args**_  dodatkowe dane
 
 ```javascript
@@ -175,6 +179,7 @@ Dodaje wpis tylko jeśli nie istnieje już wpis o tym samym poziomie i wiadomoś
 ---
 
 ## Pełny kod klasy
+
 ```javascript
 class LoggerService {
   static buffer = [];
@@ -201,7 +206,11 @@ class LoggerService {
 
     const style = styleMap[level] || "";
     const displayMsg = `${emojiLevels[level] || ""} ${msg}`;
-    console[level](`%c[${new Date(timestamp).toLocaleTimeString()}] ${displayMsg}`, style, ...args);
+    console[level](
+      `%c[${new Date(timestamp).toLocaleTimeString()}] ${displayMsg}`,
+      style,
+      ...args
+    );
   }
 
   static cleanup() {

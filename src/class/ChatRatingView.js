@@ -1,38 +1,21 @@
 /**
- * ChatRatingView
- * ==============
+ *
  * Komponent UI odpowiedzialny za wyświetlanie i obsługę panelu ocen wiadomości AI.
- * 
  * Funkcje:
- * --------
  *  - Renderuje panel ocen w formie <details> z listą kryteriów i suwakami (range input)
  *  - Obsługuje zmianę wartości suwaków (aktualizacja widocznej wartości)
  *  - Po kliknięciu "Wyślij ocenę" zbiera wszystkie wartości i przekazuje je w callbacku `onSubmit`
  *  - Zapobiega duplikowaniu panelu ocen w tej samej wiadomości
- * 
- * Zasady:
- * -------
- * ✅ Odpowiedzialność:
+ *
+ * ## Zasady:
+ *
+ * - ✅ Dozwolone:
  *   - Tworzenie i osadzanie elementów DOM panelu ocen
  *   - Obsługa interakcji użytkownika (zmiana wartości, wysyłka oceny)
- * 
- * ❌ Niedozwolone:
+ *
+ * - ❌ Niedozwolone:
  *   - Samodzielne wysyłanie ocen do backendu (od tego jest logika wyżej)
  *   - Modyfikowanie innych elementów wiadomości poza panelem ocen
- * 
- * API:
- * ----
- * - `constructor(msgEl, onSubmit)` — tworzy panel ocen w podanym elemencie wiadomości
- * - `render(msgEl)` — renderuje panel ocen (wywoływane automatycznie w konstruktorze)
- * 
- * Callbacki:
- * ----------
- * - `onSubmit(payload)` — wywoływany po kliknięciu "Wyślij ocenę"
- *    - payload: {
- *        messageId: string,
- *        sessionId: string,
- *        ratings: { [kryterium]: number }
- *      }
  */
 class ChatRatingView {
   /**
@@ -52,7 +35,7 @@ class ChatRatingView {
       { key: "Style", label: "Styl" },
       { key: "Logic", label: "Logika" },
       { key: "Quality", label: "Jakość" },
-      { key: "Emotions", label: "Emocje" }
+      { key: "Emotions", label: "Emocje" },
     ];
 
     this.render(msgEl);
@@ -114,7 +97,7 @@ class ChatRatingView {
       const payload = {
         messageId: msgEl.dataset.msgId,
         sessionId: msgEl.dataset.sessionId,
-        ratings
+        ratings,
       };
       this.onSubmit?.(payload);
     });

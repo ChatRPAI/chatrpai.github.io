@@ -1,28 +1,19 @@
 # VirtualKeyboardDock
 
-# VirtualKeyboardDock
 Komponent odpowiedzialny za dostosowanie położenia elementu docka (np. paska narzędzi, przycisków)
 w momencie pojawienia się lub zniknięcia wirtualnej klawiatury na urządzeniach mobilnych.
-## Funkcje:
+Funkcje:
  - Nasłuchuje zdarzeń `focus` i `blur` na polach tekstowych, aby wykryć aktywację klawiatury.
  - Reaguje na zdarzenia `resize`/`visualViewport`/`keyboardchange` w celu aktualizacji pozycji docka.
  - Ustawia odpowiedni `bottom` docka tak, aby nie był zasłaniany przez klawiaturę.
  - Ukrywa dock, gdy klawiatura jest schowana (opcjonalnie).
 ## Zasady:
-
-✅ Odpowiedzialność:
+- ✅ Dozwolone:
   - Manipulacja stylem docka w reakcji na zmiany widoczności klawiatury.
   - Obsługa zdarzeń wejściowych i zmian rozmiaru widoku.
-❌ Niedozwolone:
+- ❌ Niedozwolone:
   - Modyfikowanie innych elementów UI poza dockiem.
   - Wysyłanie żądań sieciowych.
-API:
-----
-- `constructor(dockEl)` — inicjalizuje obiekt z referencją do elementu docka.
-- `init()` — podpina nasłuchy zdarzeń i ustawia początkowy stan.
-- `updatePosition()` — oblicza i ustawia pozycję docka względem dolnej krawędzi okna/viewportu.
-- `show()` — pokazuje dock.
-- `hide()` — ukrywa dock.
 
 ---
 
@@ -113,6 +104,7 @@ Ukrywa dock.
 ---
 
 ## Pełny kod klasy
+
 ```javascript
 class VirtualKeyboardDock {
   constructor(dockEl, forceEnable = false) {

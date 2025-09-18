@@ -1,26 +1,16 @@
-# Utils
 Zestaw funkcji pomocniczych wykorzystywanych w całej aplikacji.
 Nie wymaga instancjonowania — wszystkie metody są dostępne statycznie.
 ## Zasady:
-
-✅ Dozwolone:
+- ✅ Dozwolone:
   - Funkcje czyste: throttle, debounce, clamp, formatDate, randomId
   - Operacje na DOM: safeQuery, createButton
   - Detekcja środowiska: isMobile
   - Sprawdzenie dostępności zasobów: checkImageExists
- 
-❌ Niedozwolone:
+- ❌ Niedozwolone:
   - Logika aplikacyjna (np. renderowanie wiadomości)
   - Zależności od klas domenowych (ChatManager, BackendAPI itd.)
   - Mutacje globalnego stanu
   - Efekty uboczne poza LoggerService
- 
-TODO:
-  - once(fn)
-  - retry(fn, attempts)
-  - escapeHTML(str)
-  - parseQueryParams(url)
-  - wait(ms)
 
 ---
 
@@ -29,6 +19,7 @@ TODO:
 Ogranicza wywołanie funkcji do max raz na `limit` ms.
 
 **_@param_** *`{Function}`* _**fn**_  Funkcja do ograniczenia
+
 **_@param_** *`{number}`* _**limit**_  Minimalny odstęp między wywołaniami (ms)
 
 **@returns** *`{Function}`*  - Funkcja z throttlingiem
@@ -53,6 +44,7 @@ Ogranicza wywołanie funkcji do max raz na `limit` ms.
 Opóźnia wywołanie funkcji do momentu, gdy przestanie być wywoływana przez `delay` ms.
 
 **_@param_** *`{Function}`* _**fn**_  Funkcja do opóźnienia
+
 **_@param_** *`{number}`* _**delay**_  Czas oczekiwania po ostatnim wywołaniu (ms)
 
 **@returns** *`{Function}`*  - Funkcja z debounce
@@ -74,7 +66,9 @@ Opóźnia wywołanie funkcji do momentu, gdy przestanie być wywoływana przez `
 Ogranicza wartość do zakresu [min, max].
 
 **_@param_** *`{number}`* _**val**_  Wartość wejściowa
+
 **_@param_** *`{number}`* _**min**_  Minimalna wartość
+
 **_@param_** *`{number}`* _**max**_  Maksymalna wartość
 
 **@returns** *`{number}`*  - Wartość ograniczona do zakresu
@@ -143,6 +137,7 @@ Jeśli element nie istnieje, loguje ostrzeżenie.
 Tworzy przycisk z tekstem i handlerem kliknięcia.
 
 **_@param_** *`{string}`* _**label**_  Tekst przycisku
+
 **_@param_** *`{Function}`* _**onClick**_  Funkcja obsługująca kliknięcie
 
 **@returns** *`{HTMLButtonElement}`*  - Gotowy element przycisku
@@ -181,6 +176,7 @@ Detekcja urządzenia mobilnego na podstawie user-agenta i szerokości okna.
 ---
 
 ## Pełny kod klasy
+
 ```javascript
 const Utils = {
   throttle(fn, limit) {

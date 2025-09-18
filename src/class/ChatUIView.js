@@ -1,6 +1,5 @@
 /**
- * ChatUIView
- * ==========
+ *
  * Widok głównego interfejsu czatu.
  * Odpowiada za:
  *  - Obsługę formularza promptu (wysyłanie wiadomości użytkownika)
@@ -10,33 +9,16 @@
  *  - Obsługę przycisku edycji i panelu ocen
  *  - Aktualizację treści wiadomości po edycji
  *
- * Zasady:
- * -------
- * ✅ Odpowiedzialność:
+ * ## Zasady:
+ *
+ * - ✅ Dozwolone:
  *   - Manipulacja DOM w obrębie kontenera czatu
  *   - Obsługa zdarzeń UI (submit, ctrl+enter, kliknięcia)
  *   - Integracja z `UserManager`, `SenderRegistry`, `ChatRatingView`
  *
- * ❌ Niedozwolone:
+ * - ❌ Niedozwolone:
  *   - Logika backendowa (wysyłanie żądań HTTP)
  *   - Walidacja treści (poza prostym sprawdzeniem pustego promptu)
- *
- * API:
- * ----
- * - `constructor(container, promptForm, promptInput)` — inicjalizuje widok
- * - `init()` — podpina obsługę formularza i skrótów klawiszowych
- * - `addUserMessage(text)` — dodaje wiadomość użytkownika do czatu
- * - `addLoadingMessage()` — dodaje placeholder ładowania odpowiedzi AI
- * - `hydrateAIMessage(msgEl, data, isEdited)` — renderuje wiadomość AI z danymi
- * - `showError(msgEl)` — pokazuje komunikat błędu w wiadomości AI
- * - `scrollToBottom()` — przewija czat na dół
- * - `updateMessage(msgEl, editedText, tags, imageUrl)` — aktualizuje treść wiadomości
- *
- * Callbacki:
- * ----------
- * - `onPromptSubmit(prompt: string)` — wywoływany po wysłaniu promptu
- * - `onEditRequested(msgEl, originalText, id, timestamp, sessionId)` — po kliknięciu "Edytuj"
- * - `onRatingSubmit(payload)` — po wysłaniu oceny wiadomości
  */
 class ChatUIView {
   /**
@@ -136,7 +118,6 @@ class ChatUIView {
    * @param {boolean} [isEdited=false] - Czy wiadomość jest edytowana
    */
   hydrateAIMessage(msgEl, data, isEdited = false) {
-
     msgEl.classList.add("msg-fading-out");
 
     const sessionId = data.sessionId || "sess-unknown";
@@ -215,8 +196,8 @@ class ChatUIView {
 
     new ChatRatingView(msgEl, (payload) => this.onRatingSubmit?.(payload));
 
-      msgEl.classList.remove("msg-fading-out");
-      msgEl.classList.add("msg-fading-in");
+    msgEl.classList.remove("msg-fading-out");
+    msgEl.classList.add("msg-fading-in");
     this.scrollToBottom();
   }
 

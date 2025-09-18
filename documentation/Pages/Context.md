@@ -2,25 +2,14 @@
 
 Kontener zależności aplikacji. Przechowuje i udostępnia instancje usług oraz
 zapewnia wygodne gettery do najczęściej używanych komponentów.
- 
-✅ Dozwolone:
+- ✅ Dozwolone:
   - Rejestracja instancji usług i komponentów (np. Dom, Utils, UserManager)
   - Pobieranie zależności po nazwie lub przez getter
   - Dynamiczne dodawanie nowych zależności w trakcie działania
- 
-❌ Niedozwolone:
+- ❌ Niedozwolone:
   - Tworzenie instancji usług na sztywno (to robi warstwa inicjalizacyjna)
   - Logika biznesowa lub UI
   - Operacje sieciowe
- 
-TODO:
-  - Walidacja typów rejestrowanych instancji
-  - Obsługa usuwania zależności
-  - Wstrzykiwanie konfiguracji środowiskowej
- 
-Refaktoryzacja?:
-  - Rozszerzenie o mechanizm „scopes” dla izolacji modułów
-  - Integracja z systemem eventów do powiadamiania o zmianach zależności
 
 ---
 
@@ -41,17 +30,20 @@ Tworzy nowy kontekst z początkowym zestawem usług.
 
 ## register()
 
-this._registry = new Map(Object.entries(services));
+    this._registry = new Map(Object.entries(services));
   }
 
   /**
 Rejestruje nową lub nadpisuje istniejącą zależność.
 
 **_@param_** *`{string}`* _**name**_  unikalna nazwa zależności
+
 **_@param_** *`{any}`* _**instance**_  instancja lub obiekt usługi
 
 ```javascript
-  register(name, instance) { this._registry.set(name, instance); }
+  register(name, instance) {
+    this._registry.set(name, instance);
+  }
 ```
 
 ---
@@ -65,26 +57,43 @@ Pobiera zarejestrowaną zależność po nazwie.
 **@returns** *`{any}`*  - instancja lub undefined
 
 ```javascript
-  get(name) { return this._registry.get(name); }
+  get(name) {
+    return this._registry.get(name);
+  }
 ```
 
 ---
 
 ## Pełny kod klasy
+
 ```javascript
 class Context {
   constructor(services = {}) {
     this._registry = new Map(Object.entries(services));
   }
 
-  register(name, instance) { this._registry.set(name, instance); }
+  register(name, instance) {
+    this._registry.set(name, instance);
+  }
 
-  get(name) { return this._registry.get(name); }
+  get(name) {
+    return this._registry.get(name);
+  }
 
-  get dom() { return this.get("dom"); }
-  get utils() { return this.get("utils"); }
-  get userManager() { return this.get("userManager"); }
-  get diagnostics() { return this.get("diagnostics"); }
-  get backendAPI() { return this.get("backendAPI"); }
+  get dom() {
+    return this.get("dom");
+  }
+  get utils() {
+    return this.get("utils");
+  }
+  get userManager() {
+    return this.get("userManager");
+  }
+  get diagnostics() {
+    return this.get("diagnostics");
+  }
+  get backendAPI() {
+    return this.get("backendAPI");
+  }
 }
 ```
