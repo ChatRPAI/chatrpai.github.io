@@ -1,23 +1,22 @@
 /**
- * Utils
- * =====
+ * # Utils
  * Zestaw funkcji pomocniczych wykorzystywanych w całej aplikacji.
  * Nie wymaga instancjonowania — wszystkie metody są dostępne statycznie.
  *
- * Zasady:
- * -------
+ * ## Zasady:
+ * 
  * ✅ Dozwolone:
  *   - Funkcje czyste: throttle, debounce, clamp, formatDate, randomId
  *   - Operacje na DOM: safeQuery, createButton
  *   - Detekcja środowiska: isMobile
  *   - Sprawdzenie dostępności zasobów: checkImageExists
- *
+ *  
  * ❌ Niedozwolone:
  *   - Logika aplikacyjna (np. renderowanie wiadomości)
  *   - Zależności od klas domenowych (ChatManager, BackendAPI itd.)
  *   - Mutacje globalnego stanu
  *   - Efekty uboczne poza LoggerService
- *
+ *  
  * TODO:
  *   - once(fn)
  *   - retry(fn, attempts)

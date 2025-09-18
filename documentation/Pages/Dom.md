@@ -82,7 +82,7 @@ Inicjalizuje referencje do elementów wewnątrz `<main id="app">`
 
 Wyszukuje element w obrębie `<main id="app">`
 
-**_@param_** *`{string}`* _**selector**_  
+**_@param_** *`{string}`* _**selector**_
 
 **@returns** *`{HTMLElement|null}`*
 
@@ -98,7 +98,7 @@ Wyszukuje element w obrębie `<main id="app">`
 
 Wyszukuje wszystkie elementy pasujące do selektora w obrębie `<main id="app">`
 
-**_@param_** *`{string}`* _**selector**_  
+**_@param_** *`{string}`* _**selector**_
 
 **@returns** *`{NodeListOf<HTMLElement>}`*
 
@@ -109,3 +109,53 @@ Wyszukuje wszystkie elementy pasujące do selektora w obrębie `<main id="app">`
 ```
 
 ---
+
+## Pełny kod klasy
+```javascript
+class Dom {
+  constructor(rootSelector = "#app") {
+    this.rootSelector = rootSelector;
+    this.root = null;
+    this.refs = {};
+  }
+
+  init(refMap) {
+    const rootCandidate = typeof this.rootSelector === "string"
+      ? document.querySelector(this.rootSelector)
+      : this.rootSelector;
+
+    if (!(rootCandidate instanceof HTMLElement)) {
+      LoggerService.record("error", "[Dom] Nie znaleziono <main id=\"app\">. Wymagana struktura HTML.");
+      return;
+    }
+
+    if (rootCandidate.tagName !== "MAIN" || rootCandidate.id !== "app") {
+      LoggerService.record("error", "[Dom] Kontener bazowy musi być <main id=\"app\">. Otrzymano:", rootCandidate);
+      return;
+    }
+
+    this.root = rootCandidate;
+
+    Object.entries(refMap).forEach(([name, selector]) => {
+      const el = selector === this.rootSelector
+        ? this.root
+        : this.root.querySelector(selector);
+
+      if (!el) {
+        LoggerService.record("warn", `[Dom] Brak elementu: ${selector}`);
+      }
+
+      this.refs[name] = el || null;
+      this[name] = el || null;
+    });
+  }
+
+  q(selector) {
+    return this.root?.querySelector(selector) || null;
+  }
+
+  qa(selector) {
+    return this.root?.querySelectorAll(selector) || [];
+  }
+}
+```

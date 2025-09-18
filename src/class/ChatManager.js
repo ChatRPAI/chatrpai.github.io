@@ -19,11 +19,11 @@
  *
  * API:
  * ----
- * • `constructor({ dom })` — inicjalizuje widoki i podpina zdarzenia
- * • `init()` — aktywuje widoki i podpina zdarzenia edycji/oceny
- * • `sendPrompt(prompt: string)` — wysyła prompt do backendu i renderuje odpowiedź
- * • `sendEdit(msgEl, editedText, tags, imageUrl, sessionId)` — przesyła edytowaną wiadomość
- * • `sendRating({ messageId, sessionId, ratings })` — przesyła ocenę wiadomości
+ * - `constructor({ dom })` — inicjalizuje widoki i podpina zdarzenia
+ * - `init()` — aktywuje widoki i podpina zdarzenia edycji/oceny
+ * - `sendPrompt(prompt: string)` — wysyła prompt do backendu i renderuje odpowiedź
+ * - `sendEdit(msgEl, editedText, tags, imageUrl, sessionId)` — przesyła edytowaną wiadomość
+ * - `sendRating({ messageId, sessionId, ratings })` — przesyła ocenę wiadomości
  *
  * Zależności:
  *  - `ChatUIView`: widok głównego czatu

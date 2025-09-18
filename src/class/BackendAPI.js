@@ -20,13 +20,13 @@
  *
  * API:
  * ----
- * • `setBaseURL(url: string)` — ustawia bazowy adres backendu
- * • `setAuthToken(token: string|null)` — ustawia lub usuwa token autoryzacyjny
- * • `generate(prompt: string)` — wysyła prompt użytkownika
- * • `rate(ratings: object)` — przesyła oceny odpowiedzi AI
- * • `edit(editedText: string, tags: object, sessionId: string, msgId: string)` — przesyła edytowaną odpowiedź
- * • `postMessage({sender,text})` — przesyła wiadomość użytkownika
- * • `getTags()` — pobiera słownik tagów
+ * - `setBaseURL(url: string)` — ustawia bazowy adres backendu
+ * - `setAuthToken(token: string|null)` — ustawia lub usuwa token autoryzacyjny
+ * - `generate(prompt: string)` — wysyła prompt użytkownika
+ * - `rate(ratings: object)` — przesyła oceny odpowiedzi AI
+ * - `edit(editedText: string, tags: object, sessionId: string, msgId: string)` — przesyła edytowaną odpowiedź
+ * - `postMessage({sender,text})` — przesyła wiadomość użytkownika
+ * - `getTags()` — pobiera słownik tagów
  *
  * Zależności:
  *  - `RequestRetryManager`: obsługuje retry i backoff

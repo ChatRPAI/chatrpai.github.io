@@ -21,24 +21,24 @@
  *
  * API:
  * ----
- * • `static isRetryable(errOrRes): boolean`
+ * - `static isRetryable(errOrRes): boolean`
  *    - Sprawdza, czy błąd lub odpowiedź kwalifikuje się do ponowienia.
  *    - Retry przy:
- *        • Błędach sieciowych (`TypeError` z `fetch`)
- *        • Kodach HTTP 5xx
- *        • Kodzie HTTP 429 (Too Many Requests)
+ *        - Błędach sieciowych (`TypeError` z `fetch`)
+ *        - Kodach HTTP 5xx
+ *        - Kodzie HTTP 429 (Too Many Requests)
  *    - Brak retry przy:
- *        • Kodach HTTP 4xx (poza 429)
- *        • Odpowiedziach `ok === true`
+ *        - Kodach HTTP 4xx (poza 429)
+ *        - Odpowiedziach `ok === true`
  *
- * • `static async fetchWithRetry(input, init?, retries?, baseDelay?, options?): Promise<Response>`
+ * - `static async fetchWithRetry(input, init?, retries?, baseDelay?, options?): Promise<Response>`
  *    - Wykonuje `fetch` z mechanizmem retry i backoffem z jitterem.
  *    - Parametry:
- *        • `input` — URL lub obiekt `Request`
- *        • `init` — opcje `fetch` (method, headers, body itd.)
- *        • `retries` — maksymalna liczba ponowień (bez pierwszej próby)
- *        • `baseDelay` — bazowe opóźnienie (ms) dla backoffu
- *        • `options`:
+ *        - `input` — URL lub obiekt `Request`
+ *        - `init` — opcje `fetch` (method, headers, body itd.)
+ *        - `retries` — maksymalna liczba ponowień (bez pierwszej próby)
+ *        - `baseDelay` — bazowe opóźnienie (ms) dla backoffu
+ *        - `options`:
  *            - `silent` — jeśli true, logowanie na poziomie `log` zamiast `warn`
  *            - `maxTotalTime` — twardy limit łącznego czasu (ms)
  *            - `onRetry(info)` — callback wywoływany przy każdej próbie ponowienia

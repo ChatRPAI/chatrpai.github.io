@@ -40,3 +40,48 @@ Tworzy instancję aplikacji.
 ```
 
 ---
+
+this.ctx = context;
+
+---
+
+## init()
+
+Uruchamia wszystkie moduły w kolejności, przekazując im kontekst.
+Obsługuje moduły synchroniczne i asynchroniczne.
+
+**@returns** *`{Promise<void>}`*
+
+```javascript
+  async init() {
+    LoggerService.record("log", "[App] Inicjalizacja aplikacji...");
+    for (const m of this.modules) {
+      if (m && typeof m.init === "function") {
+        await m.init(this.ctx);
+      }
+    }
+    LoggerService.record("log", "[App] Aplikacja gotowa.");
+  }
+```
+
+---
+
+## Pełny kod klasy
+```javascript
+class App {
+  constructor(context, modules = []) {
+    this.ctx = context;
+    this.modules = modules;
+  }
+
+  async init() {
+    LoggerService.record("log", "[App] Inicjalizacja aplikacji...");
+    for (const m of this.modules) {
+      if (m && typeof m.init === "function") {
+        await m.init(this.ctx);
+      }
+    }
+    LoggerService.record("log", "[App] Aplikacja gotowa.");
+  }
+}
+```

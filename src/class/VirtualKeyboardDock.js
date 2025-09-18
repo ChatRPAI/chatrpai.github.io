@@ -1,18 +1,17 @@
 /**
- * VirtualKeyboardDock
- * ===================
+ * # VirtualKeyboardDock
  * Komponent odpowiedzialny za dostosowanie położenia elementu docka (np. paska narzędzi, przycisków)
  * w momencie pojawienia się lub zniknięcia wirtualnej klawiatury na urządzeniach mobilnych.
  *
- * Funkcje:
- * --------
+ * ## Funkcje:
+ *
  *  - Nasłuchuje zdarzeń `focus` i `blur` na polach tekstowych, aby wykryć aktywację klawiatury.
  *  - Reaguje na zdarzenia `resize`/`visualViewport`/`keyboardchange` w celu aktualizacji pozycji docka.
  *  - Ustawia odpowiedni `bottom` docka tak, aby nie był zasłaniany przez klawiaturę.
  *  - Ukrywa dock, gdy klawiatura jest schowana (opcjonalnie).
  *
- * Zasady:
- * -------
+ * ## Zasady:
+ * 
  * ✅ Odpowiedzialność:
  *   - Manipulacja stylem docka w reakcji na zmiany widoczności klawiatury.
  *   - Obsługa zdarzeń wejściowych i zmian rozmiaru widoku.
@@ -23,28 +22,27 @@
  *
  * API:
  * ----
- * • `constructor(dockEl)` — inicjalizuje obiekt z referencją do elementu docka.
- * • `init()` — podpina nasłuchy zdarzeń i ustawia początkowy stan.
- * • `updatePosition()` — oblicza i ustawia pozycję docka względem dolnej krawędzi okna/viewportu.
- * • `show()` — pokazuje dock.
- * • `hide()` — ukrywa dock.
+ * - `constructor(dockEl)` — inicjalizuje obiekt z referencją do elementu docka.
+ * - `init()` — podpina nasłuchy zdarzeń i ustawia początkowy stan.
+ * - `updatePosition()` — oblicza i ustawia pozycję docka względem dolnej krawędzi okna/viewportu.
+ * - `show()` — pokazuje dock.
+ * - `hide()` — ukrywa dock.
  */
 class VirtualKeyboardDock {
   /**
    * @param {HTMLElement} dockEl - Element docka, który ma być pozycjonowany.
    */
- constructor(dockEl, forceEnable = false) {
-  this.dock = dockEl;
-  this.isVisible = false;
-  this.boundUpdate = this.updatePosition.bind(this);
-  this.forceEnable = forceEnable;
-}
+  constructor(dockEl, forceEnable = false) {
+    this.dock = dockEl;
+    this.isVisible = false;
+    this.boundUpdate = this.updatePosition.bind(this);
+    this.forceEnable = forceEnable;
+  }
   /**
    * Podpina nasłuchy zdarzeń i ustawia początkową pozycję docka.
    */
   init() {
     if (!this.forceEnable && Utils.isMobile() === false) return;
-    // Obsługa focus/blur na polach tekstowych
     document.addEventListener("focusin", (e) => {
       if (e.target.tagName === "INPUT" || e.target.tagName === "TEXTAREA") {
         this.show();
@@ -56,7 +54,6 @@ class VirtualKeyboardDock {
       }
     });
 
-    // Obsługa zmiany rozmiaru okna / viewportu
     window.addEventListener("resize", this.boundUpdate);
     if (window.visualViewport) {
       window.visualViewport.addEventListener("resize", this.boundUpdate);

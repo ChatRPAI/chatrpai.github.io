@@ -116,72 +116,141 @@ def resolve_all_dependencies(seed_symbols, providers, extends_map):
 
     return ordered
 
+
+# =========================
+# DOKUMENTACJA
+# =========================
+
 def generate_docs(symbol, code):
-    md_lines = []
+    md = []
     lines = code.splitlines()
 
+    # 1. Parsowanie JSDoc bloków
     i = 0
     while i < len(lines):
         line = lines[i]
         if line.strip().startswith("/**"):
-            # 1) Zbierz blok JSDoc (bez linii '*/')
-            doc_block = []
+            block = []
             j = i + 1
             while j < len(lines) and "*/" not in lines[j]:
-                doc_block.append(lines[j])
+                block.append(lines[j])
                 j += 1
-            # pomijamy j (linia z '*/')
-            # 2) Oczyść gwiazdki
-            doc_text = "\n".join(doc_block)
-            doc_text = re.sub(r"^\s*\*\s?", "", doc_text, flags=re.MULTILINE).strip()
 
-            # 3) Znajdź następną niepustą linię po JSDoc
+            doc_text = "\n".join(block)
+            doc_text = re.sub(r"^\s*\*\s?", "", doc_text, flags=re.MULTILINE)
+            doc_text = "\n".join(l for l in doc_text.split("\n") if l.strip() != "/").strip()
+
             k = j + 1
             while k < len(lines) and not lines[k].strip():
                 k += 1
-            signature_line = lines[k].strip() if k < len(lines) else ""
+            decl = lines[k].strip() if k < len(lines) else ""
 
-            # 4) Rozpoznaj element i generuj markdown
-            if signature_line.startswith("class "):
-                # Opis klasy
-                cleaned = _cleanup_class_doc(symbol, doc_text)
-                md_lines.append(f"# {symbol}\n")
-                md_lines.append(cleaned)
-                md_lines.append("\n---\n")
+            if decl.startswith("class "):
+                md.append(f"# {symbol}\n")
+                md.append(_cleanup_class_doc(symbol, doc_text))
+                md.append("\n---\n")
+            else:
+                kind, name, sig, body = match_declaration_and_extract(lines, k)
 
-            elif signature_line.startswith("constructor"):
-                sig, body = extract_block(lines, k)
-                md_lines.append(f"## constructor\n")
-                md_lines.extend(format_jsdoc_block(doc_text))
-                md_lines.append("```javascript")
-                md_lines.append(body)
-                md_lines.append("```")
-                md_lines.append("\n---\n")
+                if kind == "ctor":
+                    md.append("## constructor\n")
+                    md.extend(format_jsdoc_block(doc_text))
+                    md.append("```javascript")
+                    md.append(body)
+                    md.append("```")
+                    md.append("\n---\n")
 
-            elif re.match(r"^[A-Za-z0-9_]+\s*\(", signature_line) or re.match(r"^[A-Za-z0-9_]+\s*=\s*\(", signature_line):
-                sig, body = extract_block(lines, k)
-                method_name = re.split(r"\(", sig, 1)[0].strip()
-                md_lines.append(f"## {method_name}()\n")
-                md_lines.extend(format_jsdoc_block(doc_text))
-                md_lines.append("```javascript")
-                md_lines.append(body)
-                md_lines.append("```")
-                md_lines.append("\n---\n")
+                elif kind == "method":
+                    md.append(f"## {name}()\n")
+                    md.extend(format_jsdoc_block(doc_text))
+                    md.append("```javascript")
+                    md.append(body)
+                    md.append("```")
+                    md.append("\n---\n")
+
+                elif kind == "field":
+                    desc_lines = []
+                    tag_lines = []
+                    for l in doc_text.split("\n"):
+                        if l.strip().startswith("@"):
+                            tag_lines.append(l)
+                        else:
+                            desc_lines.append(l)
+                    md.append(_inline_sanitize("\n".join(desc_lines).strip()))
+                    md.append("")
+                    md.extend(format_jsdoc_block("\n".join(tag_lines)))
+                    md.append("```javascript")
+                    md.append(body)
+                    md.append("```")
+                    md.append("\n---\n")
+
+                else:
+                    md.append(doc_text)
+                    md.append("\n---\n")
 
             i = j + 1
         else:
             i += 1
 
-    (DOCS_PAGES / f"{symbol}.md").write_text("\n".join(md_lines), encoding="utf-8")
+    # 2. Dodanie pełnego kodu klasy bez komentarzy
+    stripped = []
+    for line in lines:
+        if line.strip().startswith("//"):
+            continue
+        if line.strip().startswith("/*") or line.strip().startswith("*") or line.strip().startswith("/**"):
+            continue
+        if "*/" in line:
+            continue
+        stripped.append(line)
+    md.append("## Pełny kod klasy")
+    md.append("```javascript")
+    md.extend(stripped)
+    md.append("```")
+
+    (DOCS_PAGES / f"{symbol}.md").write_text("\n".join(md), encoding="utf-8")
+
+
+
+def match_declaration_and_extract(lines, start_idx):
+    if start_idx >= len(lines):
+        return ("unknown", "", "", "")
+
+    probe = ""
+    end_idx = start_idx
+    while end_idx < len(lines):
+        probe += lines[end_idx].strip() + " "
+        if "{" in lines[end_idx] or ";" in lines[end_idx] or "=" in lines[end_idx]:
+            break
+        end_idx += 1
+
+    probe_compact = probe.strip()
+
+    if re.match(r"^(?:async\s+)?constructor\s*\(", probe_compact):
+        sig, body = extract_block(lines, start_idx)
+        return ("ctor", "constructor", sig, body)
+
+    m = re.match(r"^(?:async\s+|static\s+|get\s+|set\s+)*\s*(#?[A-Za-z_]\w*)\s*\(", probe_compact)
+    if m:
+        name = m.group(1)
+        sig, body = extract_block(lines, start_idx)
+        return ("method", name, sig, body)
+
+    m = re.match(r"^(?:async\s+|static\s+)*\s*(#?[A-Za-z_]\w*)\s*=\s*\(.*?\)\s*=>", probe_compact)
+    if m:
+        name = m.group(1)
+        sig, body = extract_block(lines, start_idx)
+        return ("method", name, sig, body)
+
+    m = re.match(r"^(?:static\s+)?(#?[A-Za-z_]\w*)\s*=", probe_compact)
+    if m:
+        name = m.group(1)
+        field_line = lines[start_idx].rstrip()
+        return ("field", name, name, field_line)
+
+    return ("unknown", "", "", "")
 
 
 def extract_block(lines, start_index):
-    """
-    Zwraca (signature, full_block_text) dla konstruktora/metody.
-    signature: tekst od linii startowej do '{' (bez '{')
-    full_block_text: od deklaracji (z zachowaniem tej linii) aż do domknięcia klamer
-    """
-    # Zbierz do pierwszej klamry '{'
     sig_parts = []
     first_brace_line = None
     for idx in range(start_index, len(lines)):
@@ -192,100 +261,91 @@ def extract_block(lines, start_index):
     raw_sig = " ".join(sig_parts)
     signature = raw_sig.split("{", 1)[0].strip()
 
-    # Teraz policz klamry od pierwszej '{' do zera
     brace_count = 0
-    block_lines = []
+    block = []
     for idx in range(start_index, len(lines)):
         line = lines[idx]
-        # liczymy klamry prosto (bez analizy stringów) – w praktyce wystarcza
         brace_count += line.count("{")
-        block_lines.append(line)
+        block.append(line)
         brace_count -= line.count("}")
-        if brace_count == 0 and idx >= first_brace_line:
+        if brace_count == 0 and (first_brace_line is not None) and idx >= first_brace_line:
             break
 
-    # Złóż pełny blok z oryginalnym formatowaniem
-    full_block_text = "\n".join(block_lines).rstrip()
-    return signature, full_block_text
+    full = "\n".join(block).rstrip()
+    return signature, full
 
 
 def format_jsdoc_block(doc_text):
-    """
-    Formatuje opis + parametry + returns zgodnie z wymaganym stylem:
-    - **_@param_** *`{type}`* _**name**_
-    - **@returns** *`{type}`*
-    + pusta linia po sekcji parametrów
-    """
     out = []
     params = []
     returns = None
-    desc_lines = []
+    type_line = None
+    desc = []
 
     for raw in doc_text.split("\n"):
         line = raw.strip()
         if line.startswith("@param"):
-            # @param {type} name - desc (desc opcjonalny)
             m = re.match(r"@param\s+\{(.+?)\}\s+([\w<>]+)(?:\s*-\s*(.*))?$", line)
             if m:
                 ptype, pname, pdesc = m.groups()
-                typed = f"**_@param_** *`{{{ptype}}}`* _**{pname}**_"
-                if pdesc:
-                    params.append(f"{typed}  {pdesc}")
-                else:
-                    params.append(f"{typed}  ")
+                head = f"**_@param_** *`{{{ptype}}}`* _**{pname}**_"
+                params.append(f"{head}  {pdesc or ''}".rstrip())
             else:
-                # niech wpadnie do opisu, jeśli format jest nietypowy
-                desc_lines.append(raw)
+                desc.append(_inline_sanitize(raw))
         elif line.startswith("@returns"):
             m = re.match(r"@returns\s+\{(.+?)\}\s*(.*)$", line)
             if m:
                 rtype, rdesc = m.groups()
-                typed = f"**@returns** *`{{{rtype}}}`*"
-                returns = f"{typed}  {rdesc}".rstrip()
+                returns = f"**@returns** *`{{{rtype}}}`*  {rdesc}".rstrip()
             else:
-                desc_lines.append(raw)
+                desc.append(_inline_sanitize(raw))
+        elif line.startswith("@type"):
+            m = re.match(r"@type\s+\{(.+?)\}", line)
+            if m:
+                ttype = m.group(1)
+                type_line = f"**@type** *`{{{ttype}}}`*"
+            else:
+                desc.append(_inline_sanitize(raw))
         else:
-            # Zamień np. <main id="app"> na `...` dla lepszej czytelności
-            safe = re.sub(r"<([^>]+)>", r"`<\1>`", raw)
-            desc_lines.append(safe)
+            desc.append(_inline_sanitize(raw))
 
-    if desc_lines:
-        out.append("\n".join(desc_lines).strip())
+    if desc:
+        out.append("\n".join(desc).strip())
         out.append("")
-
     if params:
         out.extend(params)
-        out.append("")  # pusta linia po ostatnim parametrze
-
+        out.append("")
     if returns:
         out.append(returns)
+        out.append("")
+    if type_line:
+        out.append(type_line)
         out.append("")
 
     return out
 
 
-def _cleanup_class_doc(symbol, doc_text):
-    """
-    Usuwa z opisu klasy ewentualny duplikat tytułu typu 'Dom' i dekoracyjne '==='/'---'.
-    Konwertuje <tagi> na kod inline.
-    """
-    lines = [re.sub(r"<([^>]+)>", r"`<\1>`", l) for l in doc_text.split("\n")]
-    cleaned = []
-    skip_next_decoration = False
+def _inline_sanitize(text):
+    return re.sub(r"<([^>]+)>", r"`<\1>`", text)
 
-    for idx, l in enumerate(lines):
+
+def _cleanup_class_doc(symbol, doc_text):
+    rows = [_inline_sanitize(l) for l in doc_text.split("\n")]
+    cleaned = []
+    skip_decoration = False
+    for idx, l in enumerate(rows):
         if idx == 0 and l.strip() == symbol:
-            skip_next_decoration = True
+            skip_decoration = True
             continue
-        if skip_next_decoration and l.strip() in ("===", "---"):
-            skip_next_decoration = False
+        if skip_decoration and l.strip() in ("===", "---"):
+            skip_decoration = False
             continue
         cleaned.append(l)
-
     return "\n".join(cleaned).strip()
 
-
-
+# ========================
+# DOKUMENTACJA
+# ========================
 
 def update_copilot_files(symbols):
     nav = []

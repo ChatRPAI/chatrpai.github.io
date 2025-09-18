@@ -16,11 +16,11 @@ Zasady:
   - Logika domenowa (np. interpretacja tagów)
 API:
 ----
-• `constructor({ dom })` — inicjalizuje widoki i podpina zdarzenia
-• `init()` — aktywuje widoki i podpina zdarzenia edycji/oceny
-• `sendPrompt(prompt: string)` — wysyła prompt do backendu i renderuje odpowiedź
-• `sendEdit(msgEl, editedText, tags, imageUrl, sessionId)` — przesyła edytowaną wiadomość
-• `sendRating({ messageId, sessionId, ratings })` — przesyła ocenę wiadomości
+- `constructor({ dom })` — inicjalizuje widoki i podpina zdarzenia
+- `init()` — aktywuje widoki i podpina zdarzenia edycji/oceny
+- `sendPrompt(prompt: string)` — wysyła prompt do backendu i renderuje odpowiedź
+- `sendEdit(msgEl, editedText, tags, imageUrl, sessionId)` — przesyła edytowaną wiadomość
+- `sendRating({ messageId, sessionId, ratings })` — przesyła ocenę wiadomości
 Zależności:
  - `ChatUIView`: widok głównego czatu
  - `ChatEditView`: widok edycji wiadomości
@@ -167,3 +167,275 @@ Inicjalizuje widoki i podpina zdarzenia walidacji promptu oraz edycji i oceny.
 ```
 
 ---
+
+## sendPrompt()
+
+Wysyła prompt użytkownika do backendu i renderuje odpowiedź.
+
+**_@param_** *`{string}`* _**prompt**_  Treść promptu.
+
+**@returns** *`{Promise<void>}`*
+
+```javascript
+  async sendPrompt(prompt) {
+    this.chatView.addUserMessage(prompt);
+    const { msgEl, timer } = this.chatView.addLoadingMessage();
+    try {
+      const data = await BackendAPI.generate(prompt);
+
+      // Rozwiąż URL ilustracji
+      const urls = await ImageResolver.resolve(data.tags);
+      data.imageUrl = urls[0] || "";
+
+      // Renderuj odpowiedź AI
+      this.chatView.hydrateAIMessage(msgEl, data);
+    } catch (err) {
+      this.chatView.showError(msgEl);
+      LoggerService.record("error", "[ChatManager] sendPrompt", err);
+    } finally {
+      clearInterval(timer);
+    }
+  }
+```
+
+---
+
+## sendEdit()
+
+Przesyła edytowaną wiadomość do backendu i aktualizuje UI.
+@param {string} [sessionId] - ID sesji (opcjonalne).
+
+**_@param_** *`{HTMLElement}`* _**msgEl**_  Element wiadomości.
+**_@param_** *`{string}`* _**editedText**_  Nowa treść.
+**_@param_** *`{Record<string, any>}`* _**tags**_  Tagowanie wiadomości.
+**_@param_** *`{string}`* _**imageUrl**_  URL ilustracji.
+
+**@returns** *`{Promise<void>}`*
+
+```javascript
+  async sendEdit(msgEl, editedText, tags, imageUrl, sessionId) {
+    this.chatView.hydrateAIMessage(
+      msgEl,
+      {
+        id: msgEl.dataset.msgId,
+        sessionId: sessionId || msgEl.dataset.sessionId,
+        tags,
+        timestamp: msgEl.dataset.timestamp,
+        originalText: editedText,
+        text: editedText,
+        sender: msgEl.dataset.sender,
+        avatarUrl: msgEl.dataset.avatarUrl,
+        generation_time: Number.isFinite(
+          parseFloat(msgEl.dataset.generation_time)
+        )
+          ? parseFloat(msgEl.dataset.generation_time)
+          : 0,
+
+        imageUrl,
+      },
+      true
+    );
+
+    try {
+      await BackendAPI.edit(editedText, tags, sessionId, msgEl.dataset.msgId);
+    } catch (err) {
+      LoggerService.record("error", "[ChatManager] sendEdit", err);
+    }
+  }
+```
+
+---
+
+## sendRating()
+
+Przesyła ocenę wiadomości do backendu.
+
+**_@param_** *`{{ messageId: string, sessionId: string, ratings: Record<string, any> }}`* _**payload**_
+
+**@returns** *`{Promise<void>}`*
+
+```javascript
+  async sendRating({ messageId, sessionId, ratings }) {
+    try {
+      await BackendAPI.rate({ messageId, sessionId, ratings });
+    } catch (err) {
+      LoggerService.record("error", "[ChatManager] sendRating", err);
+    }
+  }
+```
+
+---
+
+## Pełny kod klasy
+```javascript
+class ChatManager {
+  constructor(context) {
+    const { dom } = context;
+    this.chatView = new ChatUIView(
+      dom.chatContainer,
+      dom.inputArea,
+      dom.prompt
+    );
+
+    this.promptVal = {
+      promptEl: dom.prompt,
+      errorEl: dom.promptError,
+      warningEl: dom.promptWarning,
+    };
+
+    this.editView = new ChatEditView(dom);
+
+    this.chatView.onEditRequested = (msgEl, text, id, ts, sessionId) =>
+      this.editView.enableEdit(msgEl, text, id, ts, sessionId);
+
+    this.chatView.onRatingSubmit = (msgEl) => this.ratingView.open(msgEl);
+  }
+
+  init() {
+    const { promptEl, errorEl, warningEl } = this.promptVal;
+    let hadInput = false;
+
+    const syncUI = (text) => {
+      const raw = typeof text === "string" ? text : promptEl.value;
+      const trimmed = raw.trim();
+      const len = raw.length;
+
+      warningEl.textContent = `${len}/${PromptValidator.maxLength} znaków`;
+
+      if (len > PromptValidator.maxLength) {
+        warningEl.classList.add("error-text-length");
+      } else {
+        warningEl.classList.remove("error-text-length");
+      }
+
+      const { valid, errors } = PromptValidator.validate(raw);
+
+      const isEmpty = trimmed.length === 0;
+      const filteredErrors = errors.filter((msg) => {
+        const isEmptyError = msg.startsWith("Prompt nie może być pusty");
+        if (isEmptyError) return hadInput && isEmpty;
+        return true;
+      });
+
+      errorEl.textContent = filteredErrors.join(" ");
+      return { valid, filteredErrors };
+    };
+
+    const initialText = promptEl.value || "";
+    if (initialText.length > 0) hadInput = true;
+    syncUI(initialText);
+
+    promptEl.addEventListener("input", () => {
+      const len = promptEl.value.length;
+      if (len > 0) hadInput = true;
+
+      const { filteredErrors } = syncUI();
+      if (len > 0) {
+        const keep = filteredErrors.filter(
+          (e) => !e.startsWith("Prompt nie może być pusty")
+        );
+        errorEl.textContent = keep.join(" ");
+      }
+    });
+
+    this.chatView.onPromptSubmit = (text) => {
+      const raw = text;
+      const trimmed = raw.trim();
+      const len = raw.length;
+      const { valid } = PromptValidator.validate(raw);
+      const { filteredErrors } = syncUI(raw);
+
+      if (!valid) {
+        const empty = trimmed.length === 0;
+        const onlyEmptyError =
+          filteredErrors.length === 1 &&
+          filteredErrors[0].startsWith("Prompt nie może być pusty");
+
+        if (empty && !hadInput) {
+          return false; // odrzucone – brak wcześniejszego inputu
+        }
+
+        errorEl.textContent = filteredErrors.join(" ");
+        if (len > PromptValidator.maxLength) {
+          warningEl.classList.add("error-text-length");
+        }
+        return false; // odrzucone – błędy walidacji
+      }
+
+      warningEl.classList.remove("error-text-length");
+      errorEl.textContent = "";
+      this.sendPrompt(raw);
+      return true; // zaakceptowane – ChatUIView wyczyści pole
+    };
+
+    this.chatView.init();
+
+    this.editView.onEditSubmit = (msgEl, txt, tags, imageUrl) =>
+      this.sendEdit(msgEl, txt, tags, imageUrl);
+
+    this.editView.onEditCancel = (msgEl, data) => {
+      this.chatView.hydrateAIMessage(msgEl, data);
+    };
+
+    this.chatView.onRatingSubmit = (payload) => {
+      this.sendRating(payload);
+    };
+  }
+
+  async sendPrompt(prompt) {
+    this.chatView.addUserMessage(prompt);
+    const { msgEl, timer } = this.chatView.addLoadingMessage();
+    try {
+      const data = await BackendAPI.generate(prompt);
+
+      const urls = await ImageResolver.resolve(data.tags);
+      data.imageUrl = urls[0] || "";
+
+      this.chatView.hydrateAIMessage(msgEl, data);
+    } catch (err) {
+      this.chatView.showError(msgEl);
+      LoggerService.record("error", "[ChatManager] sendPrompt", err);
+    } finally {
+      clearInterval(timer);
+    }
+  }
+
+  async sendEdit(msgEl, editedText, tags, imageUrl, sessionId) {
+    this.chatView.hydrateAIMessage(
+      msgEl,
+      {
+        id: msgEl.dataset.msgId,
+        sessionId: sessionId || msgEl.dataset.sessionId,
+        tags,
+        timestamp: msgEl.dataset.timestamp,
+        originalText: editedText,
+        text: editedText,
+        sender: msgEl.dataset.sender,
+        avatarUrl: msgEl.dataset.avatarUrl,
+        generation_time: Number.isFinite(
+          parseFloat(msgEl.dataset.generation_time)
+        )
+          ? parseFloat(msgEl.dataset.generation_time)
+          : 0,
+
+        imageUrl,
+      },
+      true
+    );
+
+    try {
+      await BackendAPI.edit(editedText, tags, sessionId, msgEl.dataset.msgId);
+    } catch (err) {
+      LoggerService.record("error", "[ChatManager] sendEdit", err);
+    }
+  }
+
+  async sendRating({ messageId, sessionId, ratings }) {
+    try {
+      await BackendAPI.rate({ messageId, sessionId, ratings });
+    } catch (err) {
+      LoggerService.record("error", "[ChatManager] sendRating", err);
+    }
+  }
+}
+```

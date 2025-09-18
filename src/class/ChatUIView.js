@@ -23,20 +23,20 @@
  *
  * API:
  * ----
- * • `constructor(container, promptForm, promptInput)` — inicjalizuje widok
- * • `init()` — podpina obsługę formularza i skrótów klawiszowych
- * • `addUserMessage(text)` — dodaje wiadomość użytkownika do czatu
- * • `addLoadingMessage()` — dodaje placeholder ładowania odpowiedzi AI
- * • `hydrateAIMessage(msgEl, data, isEdited)` — renderuje wiadomość AI z danymi
- * • `showError(msgEl)` — pokazuje komunikat błędu w wiadomości AI
- * • `scrollToBottom()` — przewija czat na dół
- * • `updateMessage(msgEl, editedText, tags, imageUrl)` — aktualizuje treść wiadomości
+ * - `constructor(container, promptForm, promptInput)` — inicjalizuje widok
+ * - `init()` — podpina obsługę formularza i skrótów klawiszowych
+ * - `addUserMessage(text)` — dodaje wiadomość użytkownika do czatu
+ * - `addLoadingMessage()` — dodaje placeholder ładowania odpowiedzi AI
+ * - `hydrateAIMessage(msgEl, data, isEdited)` — renderuje wiadomość AI z danymi
+ * - `showError(msgEl)` — pokazuje komunikat błędu w wiadomości AI
+ * - `scrollToBottom()` — przewija czat na dół
+ * - `updateMessage(msgEl, editedText, tags, imageUrl)` — aktualizuje treść wiadomości
  *
  * Callbacki:
  * ----------
- * • `onPromptSubmit(prompt: string)` — wywoływany po wysłaniu promptu
- * • `onEditRequested(msgEl, originalText, id, timestamp, sessionId)` — po kliknięciu "Edytuj"
- * • `onRatingSubmit(payload)` — po wysłaniu oceny wiadomości
+ * - `onPromptSubmit(prompt: string)` — wywoływany po wysłaniu promptu
+ * - `onEditRequested(msgEl, originalText, id, timestamp, sessionId)` — po kliknięciu "Edytuj"
+ * - `onRatingSubmit(payload)` — po wysłaniu oceny wiadomości
  */
 class ChatUIView {
   /**

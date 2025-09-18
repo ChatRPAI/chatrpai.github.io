@@ -26,9 +26,9 @@
  *
  * Refaktoryzacja?:
  *   - Rozdzielenie na podkomponenty:
- *     • GalleryRenderer → renderowanie i czyszczenie
- *     • GallerySelector → obsługa wyboru i podświetlenia
- *     • GalleryFetcher → integracja z ImageResolver i API
+ *     - GalleryRenderer → renderowanie i czyszczenie
+ *     - GallerySelector → obsługa wyboru i podświetlenia
+ *     - GalleryFetcher → integracja z ImageResolver i API
  */
 class GalleryLoader {
   /**

@@ -21,17 +21,17 @@
  *
  * API:
  * ----
- * • `constructor(dom, panels, persistentPanels)` — inicjalizacja z referencjami DOM
- * • `init()` — rejestruje nasłuchiwacze i przywraca stan (desktop only)
- * • `addPanel(button, panel, id)` — dodaje nową parę przycisk→panel
- * • `openPanel(panel)` — otwiera panel (z wyłącznością na mobile)
- * • `closePanel(panel)` — zamyka panel
- * • `togglePanel(panel)` — przełącza widoczność panelu
- * • `closeAllPanels()` — zamyka wszystkie panele
- * • `isPanelOpen(panel)` — sprawdza, czy panel jest otwarty
- * • `getOpenPanel()` — zwraca pierwszy otwarty panel
- * • `getOpenPanels()` — zwraca wszystkie otwarte panele
- * • `destroy()` — usuwa nasłuchiwacze i czyści zasoby
+ * - `constructor(dom, panels, persistentPanels)` — inicjalizacja z referencjami DOM
+ * - `init()` — rejestruje nasłuchiwacze i przywraca stan (desktop only)
+ * - `addPanel(button, panel, id)` — dodaje nową parę przycisk→panel
+ * - `openPanel(panel)` — otwiera panel (z wyłącznością na mobile)
+ * - `closePanel(panel)` — zamyka panel
+ * - `togglePanel(panel)` — przełącza widoczność panelu
+ * - `closeAllPanels()` — zamyka wszystkie panele
+ * - `isPanelOpen(panel)` — sprawdza, czy panel jest otwarty
+ * - `getOpenPanel()` — zwraca pierwszy otwarty panel
+ * - `getOpenPanels()` — zwraca wszystkie otwarte panele
+ * - `destroy()` — usuwa nasłuchiwacze i czyści zasoby
  *
  * Zależności:
  *  - `Dom`: dostarcza referencje do przycisków i paneli

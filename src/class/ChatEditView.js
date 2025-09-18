@@ -21,13 +21,13 @@
  *
  * API:
  * ----
- * • `constructor(dom)` — inicjalizuje widok z referencjami do DOM
- * • `enableEdit(msgElement, originalText, messageId, sessionId)` — uruchamia tryb edycji
+ * - `constructor(dom)` — inicjalizuje widok z referencjami do DOM
+ * - `enableEdit(msgElement, originalText, messageId, sessionId)` — uruchamia tryb edycji
  *
  * Wydarzenia (callbacki):
  * -----------------------
- * • `onEditSubmit(msgEl, editedText, tags, imageUrl, sessionId)` — wywoływane po kliknięciu "Zapisz"
- * • `onEditCancel(msgEl, data)` — wywoływane po kliknięciu "Anuluj"
+ * - `onEditSubmit(msgEl, editedText, tags, imageUrl, sessionId)` — wywoływane po kliknięciu "Zapisz"
+ * - `onEditCancel(msgEl, data)` — wywoływane po kliknięciu "Anuluj"
  */
 class ChatEditView {
   /**

@@ -22,12 +22,12 @@
  * 
  * API:
  * ----
- * • `constructor(msgEl, onSubmit)` — tworzy panel ocen w podanym elemencie wiadomości
- * • `render(msgEl)` — renderuje panel ocen (wywoływane automatycznie w konstruktorze)
+ * - `constructor(msgEl, onSubmit)` — tworzy panel ocen w podanym elemencie wiadomości
+ * - `render(msgEl)` — renderuje panel ocen (wywoływane automatycznie w konstruktorze)
  * 
  * Callbacki:
  * ----------
- * • `onSubmit(payload)` — wywoływany po kliknięciu "Wyślij ocenę"
+ * - `onSubmit(payload)` — wywoływany po kliknięciu "Wyślij ocenę"
  *    - payload: {
  *        messageId: string,
  *        sessionId: string,

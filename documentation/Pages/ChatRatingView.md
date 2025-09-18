@@ -22,12 +22,12 @@ Zasady:
 
 API:
 ----
-• `constructor(msgEl, onSubmit)` — tworzy panel ocen w podanym elemencie wiadomości
-• `render(msgEl)` — renderuje panel ocen (wywoływane automatycznie w konstruktorze)
+- `constructor(msgEl, onSubmit)` — tworzy panel ocen w podanym elemencie wiadomości
+- `render(msgEl)` — renderuje panel ocen (wywoływane automatycznie w konstruktorze)
 
 Callbacki:
 ----------
-• `onSubmit(payload)` — wywoływany po kliknięciu "Wyślij ocenę"
+- `onSubmit(payload)` — wywoływany po kliknięciu "Wyślij ocenę"
    - payload: {
        messageId: string,
        sessionId: string,
@@ -62,6 +62,11 @@ Callbacki:
     this.render(msgEl);
   }
 ```
+
+---
+
+Lista kryteriów oceniania
+@type {{key: string, label: string}[]}
 
 ---
 
@@ -137,3 +142,82 @@ Renderuje panel ocen w wiadomości.
 ```
 
 ---
+
+## Pełny kod klasy
+```javascript
+class ChatRatingView {
+  constructor(msgEl, onSubmit) {
+    if (!(msgEl instanceof HTMLElement)) return;
+    this.onSubmit = onSubmit || null;
+
+    this.criteria = [
+      { key: "Narrative", label: "Narracja" },
+      { key: "Style", label: "Styl" },
+      { key: "Logic", label: "Logika" },
+      { key: "Quality", label: "Jakość" },
+      { key: "Emotions", label: "Emocje" }
+    ];
+
+    this.render(msgEl);
+  }
+
+  render(msgEl) {
+    if (msgEl.querySelector("details.rating-form")) return;
+
+    const details = document.createElement("details");
+    details.className = "rating-form";
+    details.open = false;
+
+    const summary = document.createElement("summary");
+    summary.textContent = "Oceń odpowiedź ⭐";
+    details.appendChild(summary);
+
+    const header = document.createElement("h3");
+    header.textContent = "Twoja ocena:";
+    details.appendChild(header);
+
+    this.criteria.forEach(({ key, label }) => {
+      const row = document.createElement("label");
+      row.className = "rating-row";
+
+      const labelSpan = document.createElement("span");
+      labelSpan.textContent = `${label}: `;
+      row.appendChild(labelSpan);
+
+      const input = document.createElement("input");
+      input.type = "range";
+      input.min = "1";
+      input.max = "5";
+      input.value = "3";
+      input.name = key;
+
+      const val = document.createElement("span");
+      val.textContent = input.value;
+      input.addEventListener("input", () => (val.textContent = input.value));
+
+      row.append(input, val);
+      details.appendChild(row);
+    });
+
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.textContent = "Wyślij ocenę";
+    btn.addEventListener("click", () => {
+      const ratings = {};
+      this.criteria.forEach(({ key }) => {
+        ratings[key] = Number(details.querySelector(`[name="${key}"]`).value);
+      });
+      const payload = {
+        messageId: msgEl.dataset.msgId,
+        sessionId: msgEl.dataset.sessionId,
+        ratings
+      };
+      this.onSubmit?.(payload);
+    });
+    details.appendChild(btn);
+
+    const footer = msgEl.querySelector(".msg-footer") || msgEl;
+    footer.appendChild(details);
+  }
+}
+```

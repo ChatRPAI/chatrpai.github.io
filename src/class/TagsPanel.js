@@ -1,33 +1,29 @@
 /**
- * TagsPanel
- * =========
  * Komponent odpowiedzialny za renderowanie i obsługę pól tagów oraz synchronizację z galerią.
  * Integruje się z TagSelectorFactory i GalleryLoader, umożliwiając wybór tagów i podgląd obrazów.
- *
- * Zasady:
- * -------
+ *  
  * ✅ Dozwolone:
  *   - Tworzenie i aktualizacja pól tagów
  *   - Synchronizacja z galerią
  *   - Emisja zmian tagów do świata zewnętrznego
  *   - Obsługa wartości domyślnych z data-tags
- *
+ *  
  * ❌ Niedozwolone:
  *   - Walidacja promptów/tekstu
  *   - Operacje sieciowe (np. pobieranie tagów z backendu)
  *   - Logika edycji, ocen, renderowania wiadomości
- *
+ *  
  * TODO:
  *   - setMaxTagsPerField(n)
  *   - disableFields()
  *   - exposeSelectedTags(): string[]
  *   - obsługa tagów wielokrotnego wyboru
- *
+ *  
  * Refaktoryzacja?:
  *   - Rozdzielenie na podkomponenty:
- *     • TagsFieldManager → tworzenie i aktualizacja pól
- *     • TagsSync → synchronizacja z galerią
- *     • TagsDefaults → obsługa data-tags i presetów
+ *     - TagsFieldManager → tworzenie i aktualizacja pól
+ *     - TagsSync → synchronizacja z galerią
+ *     - TagsDefaults → obsługa data-tags i presetów
  */
 class TagsPanel {
   /**
@@ -51,32 +47,24 @@ class TagsPanel {
       );
     }
 
-    /** @type {HTMLElement} */
     this.container = container;
 
-    /** @type {{(tags:string[]):void}|null} */
     this.onTagsChanged = null;
 
-    /** @type {Record<string, HTMLInputElement|HTMLSelectElement>} */
     this.fields = {};
 
-    // 1) Zbuduj pola (domyślne — jeśli nie nadpiszesz setTagOptions)
     this.buildTagFields();
 
-    // 2) Galeria pod spodem
     const gallery = document.createElement("div");
     gallery.id = "image-gallery";
     gallery.className = "gallery-grid mt-10";
     this.container.appendChild(gallery);
 
-    /** @type {HTMLElement} */
     this.gallery = gallery;
 
-    // 3) Podłącz GalleryLoader (kontener wielorazowy)
     this.galleryLoader = new GalleryLoader({ galleryContainer: gallery });
     this.galleryLoader.setContainer(gallery);
 
-    // 4) Pierwsza emisja
     this.notifyTagsChanged();
   }
 

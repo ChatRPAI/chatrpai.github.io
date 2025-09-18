@@ -1,26 +1,22 @@
 /**
- * Context
- * =======
  * Kontener zależności aplikacji. Przechowuje i udostępnia instancje usług oraz
  * zapewnia wygodne gettery do najczęściej używanych komponentów.
- *
- * Zasady:
- * -------
+ *  
  * ✅ Dozwolone:
  *   - Rejestracja instancji usług i komponentów (np. Dom, Utils, UserManager)
  *   - Pobieranie zależności po nazwie lub przez getter
  *   - Dynamiczne dodawanie nowych zależności w trakcie działania
- *
+ *  
  * ❌ Niedozwolone:
  *   - Tworzenie instancji usług na sztywno (to robi warstwa inicjalizacyjna)
  *   - Logika biznesowa lub UI
  *   - Operacje sieciowe
- *
+ *  
  * TODO:
  *   - Walidacja typów rejestrowanych instancji
  *   - Obsługa usuwania zależności
  *   - Wstrzykiwanie konfiguracji środowiskowej
- *
+ *  
  * Refaktoryzacja?:
  *   - Rozszerzenie o mechanizm „scopes” dla izolacji modułów
  *   - Integracja z systemem eventów do powiadamiania o zmianach zależności

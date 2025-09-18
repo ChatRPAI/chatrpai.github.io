@@ -1,3 +1,29 @@
+# Utils
+Zestaw funkcji pomocniczych wykorzystywanych w całej aplikacji.
+Nie wymaga instancjonowania — wszystkie metody są dostępne statycznie.
+## Zasady:
+
+✅ Dozwolone:
+  - Funkcje czyste: throttle, debounce, clamp, formatDate, randomId
+  - Operacje na DOM: safeQuery, createButton
+  - Detekcja środowiska: isMobile
+  - Sprawdzenie dostępności zasobów: checkImageExists
+ 
+❌ Niedozwolone:
+  - Logika aplikacyjna (np. renderowanie wiadomości)
+  - Zależności od klas domenowych (ChatManager, BackendAPI itd.)
+  - Mutacje globalnego stanu
+  - Efekty uboczne poza LoggerService
+ 
+TODO:
+  - once(fn)
+  - retry(fn, attempts)
+  - escapeHTML(str)
+  - parseQueryParams(url)
+  - wait(ms)
+
+---
+
 ## throttle()
 
 Ogranicza wywołanie funkcji do max raz na `limit` ms.
@@ -153,3 +179,66 @@ Detekcja urządzenia mobilnego na podstawie user-agenta i szerokości okna.
 ```
 
 ---
+
+## Pełny kod klasy
+```javascript
+const Utils = {
+  throttle(fn, limit) {
+    let lastCall = 0;
+    return function (...args) {
+      const now = Date.now();
+      if (now - lastCall >= limit) {
+        lastCall = now;
+        fn.apply(this, args);
+      }
+    };
+  },
+
+  debounce(fn, delay) {
+    let timer = null;
+    return function (...args) {
+      clearTimeout(timer);
+      timer = setTimeout(() => fn.apply(this, args), delay);
+    };
+  },
+
+  clamp(val, min, max) {
+    return Math.min(Math.max(val, min), max);
+  },
+
+  formatDate(date) {
+    return date.toLocaleTimeString("pl-PL", { hour12: false });
+  },
+
+  randomId() {
+    return Math.random().toString(36).substr(2, 9);
+  },
+
+  safeQuery(selector) {
+    const el = document.querySelector(selector);
+    if (!el) {
+      LoggerService.record("warn", `Brak elementu dla selektora: ${selector}`);
+    }
+    return el;
+  },
+
+  createButton(label, onClick) {
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.textContent = label;
+    btn.className = "form-element";
+    btn.addEventListener("click", onClick);
+    return btn;
+  },
+
+  isMobile() {
+    const uaMobile = /Android|iPhone|iPad|iPod|Opera Mini|IEMobile/i.test(
+      navigator.userAgent
+    );
+    const narrow = window.innerWidth < 768;
+    const mobile = uaMobile && narrow;
+    LoggerService.record("log", "Detekcja urządzenia mobilnego:", mobile);
+    return mobile;
+  },
+};
+```

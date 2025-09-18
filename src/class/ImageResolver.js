@@ -1,22 +1,21 @@
 /**
- * ImageResolver
- * =============
+ * # ImageResolver
  * Narzędzie do wyszukiwania istniejących obrazów na podstawie tagów.
  * Obsługuje permutacje nazw plików, cache wyników oraz preload obrazów.
  *
- * Zasady:
- * -------
+ * # Zasady:
+ *  
  * ✅ Dozwolone:
  *   - resolve(tags, opts?): Promise<string[]>
  *   - resolveBest(tags, opts?): Promise<string>
  *   - clearCache(): void
  *   - preload(url): void
- *
+ *  
  * ❌ Niedozwolone:
  *   - Renderowanie DOM (poza preload <img>)
  *   - Logika UI lub biznesowa
  *   - Zależności od klas domenowych
- *
+ *  
  * TODO:
  *   - setBasePath(path: string)
  *   - setExtensions(exts: string[])
@@ -24,10 +23,16 @@
  *   - resolveAll(tags: string[]): Promise<{ found: string[], missing: string[] }>
  */
 class ImageResolver {
-  /** Bazowa ścieżka do folderu z obrazami */
+  /**
+   * Bazowa ścieżka do folderu z obrazami
+   * @type {string}
+   */
   static basePath = "/static/NarrativeIMG/";
 
-  /** Lista rozszerzeń (bez kropki) do wyszukiwania obrazów w kolejności indeksu */
+  /**
+   * Lista rozszerzeń (bez kropki) do wyszukiwania obrazów w kolejności indeksu
+   * @type {string[]}
+   */
   static extensions = ["jpg", "jpeg", "png", "gif", "webp"];
 
   /**
@@ -112,27 +117,25 @@ class ImageResolver {
    * @returns {Promise<boolean>}
    * @private
    */
-static async _checkExists(url) {
-  const key = this.cachePrefix + url;
-  const cached = AppStorageManager.getWithTTL(key);
-  if (cached === true) return true;
-  if (cached === false) return false;
+  static async _checkExists(url) {
+    const key = this.cachePrefix + url;
+    const cached = AppStorageManager.getWithTTL(key);
+    if (cached === true) return true;
+    if (cached === false) return false;
 
-  try {
-    const res = await fetch(url, { method: "HEAD" });
-    const exists = res.ok;
-    AppStorageManager.set(key, exists, this.negativeCacheTTL / 1000);
+    try {
+      const res = await fetch(url, { method: "HEAD" });
+      const exists = res.ok;
+      AppStorageManager.set(key, exists, this.negativeCacheTTL / 1000);
 
-    if (exists)
-      LoggerService.record("log", `[ImageResolver] HEAD ✓ ${url}`);
-    return exists;
-  } catch (err) {
-    AppStorageManager.set(key, false, this.negativeCacheTTL / 1000);
-    LoggerService.record("error", `[ImageResolver] HEAD error ${url}`, err);
-    return false;
+      if (exists) LoggerService.record("log", `[ImageResolver] HEAD ✓ ${url}`);
+      return exists;
+    } catch (err) {
+      AppStorageManager.set(key, false, this.negativeCacheTTL / 1000);
+      LoggerService.record("error", `[ImageResolver] HEAD error ${url}`, err);
+      return false;
+    }
   }
-}
-
 
   /**
    * Preloaduje obraz w przeglądarce (niewidoczny <img>).

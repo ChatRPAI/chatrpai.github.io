@@ -3,8 +3,8 @@
  * ==================
  * Fabryka elementów UI do wyboru tagów.
  * Tworzy pola wyboru w dwóch wariantach w zależności od środowiska:
- *  • Mobile → <select> z listą opcji
- *  • Desktop → <input> z przypisanym <datalist>
+ *  - Mobile → <select> z listą opcji
+ *  - Desktop → <input> z przypisanym <datalist>
  *
  * Zasady:
  * -------

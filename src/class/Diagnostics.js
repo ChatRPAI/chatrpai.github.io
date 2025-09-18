@@ -21,6 +21,20 @@ class Diagnostics {
     this.register(name, fn, this.currentGroup);
   }
 
+  /**
+   * Fluent API do asercji w testach.
+   * Przykład użycia:
+   * ```
+   * Diagnostics.expect(value).toBe(expected);
+   * Diagnostics.expect(value).toBeType("string");
+   * Diagnostics.expect(array).toInclude(item);
+   * Diagnostics.expect(value).toBeTruthy();
+   * Diagnostics.expect(value).toBeFalsy();
+   * Diagnostics.expect(value).toBeGreaterThan(min);
+   * ```
+   * @param {*} value - Wartość do testowania
+   * @returns {object} - Obiekt z metodami asercji
+   */
   static expect(value) {
     return {
       toBe(expected) {
