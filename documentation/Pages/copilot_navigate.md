@@ -20,4 +20,3 @@
 # TagsPanel: https://chatrpai.github.io/documentation/Pages/TagsPanel.md
 # UserManager: https://chatrpai.github.io/documentation/Pages/UserManager.md
 # Utils: https://chatrpai.github.io/documentation/Pages/Utils.md
-# VirtualKeyboardDock: https://chatrpai.github.io/documentation/Pages/VirtualKeyboardDock.md

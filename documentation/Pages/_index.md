@@ -20,4 +20,3 @@
 # TagsPanel
 # UserManager
 # Utils
-# VirtualKeyboardDock

@@ -185,7 +185,9 @@ Renderuje wiadomość AI z danymi.
       : (data.tags || "").split("_").filter(Boolean);
 
     msgEl.innerHTML = `
-      <header class="msg-header">
+      <header class="msg-header ${SenderRegistry.getClass(
+        msgEl.dataset.sender
+      )}">
         <div class="avatar-sender">
           <img src="${msgEl.dataset.avatarUrl}" alt="${
       msgEl.dataset.sender
@@ -193,9 +195,7 @@ Renderuje wiadomość AI z danymi.
           <strong>${msgEl.dataset.sender}</strong>
         </div>
       </header>
-      <section class="msg-content ${SenderRegistry.getClass(
-        msgEl.dataset.sender
-      )}">
+      <section class="msg-content">
         <div class="msg-text">
           <p ${isEdited ? 'class="edited"' : ""}>${renderedText}</p>
           ${
@@ -214,22 +214,26 @@ Renderuje wiadomość AI z danymi.
       </footer>
     `.trim();
 
-    const btn = document.createElement("button");
-    btn.type = "button";
-    btn.className = "form-element button-base msg-edit-btn";
-    btn.textContent = "✏️ Edytuj";
-    btn.addEventListener("click", () =>
-      this.onEditRequested?.(
-        msgEl,
-        msgEl.dataset.originalText,
-        msgEl.dataset.msgId,
-        msgEl.dataset.timestamp,
-        msgEl.dataset.sessionId
-      )
-    );
-    msgEl.querySelector(".msg-footer").appendChild(btn);
+    if (AppStorageManager.getWithTTL("editingMode") === "1") {
+      const btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "form-element button-base msg-edit-btn";
+      btn.textContent = "✏️ Edytuj";
+      btn.addEventListener("click", () =>
+        this.onEditRequested?.(
+          msgEl,
+          msgEl.dataset.originalText,
+          msgEl.dataset.msgId,
+          msgEl.dataset.timestamp,
+          msgEl.dataset.sessionId
+        )
+      );
+      msgEl.querySelector(".msg-footer").appendChild(btn);
+    }
 
-    new ChatRatingView(msgEl, (payload) => this.onRatingSubmit?.(payload));
+    if (AppStorageManager.getWithTTL("ratingMode") === "1") {
+      new ChatRatingView(msgEl, (payload) => this.onRatingSubmit?.(payload));
+    }
 
     msgEl.classList.remove("msg-fading-out");
     msgEl.classList.add("msg-fading-in");
@@ -416,7 +420,9 @@ class ChatUIView {
       : (data.tags || "").split("_").filter(Boolean);
 
     msgEl.innerHTML = `
-      <header class="msg-header">
+      <header class="msg-header ${SenderRegistry.getClass(
+        msgEl.dataset.sender
+      )}">
         <div class="avatar-sender">
           <img src="${msgEl.dataset.avatarUrl}" alt="${
       msgEl.dataset.sender
@@ -424,9 +430,7 @@ class ChatUIView {
           <strong>${msgEl.dataset.sender}</strong>
         </div>
       </header>
-      <section class="msg-content ${SenderRegistry.getClass(
-        msgEl.dataset.sender
-      )}">
+      <section class="msg-content">
         <div class="msg-text">
           <p ${isEdited ? 'class="edited"' : ""}>${renderedText}</p>
           ${
@@ -445,22 +449,26 @@ class ChatUIView {
       </footer>
     `.trim();
 
-    const btn = document.createElement("button");
-    btn.type = "button";
-    btn.className = "form-element button-base msg-edit-btn";
-    btn.textContent = "✏️ Edytuj";
-    btn.addEventListener("click", () =>
-      this.onEditRequested?.(
-        msgEl,
-        msgEl.dataset.originalText,
-        msgEl.dataset.msgId,
-        msgEl.dataset.timestamp,
-        msgEl.dataset.sessionId
-      )
-    );
-    msgEl.querySelector(".msg-footer").appendChild(btn);
+    if (AppStorageManager.getWithTTL("editingMode") === "1") {
+      const btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "form-element button-base msg-edit-btn";
+      btn.textContent = "✏️ Edytuj";
+      btn.addEventListener("click", () =>
+        this.onEditRequested?.(
+          msgEl,
+          msgEl.dataset.originalText,
+          msgEl.dataset.msgId,
+          msgEl.dataset.timestamp,
+          msgEl.dataset.sessionId
+        )
+      );
+      msgEl.querySelector(".msg-footer").appendChild(btn);
+    }
 
-    new ChatRatingView(msgEl, (payload) => this.onRatingSubmit?.(payload));
+    if (AppStorageManager.getWithTTL("ratingMode") === "1") {
+      new ChatRatingView(msgEl, (payload) => this.onRatingSubmit?.(payload));
+    }
 
     msgEl.classList.remove("msg-fading-out");
     msgEl.classList.add("msg-fading-in");

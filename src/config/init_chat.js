@@ -90,10 +90,67 @@ function ClearImageCacheButtonModule() {
       btn.className = "form-element text-base mt-5 w-full button-base";
       wrapper.append(label, btn);
       ctx.dom.settingSidePanel.appendChild(wrapper);
+      const hr = document.createElement("hr");
+      ctx.dom.settingSidePanel.appendChild(hr);
     }
   };
 }
+function ratingModeChange(dom) {
+  let isRatingMode = AppStorageManager.getWithTTL("ratingMode") === "1";
+  const ratingElement = dom.settingSidePanel.querySelector("input[name='ratingMode']");
 
+  // Bezpośrednie ustawienie stanu checkboxa na podstawie wartości w AppStorageManager
+  if (ratingElement) {
+    ratingElement.checked = isRatingMode;
+
+    // Ustawienie klasy na chatContainer na podstawie stanu
+    if (isRatingMode) {
+      dom.chatContainer.classList.add("with-rating");
+    } else {
+      dom.chatContainer.classList.remove("with-rating");
+    }
+
+    // Dodanie nasłuchiwania na zdarzenie 'change'
+    ratingElement.addEventListener("change", (e) => {
+      const checked = e.target.checked;
+      isRatingMode = checked ? "1" : "0";
+      AppStorageManager.set("ratingMode", isRatingMode);
+
+      if (checked) {
+        dom.chatContainer.classList.add("with-rating");
+      } else {
+        dom.chatContainer.classList.remove("with-rating");
+      }
+    });
+  }
+}
+
+function editingModeChange(dom) {
+  let isEditingMode = AppStorageManager.getWithTTL("editingMode") === "1";
+  const editingElement = dom.settingSidePanel.querySelector("input[name='editingMode']"); 
+  // Bezpośrednie ustawienie stanu checkboxa na podstawie wartości w AppStorageManager
+  if (editingElement) {
+    editingElement.checked = isEditingMode;
+    // Ustawienie klasy na chatContainer na podstawie stanu
+    if (isEditingMode) {
+      dom.chatContainer.classList.add("with-editing");
+    } else {
+      dom.chatContainer.classList.remove("with-editing");
+    }
+    // Dodanie nasłuchiwania na zdarzenie 'change'
+    editingElement.addEventListener("change", (e) => {
+      const checked = e.target.checked;
+      isEditingMode = checked ? "1" : "0";
+      AppStorageManager.set("editingMode", isEditingMode);
+      if (checked) {
+        dom.chatContainer.classList.add("with-editing");
+      }
+      else {
+        dom.chatContainer.classList.remove("with-editing");
+      }
+    });
+  }
+}
 
 let originalBodyHTML = document.body.innerHTML;
 // 3) Start aplikacji
@@ -118,6 +175,8 @@ window.addEventListener("load", async () => {
     PanelsControllerModule(dom),
     ChatManagerModule(context),       // tylko na stronie czatu
     ClearImageCacheButtonModule(),    // feature
+    ratingModeChange(dom),
+    editingModeChange(dom),
   ];
 
   // d) App dostaje Context + listę modułów, i tylko je odpala

@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="pl">
+  <head>
+    <meta charset="UTF-8" />
+    <title>AI RP Chat</title>
+    <link rel="stylesheet" href="/static/data/global-layout.css" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, interactive-widget=resizes-content"
+    />
+
+    <!-- Favicon -->
+    <link
+      rel="icon"
+      type="image/png"
+      sizes="16x16"
+      href="../static/favicons/favicon-16x16.png"
+    />
+    <link
+      rel="icon"
+      type="image/png"
+      sizes="32x32"
+      href="../static/favicons/favicon-32x32.png"
+    />
+    <link
+      rel="icon"
+      type="image/png"
+      sizes="48x48"
+      href="../static/favicons/favicon-48x48.png"
+    />
+    <link
+      rel="icon"
+      type="image/png"
+      sizes="64x64"
+      href="../static/favicons/favicon-64x64.png"
+    />
+    <link
+      rel="apple-touch-icon"
+      sizes="180x180"
+      href="../static/favicons/apple-touch-icon.png"
+    />
+    <link
+      rel="icon"
+      type="image/png"
+      sizes="192x192"
+      href="../static/favicons/android-chrome-192x192.png"
+    />
+    <link
+      rel="icon"
+      type="image/png"
+      sizes="512x512"
+      href="../static/favicons/android-chrome-512x512.png"
+    />
+    <link rel="manifest" href="../static/favicons/site.webmanifest" />
+  </head>
+  <body class="bg-dark text-light flex flex-col items-center">
+    <main id="app" class="flex flex-col items-center w-full h-full ov-fy-hidden">
+     <header id="app-header">
+      <h1 class="text-center text-lg mt-10">AI RP Chat</h1>
+     </header>
+      <div
+        id="chat-wrapper"
+        class="w-full max-w-1200 flex flex-col justify-end m-auto"
+      >
+        <div
+          id="chat-container"
+          class="bg-panel p-10 br-3 mb-20 max-w-1200"
+          role="log"
+          aria-live="polite"
+          aria-label="Historia rozmowy z AI"
+        >
+      <!-- Tutaj będą wyświetlane wiadomości użytkownika i postaci AI -->
+      </div>
+      </div>
+      <form
+        id="input-area"
+        class="flex gap-10 items-center bg-dark p-10 w-full max-w-1200"
+        aria-label="Formularz wysyłania wiadomości do AI"
+      >
+      <!-- komponent wpisywania i wysyłania wiadomości(promptu) -->
+        <div
+          style="width: calc(100% - 80px)"
+          class="flex flex-col gap-10 mr-10 fix-w-full"
+        >
+          <p class="prompt-message flex justify-between">
+            <span class="prompt-error"></span>
+            <span class="max-text-length-warning">0/2000 znaków</span>
+          </p>
+
+          <p id="prompt-desc" hidden>
+            Wpisz wiadomość, którą AI ma zinterpretować w kontekście
+            narracyjnym. Możesz używać komend: @nazwa_postaci aby skierować
+            wiadomość, lub /set-location(nazwa) aby zmienić scenę. Podpowiedzi
+            pojawią się automatycznie.
+          </p>
+          <textarea
+            id="prompt"
+            class="form-element textarea-base flex-1"
+            rows="4"
+            lang="pl"
+            placeholder="Wpisz wiadomość... [Możesz wysyłać ją przez Ctrl+Enter]"
+            aria-label="Wiadomość do AI"
+            aria-describedby="prompt-desc"
+            title="Możesz używać komend: @nazwa_postaci aby skierować wiadomość, lub /set-location(nazwa) aby zmienić scenę. Podpowiedzi pojawią się automatycznie."
+            aria-autocomplete="list"
+            required
+            autofocus
+          ></textarea>
+        </div>
+
+        <button
+          type="submit"
+          class="form-element button-base br-2"
+          aria-controls="chat-container"
+          title="Wyślij wiadomość"
+        >
+          ▷
+        </button>
+      </form>
+
+      <button id="burger-toggle" class="button-icon button-base">☰</button>
+     <aside id="web-side-panel" class="bg-panel p-10 br-2">
+        <h2 class="text-center text-lg mb-5">Nawigacja</h2>
+        <nav class="flex flex-col gap-4">
+         <a
+            href="/"
+            class="button-base button-primary text-center"
+            >Strona główna</a
+          >
+          <a
+            href="/chat"
+            class="button-base button-secondary text-center"
+            >Czat</a
+          >
+          <a
+            href="/settings"
+            class="button-base button-primary text-center"
+            >Ustawienia</a
+          >
+           <a
+            href="/characters"
+            class="button-base button-primary text-center"
+            >Postacie</a
+          >
+        </nav>
+      </aside>
+
+      <button id="settings-toggle" class="button-icon button-base">⚙️</button>
+      <aside id="setting-side-panel" class="bg-panel p-10 br-2" tabindex="-1">
+        <h2 class="text-center text-lg mb-5">Ustawienia</h2>
+        <label for="ratingMode" class="text-sm">Tryb oceny:
+          <input type="checkbox" name="ratingMode" id="ratingMode" value="1" />
+        </label>
+        <hr>
+        <label for="editingMode" class="text-sm">Tryb edycji:
+          <input type="checkbox" name="editingMode" id="editingMode" value="1" />
+        </label>
+        <hr>
+        <label for="user_name" class="text-sm">
+          Podaj swoje imię:
+          <input
+            type="text"
+            id="user_name"
+            class="form-element text-base w-full mt-10"
+            placeholder="Twoje imię (max 20 znaków)"
+            maxlength="20"
+          />
+        </label>
+        <hr>
+      </aside>
+    </main>
+
+    <script src="/static/data/chat.js"></script>
+  </body>
+</html>

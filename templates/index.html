@@ -53,90 +53,169 @@
     />
     <link rel="manifest" href="../static/favicons/site.webmanifest" />
   </head>
-  <body class="bg-dark text-light flex flex-col items-center">
+  <body class="bg-dark text-light flex flex-col items-center ov-fy-auto">
     <main id="app" class="flex flex-col items-center w-full h-full">
+     <header id="app-header">
       <h1 class="text-center text-lg mt-10">AI RP Chat</h1>
-      <div
-        id="chat-wrapper"
-        class="w-full max-w-1200 flex flex-col justify-end m-auto"
-      >
-        <div
-          id="chat-container"
-          class="bg-panel p-10 br-3 mb-20 max-w-1200"
-          role="log"
-          aria-live="polite"
-          aria-label="Historia rozmowy z AI"
-        >
-      <!-- Tutaj będą wyświetlane wiadomości użytkownika i postaci AI -->
-      </div>
-      </div>
-      <form
-        id="input-area"
-        class="flex gap-10 items-center bg-dark p-10 w-full max-w-1200"
-        aria-label="Formularz wysyłania wiadomości do AI"
-      >
-      <!-- komponent wpisywania i wysyłania wiadomości(promptu) -->
-        <div
-          style="width: calc(100% - 80px)"
-          class="flex flex-col gap-10 mr-10 fix-w-full"
-        >
-          <p class="prompt-message flex justify-between">
-            <span class="prompt-error"></span>
-            <span class="max-text-length-warning">0/2000 znaków</span>
-          </p>
+     </header>
+      
 
-          <p id="prompt-desc" hidden>
-            Wpisz wiadomość, którą AI ma zinterpretować w kontekście
-            narracyjnym. Możesz używać komend: @nazwa_postaci aby skierować
-            wiadomość, lub /set-location(nazwa) aby zmienić scenę. Podpowiedzi
-            pojawią się automatycznie.
+   <article id="home-page">
+     <section id="hero">
+      <div class="hero-content">
+        <h1>Wyrusz na swoją tekstową przygodę fantasy</h1>
+        <p>
+          Zanurz się w świat nieskończonych możliwości dzięki naszej opartej na
+          sztucznej inteligencji grze RPG z czatem w roli głównej. <br />Stwórz swoją postać, wybierz
+          swoją ścieżkę i przeżyj wyjątkową, narracyjną podróż.
+        </p>
+        <a href="#" class="button-base cta-button">Rozpocznij swoją przygodę już teraz</a>
+      </div>
+    </section>
+
+    <section id="features">
+      <h2>Kluczowe funkcje</h2>
+      <div class="feature-list">
+        <div class="feature">
+          <img src="../static/resources/feature1.png" alt="Dynamiczne opowiadanie historii" />
+          <h3>Dynamiczne opowiadanie historii</h3>
+          <p>
+            Nasza sztuczna inteligencja dostosowuje się do Twoich wyborów,
+            tworząc unikalną i ewoluującą narrację.
           </p>
-          <textarea
-            id="prompt"
-            class="form-element textarea-base flex-1"
-            rows="4"
-            lang="pl"
-            placeholder="Wpisz wiadomość... [Możesz wysyłać ją przez Ctrl+Enter]"
-            aria-label="Wiadomość do AI"
-            aria-describedby="prompt-desc"
-            title="Możesz używać komend: @nazwa_postaci aby skierować wiadomość, lub /set-location(nazwa) aby zmienić scenę. Podpowiedzi pojawią się automatycznie."
-            aria-autocomplete="list"
-            required
-            autofocus
-          ></textarea>
         </div>
+        <div class="feature">
+          <img src="../static/resources/feature2.png" alt="Tworzenie postaci" />
+          <h3>RPG-owe tworzenie postaci</h3>
+          <p>
+            Stwórz swojego bohatera z bogatą historią, umiejętnościami i
+            osobowością.
+          </p>
+        </div>
+        <div class="feature">
+          <img src="../static/resources/feature3.png" alt="Bogaty świat" />
+          <h3>Wciągający świat</h3>
+          <p>
+            Odkrywaj rozległy i szczegółowy świat pełen historii, kultur i
+            tajemnic.
+          </p>
+        </div>
+      </div>
+    </section>
 
-        <button
-          type="submit"
-          class="form-element button-base br-2"
-          aria-controls="chat-container"
-          title="Wyślij wiadomość"
-        >
-          ▷
-        </button>
-      </form>
+    <section id="examples">
+      <h2>Przykładowe lokacje</h2>
+      <div class="example-list">
+        <div class="example">
+          <img src="../static/resources/example1.jpg" alt="Smocza Jama" />
+          <h3>Smocza Jama</h3>
+          <p>
+            Staw czoła ognistym głębokościom i skonfrontuj się z przerażającym
+            smokiem.
+          </p>
+        </div>
+        <div class="example">
+          <img src="../static/resources/example2.jpg" alt="Zaczarowany Las" />
+          <h3>Zaczarowany Las</h3>
+          <p>Przemierzaj mistyczny las pełen pradawnej magii.</p>
+        </div>
+      </div>
+    </section>
+
+    <section id="testimonials">
+      <h2>Przykładowe postacie</h2>
+      <div class="testimonial-list">
+        <div class="testimonial">
+            <div class="char-avatar">
+                <img src="../static/resources/char-1.png" alt="Elfka Uzdrowicielka Lytha" />
+            </div>
+          <p>
+            <b>Elfka Uzdrowicielka Lytha</b>, znana ze swojej mądrości i umiejętności
+            leczenia, podróżuje po krainie, pomagając potrzebującym.
+          </p>
+        </div>
+        <div class="testimonial">
+          <div class="char-avatar">
+              <img src="../static/resources/char-2.png" alt="Człowiek Wojownik Aric" />
+          </div>
+          <p>
+            <b>Człowiek Wojownik Aric</b>, znany ze swojej siły i odwagi, walczy
+            w obronie słabszych.
+          </p>
+        </div>
+        <div class="testimonial">
+          <div class="char-avatar">
+              <img src="../static/resources/char-3.png" alt="Ork Xardas Thrain" />
+          </div>
+          <p>
+            <b>Ork Xardas Thrain</b>, potężny czarnoksiężnik, włada mrocznymi
+            zaklęciami, by chronić swoją ziemię.
+          </p>
+      </div>
+    </section>
+   </article>
+
+
+
+
+
 
       <button id="burger-toggle" class="button-icon button-base">☰</button>
       <aside id="web-side-panel" class="bg-panel p-10 br-2">
-        <!-- Tu będą linki do poszczególnych stron -->
+        <h2 class="text-center text-lg mb-5">Nawigacja</h2>
+        <nav class="flex flex-col gap-4">
+         <a
+            href="/"
+            class="button-base button-secondary text-center"
+            >Strona główna</a
+          >
+          <a
+            href="/chat"
+            class="button-base button-primary text-center"
+            >Czat</a
+          >
+          <a
+            href="/settings"
+            class="button-base button-primary text-center"
+            >Ustawienia</a
+          >
+           <a
+            href="/characters"
+            class="button-base button-primary text-center"
+            >Postacie</a
+          >
+        </nav>
       </aside>
 
-      <button id="settings-toggle" class="button-icon button-base">⚙️</button>
-      <aside id="setting-side-panel" class="bg-panel p-10 br-2" tabindex="-1">
-        <!-- Ustawienia chatu -->
-        <label for="user_name" class="text-sm">
-          Podaj swoje imię:
-          <input
-            type="text"
-            id="user_name"
-            class="form-element text-base w-full mt-10"
-            placeholder="Twoje imię (max 20 znaków)"
-            maxlength="20"
-          />
-        </label>
-      </aside>
+          <footer id="app-footer">
+      <p class="text-center text-sm mb-5">
+        &copy; 2024 AI RP Chat. Wszelkie prawa zastrzeżone.
+      </p>
+    </footer>
     </main>
 
-    <script src="/static/data/chat.js"></script>
+    <script>
+document.addEventListener('DOMContentLoaded', function() {
+  const ctaButton = document.querySelector('.cta-button');
+  const homePage = document.querySelector('#home-page');
+
+  if (ctaButton && homePage) {
+    ctaButton.addEventListener('click', function(event) {
+      event.preventDefault();
+
+      // Oblicz cel przewinięcia w oparciu o wysokość kontenera #home-page
+      const scrollTarget = homePage.clientHeight - 60;
+
+      // Użyj metody scrollBy() na elemencie #home-page, a nie na oknie
+      homePage.scrollBy({
+        top: scrollTarget,
+        behavior: 'smooth'
+      });
+    });
+  }
+});
+    </script>
+
+    <script src="/static/data/home.js"></script>
   </body>
 </html>

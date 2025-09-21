@@ -1,0 +1,121 @@
+# 🎮 **Chat RP AI - Architektura Systemu**  
+
+## 🎯 **CEL**  
+Tworzenie **spójnej gry narracyjnej** z dynamicznymi obrazami, gdzie:  
+- **Bielik-7B** generuje fabułę i dialogi  
+- **System graficzny** łączy ręczne assety w dynamiczne sceny  
+- **Pełna kontrola** nad wyglądem postaci i narracją  
+
+---
+
+## 🏗️ **ARCHITEKTURA SYSTEMU**  
+
+### **1. Warstwa Narracji (Bielik-7B)**  
+```python
+# Wejście: Akcja gracza → Wyjście: Tekst + Tagi
+{
+  "text": "Lytha leczy twoje rany w lesie...",
+  "tags": {
+    "location": "forest",
+    "character": "Lytha", 
+    "action": "healing",
+    "emotion": "concerned"
+  }
+}
+```
+
+### **2. Warstwa Graficzna (Compositing Engine)**  
+```python
+# Algorytm generowania obrazu:
+1. Odbierz tagi z Bielika
+2. Znajdź istniejący obraz lub stwórz nowy
+3. Połącz warstwy: tło + postać + efekty
+4. Zwróć gotową scenę
+```
+
+### **3. Struktura Katalogów**  
+```
+game_assets/
+├── characters/           # Postacie z alpha channel
+│   ├── Lytha/
+│   │   ├── neutral.png
+│   │   ├── healing.png
+│   │   ├── injured.png
+│   │   └── combat.png
+├── backgrounds/          # Tła
+│   ├── forest.png
+│   ├── castle.png
+│   └── dungeon.png
+├── effects/              # Efekty specjalne
+│   ├── magic_heal.png
+│   ├── rain.png
+│   └── blood.png
+└── composites/           # Wygenerowane sceny (cache)
+```
+
+---
+
+## 🛠️ **TECHNICAL STACK**  
+
+### **Backend (Python)**  
+- **Pillow (PIL)** - compositing obrazów  
+- **FastAPI/Flask** - serwer HTTP  
+- **Bielik-7B** - model językowy  
+
+### **Frontend**  
+- **HTML/CSS/JS** - interfejs czatu  
+- **WebSocket** - live updates  
+
+### **Optymalizacja**  
+- **Cache composites** - szybkie ładowanie  
+- **WebP format** - mniejsze rozmiary  
+- **Pre-generacja** - popularne sceny  
+
+---
+
+## 🎨 **PRZYGOTOWANIE ASSETÓW**  
+
+### **Dla każdej postaci:**  
+- ✅ 10-20 różnych stanów emocjonalnych  
+- ✅ 5-10 akcji (walka, magia, interakcja)  
+- ✅ Warianty (rany, ciąża, przemiana)  
+- ✅ Format PNG z przezroczystością  
+
+### **Dla światów:**  
+- ✅ 10-15 różnych lokacji  
+- ✅ Warianty pogody/pora dnia  
+- ✅ Efekty specjalne (magia, deszcz, ogień)  
+
+---
+
+## ⚡ **PRZEPLYW DANYCH**  
+```
+1. [USER] → "Lytha leczy mnie"  
+2. [Bielik] → {"text": "...", "tags": {"location": "forest", "character": "Lytha", "action": "healing"}}  
+3. [System] → Szuka forest_Lytha_healing.png  
+4. [Jeśli nie ma] → Łączy forest.png + Lytha/healing.png  
+5. [Zapisuje] → forest_Lytha_healing.png (cache)  
+6. [Zwraca] → <img src="composites/forest_Lytha_healing.png">  
+```
+
+---
+
+## 🚀 **ROZWOJ W PRZYSZLOSCI**  
+
+### **Krótkoterminowe:**  
+- ✅ Fine-tuning Bielika pod RPG  
+- ✅ Przygotowanie bazy assetów  
+- ✅ Implementacja compositing engine  
+
+### **Długoterminowe:**  
+- 🔄 Generowanie głosów (ElevenLabs)  
+- 🎭 Animowane sceny (GIF/WebM)  
+- 🌐 Multiplayer mode  
+
+---
+
+## 💾 **ZAPISZ TO JAKO:**  
+`TODO_CHAT_RPG_ARCHITECTURE.md`  
+
+**To jest SOLIDNA podstawa!** Masz klarowny plan działania. 🥳  
+**Teraz skup się na fine-tuningu Bielika** - reszta przyjdzie naturalnie! 🚀

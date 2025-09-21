@@ -10,6 +10,15 @@ app = Flask(__name__, template_folder="templates")
 def index():
     return render_template("index.html")
 
+@app.route("/chat")
+def chat():
+    return render_template("chat.html")
+
+@app.route("/characters")
+def characters():
+    return render_template("characters.html")
+
+
 @app.route("/generate", methods=["POST"])
 def generate():
     data = request.get_json()

@@ -1831,6 +1831,145 @@ class TagsPanel {
 
 /**
  *
+ * Menedżer widoczności paneli bocznych w aplikacji.
+ * Zapewnia kontrolę nad otwieraniem, zamykaniem i przełączaniem paneli w interfejsie użytkownika.
+ * Obsługuje tryb mobilny (wyłączność paneli) oraz desktopowy (współistnienie).
+ * Utrzymuje stan wybranych paneli w cookie — tylko na desktopie.
+ *
+ * ## Zasady:
+ *
+ * - ✅ Dozwolone:
+ *   - Rejestracja paneli i ich przycisków
+ *   - Obsługa zdarzeń kliknięcia
+ *   - Przełączanie widoczności paneli
+ *   - Zapisywanie stanu paneli w cookie (desktop only)
+ *
+ * - ❌ Niedozwolone:
+ *   - Deklaracja paneli statycznie
+ *   - Modyfikacja zawartości paneli
+ *   - Logika niezwiązana z UI paneli
+ *
+ */
+class PanelsController {
+  /**
+   * @param {Dom} dom - Instancja klasy Dom
+   * @param {Array<{button: HTMLElement, panel: HTMLElement, id: string}>} panels - lista paneli
+   * @param {string[]} persistentPanels - identyfikatory paneli, które mają być zapamiętywane (desktop only)
+   */
+  constructor(dom, panels = [], persistentPanels = []) {
+    this.dom = dom;
+    this.panels = panels;
+    this.cookiePanels = new Set(persistentPanels);
+    this._unbinders = new Map();
+  }
+
+  /**
+   * Inicjalizuje nasłuchiwacze kliknięć i przywraca stan z cookie (desktop only).
+   */
+  init() {
+    this.panels.forEach(({ button, panel, id }) => {
+      if (!button || !panel) return;
+
+      if (!Utils.isMobile() && this.cookiePanels.has(id)) {
+        const saved = AppStorageManager.getWithTTL(`panel:${id}`);
+        if (saved === true) panel.classList.add("open");
+      }
+
+      const handler = () => this.togglePanel(panel);
+      button.addEventListener("click", handler);
+      this._unbinders.set(button, () =>
+        button.removeEventListener("click", handler)
+      );
+    });
+  }
+
+  /**
+   * Otwiera panel. Na mobile zamyka inne.
+   * @param {HTMLElement} panel
+   */
+  openPanel(panel) {
+    if (Utils.isMobile()) {
+      this.closeAllPanels();
+    }
+    panel.classList.add("open");
+
+    if (!Utils.isMobile() && this.cookiePanels.has(panel.id)) {
+      AppStorageManager.set(`panel:${panel.id}`, true);
+    }
+  }
+
+  /**
+   * Zamyka panel.
+   * @param {HTMLElement} panel
+   */
+  closePanel(panel) {
+    panel.classList.remove("open");
+
+    if (!Utils.isMobile() && this.cookiePanels.has(panel.id)) {
+      AppStorageManager.set(`panel:${panel.id}`, false);
+    }
+  }
+
+  /**
+   * Przełącza widoczność panelu.
+   * @param {HTMLElement} panel
+   */
+  togglePanel(panel) {
+    if (!panel) return;
+    const isOpen = panel.classList.contains("open");
+    if (isOpen) {
+      this.closePanel(panel);
+    } else {
+      this.openPanel(panel);
+    }
+  }
+
+  /** Zamyka wszystkie panele. */
+  closeAllPanels() {
+    this.panels.forEach(({ panel }) => panel?.classList.remove("open"));
+  }
+
+  /**
+   * Sprawdza, czy panel jest otwarty.
+   * @param {HTMLElement} panel
+   * @returns {boolean}
+   */
+  isPanelOpen(panel) {
+    return !!panel?.classList.contains("open");
+  }
+
+  /**
+   * Zwraca pierwszy otwarty panel.
+   * @returns {HTMLElement|null}
+   */
+  getOpenPanel() {
+    const item = this.panels.find(({ panel }) =>
+      panel?.classList.contains("open")
+    );
+    return item?.panel || null;
+  }
+
+  /**
+   * Zwraca wszystkie otwarte panele.
+   * @returns {HTMLElement[]}
+   */
+  getOpenPanels() {
+    return this.panels
+      .map(({ panel }) => panel)
+      .filter((p) => p && p.classList.contains("open"));
+  }
+
+  /**
+   * Usuwa nasłuchiwacze i czyści zasoby.
+   */
+  destroy() {
+    this._unbinders.forEach((off) => off?.());
+    this._unbinders.clear();
+  }
+}
+
+/**
+ *
  * Warstwa komunikacji z backendem HTTP — odporna na błędy sieciowe, spójna i centralnie konfigurowalna.
  * Umożliwia wysyłanie żądań POST/GET z automatycznym retry i backoffem.
  * Integruje się z `RequestRetryManager` i zarządza tokenem autoryzacyjnym.
@@ -2039,145 +2178,6 @@ class BackendAPI {
    */
   static async getTags() {
     return this._getJson("/tags");
-  }
-}
-
-/**
- *
- * Menedżer widoczności paneli bocznych w aplikacji.
- * Zapewnia kontrolę nad otwieraniem, zamykaniem i przełączaniem paneli w interfejsie użytkownika.
- * Obsługuje tryb mobilny (wyłączność paneli) oraz desktopowy (współistnienie).
- * Utrzymuje stan wybranych paneli w cookie — tylko na desktopie.
- *
- * ## Zasady:
- *
- * - ✅ Dozwolone:
- *   - Rejestracja paneli i ich przycisków
- *   - Obsługa zdarzeń kliknięcia
- *   - Przełączanie widoczności paneli
- *   - Zapisywanie stanu paneli w cookie (desktop only)
- *
- * - ❌ Niedozwolone:
- *   - Deklaracja paneli statycznie
- *   - Modyfikacja zawartości paneli
- *   - Logika niezwiązana z UI paneli
- *
- */
-class PanelsController {
-  /**
-   * @param {Dom} dom - Instancja klasy Dom
-   * @param {Array<{button: HTMLElement, panel: HTMLElement, id: string}>} panels - lista paneli
-   * @param {string[]} persistentPanels - identyfikatory paneli, które mają być zapamiętywane (desktop only)
-   */
-  constructor(dom, panels = [], persistentPanels = []) {
-    this.dom = dom;
-    this.panels = panels;
-    this.cookiePanels = new Set(persistentPanels);
-    this._unbinders = new Map();
-  }
-
-  /**
-   * Inicjalizuje nasłuchiwacze kliknięć i przywraca stan z cookie (desktop only).
-   */
-  init() {
-    this.panels.forEach(({ button, panel, id }) => {
-      if (!button || !panel) return;
-
-      if (!Utils.isMobile() && this.cookiePanels.has(id)) {
-        const saved = AppStorageManager.getWithTTL(`panel:${id}`);
-        if (saved === true) panel.classList.add("open");
-      }
-
-      const handler = () => this.togglePanel(panel);
-      button.addEventListener("click", handler);
-      this._unbinders.set(button, () =>
-        button.removeEventListener("click", handler)
-      );
-    });
-  }
-
-  /**
-   * Otwiera panel. Na mobile zamyka inne.
-   * @param {HTMLElement} panel
-   */
-  openPanel(panel) {
-    if (Utils.isMobile()) {
-      this.closeAllPanels();
-    }
-    panel.classList.add("open");
-
-    if (!Utils.isMobile() && this.cookiePanels.has(panel.id)) {
-      AppStorageManager.set(`panel:${panel.id}`, true);
-    }
-  }
-
-  /**
-   * Zamyka panel.
-   * @param {HTMLElement} panel
-   */
-  closePanel(panel) {
-    panel.classList.remove("open");
-
-    if (!Utils.isMobile() && this.cookiePanels.has(panel.id)) {
-      AppStorageManager.set(`panel:${panel.id}`, false);
-    }
-  }
-
-  /**
-   * Przełącza widoczność panelu.
-   * @param {HTMLElement} panel
-   */
-  togglePanel(panel) {
-    if (!panel) return;
-    const isOpen = panel.classList.contains("open");
-    if (isOpen) {
-      this.closePanel(panel);
-    } else {
-      this.openPanel(panel);
-    }
-  }
-
-  /** Zamyka wszystkie panele. */
-  closeAllPanels() {
-    this.panels.forEach(({ panel }) => panel?.classList.remove("open"));
-  }
-
-  /**
-   * Sprawdza, czy panel jest otwarty.
-   * @param {HTMLElement} panel
-   * @returns {boolean}
-   */
-  isPanelOpen(panel) {
-    return !!panel?.classList.contains("open");
-  }
-
-  /**
-   * Zwraca pierwszy otwarty panel.
-   * @returns {HTMLElement|null}
-   */
-  getOpenPanel() {
-    const item = this.panels.find(({ panel }) =>
-      panel?.classList.contains("open")
-    );
-    return item?.panel || null;
-  }
-
-  /**
-   * Zwraca wszystkie otwarte panele.
-   * @returns {HTMLElement[]}
-   */
-  getOpenPanels() {
-    return this.panels
-      .map(({ panel }) => panel)
-      .filter((p) => p && p.classList.contains("open"));
-  }
-
-  /**
-   * Usuwa nasłuchiwacze i czyści zasoby.
-   */
-  destroy() {
-    this._unbinders.forEach((off) => off?.());
-    this._unbinders.clear();
   }
 }
 
@@ -2915,88 +2915,6 @@ class App {
 
 /**
  *
- * Komponent odpowiedzialny za dostosowanie położenia elementu docka (np. paska narzędzi, przycisków)
- * w momencie pojawienia się lub zniknięcia wirtualnej klawiatury na urządzeniach mobilnych.
- * Funkcje:
- *  - Nasłuchuje zdarzeń `focus` i `blur` na polach tekstowych, aby wykryć aktywację klawiatury.
- *  - Reaguje na zdarzenia `resize`/`visualViewport`/`keyboardchange` w celu aktualizacji pozycji docka.
- *  - Ustawia odpowiedni `bottom` docka tak, aby nie był zasłaniany przez klawiaturę.
- *  - Ukrywa dock, gdy klawiatura jest schowana (opcjonalnie).
- *
- * ## Zasady:
- *
- * - ✅ Dozwolone:
- *   - Manipulacja stylem docka w reakcji na zmiany widoczności klawiatury.
- *   - Obsługa zdarzeń wejściowych i zmian rozmiaru widoku.
- *
- * - ❌ Niedozwolone:
- *   - Modyfikowanie innych elementów UI poza dockiem.
- *   - Wysyłanie żądań sieciowych.
- */
-class VirtualKeyboardDock {
-  /**
-   * @param {HTMLElement} dockEl - Element docka, który ma być pozycjonowany.
-   */
-  constructor(dockEl, forceEnable = false) {
-    this.dock = dockEl;
-    this.isVisible = false;
-    this.boundUpdate = this.updatePosition.bind(this);
-    this.forceEnable = forceEnable;
-  }
-  /**
-   * Podpina nasłuchy zdarzeń i ustawia początkową pozycję docka.
-   */
-  init() {
-    if (!this.forceEnable && Utils.isMobile() === false) return;
-    document.addEventListener("focusin", (e) => {
-      if (e.target.tagName === "INPUT" || e.target.tagName === "TEXTAREA") {
-        this.show();
-      }
-    });
-    document.addEventListener("focusout", (e) => {
-      if (e.target.tagName === "INPUT" || e.target.tagName === "TEXTAREA") {
-        this.hide();
-      }
-    });
-
-    window.addEventListener("resize", this.boundUpdate);
-    if (window.visualViewport) {
-      window.visualViewport.addEventListener("resize", this.boundUpdate);
-    }
-  }
-
-  /**
-   * Aktualizuje pozycję docka względem dolnej krawędzi okna.
-   */
-  updatePosition() {
-    if (!this.isVisible) return;
-    const offset = window.visualViewport
-      ? window.innerHeight - window.visualViewport.height
-      : 0;
-    this.dock.style.bottom = `${offset}px`;
-  }
-
-  /**
-   * Pokazuje dock i aktualizuje jego pozycję.
-   */
-  show() {
-    this.isVisible = true;
-    this.dock.style.display = "block";
-    this.updatePosition();
-  }
-
-  /**
-   * Ukrywa dock.
-   */
-  hide() {
-    this.isVisible = false;
-    this.dock.style.display = "none";
-    this.dock.style.bottom = "0px";
-  }
-}
-
-/**
- *
  * Komponent UI odpowiedzialny za wyświetlanie i obsługę panelu ocen wiadomości AI.
  * Funkcje:
  *  - Renderuje panel ocen w formie <details> z listą kryteriów i suwakami (range input)
@@ -3547,41 +3465,11 @@ class SenderRegistry {
 // 1) Konfiguracja selektorów DOM
 const htmlElements = {
   app: "#app",
-  chatWrapper: "#chat-wrapper",
-  chatContainer: "#chat-container",
-  inputArea: "#input-area",
-  prompt: "#prompt",
-  promptDesc: "#prompt-desc",
-  promptError: ".prompt-error",
-  promptWarning: ".max-text-length-warning",
-  submitButton: 'form#input-area button[type="submit"]',
   burgerToggle: "#burger-toggle",
   webSidePanel: "#web-side-panel",
-  settingsToggle: "#settings-toggle",
-  settingSidePanel: "#setting-side-panel",
-  userNameInput: "#user_name",
 };
 
-// 2) „Adaptery” – lekkie moduły wpinane do App
 
-// 2a) User manager jako moduł lifecycle
-function UserManagerModule() {
-  return {
-    init(ctx) {
-      if (ctx.userManager && typeof ctx.userManager.init === "function") {
-        ctx.userManager.init(ctx.dom);
-      }
-    },
-  };
-}
-
-// 2b) Virtual keyboard dock moduł
-function VirtualKeyboardDockModule(dom) {
-  const vk = new VirtualKeyboardDock(dom);
-  return {
-    init() { vk.init(); }
-  };
-}
 
 // 2c) Panels controller moduł (konfiguracja tylko tutaj)
 function PanelsControllerModule(dom) {
@@ -3589,112 +3477,16 @@ function PanelsControllerModule(dom) {
     dom,
     [
       { button: dom.burgerToggle,   panel: dom.webSidePanel,     id: "web-side-panel" },
-      { button: dom.settingsToggle, panel: dom.settingSidePanel, id: "setting-side-panel" },
     ],
-    ["setting-side-panel"]
+    []
   );
   return {
     init() { pc.init(); }
   };
 }
 
-// 2d) Chat manager moduł (tylko na tej stronie)
-function ChatManagerModule(ctx) {
-  // ChatManager potrzebuje Context, bo czyta ctx.dom itd.
-  const cm = new ChatManager(ctx);
-  return {
-    init() { cm.init(); }
-  };
-}
 
-// 2e) Przycisk czyszczenia cache obrazów (feature moduł)
-function ClearImageCacheButtonModule() {
-  return {
-    init(ctx) {
-      const wrapper = document.createElement("div");
-      wrapper.className = "mt-20";
 
-      const label = document.createElement("label");
-      label.className = "text-sm block mb-5";
-      label.textContent = "Pamięć obrazów:";
-
-      const btn = ctx.utils.createButton("🧹 Wyczyść pamięć obrazów", () => {
-        let cleared = 0;
-        // W niektórych przeglądarkach Object.keys(localStorage) nie iteruje jak oczekujesz; użyj klasycznej pętli:
-        for (let i = localStorage.length - 1; i >= 0; i--) {
-          const key = localStorage.key(i);
-          if (key && key.startsWith("img-exists:")) {
-            localStorage.removeItem(key);
-            cleared++;
-          }
-        }
-        alert(`Wyczyszczono ${cleared} wpisów z pamięci obrazów.`);
-      });
-
-      btn.className = "form-element text-base mt-5 w-full button-base";
-      wrapper.append(label, btn);
-      ctx.dom.settingSidePanel.appendChild(wrapper);
-      const hr = document.createElement("hr");
-      ctx.dom.settingSidePanel.appendChild(hr);
-    }
-  };
-}
-function ratingModeChange(dom) {
-  let isRatingMode = AppStorageManager.getWithTTL("ratingMode") === "1";
-  const ratingElement = dom.settingSidePanel.querySelector("input[name='ratingMode']");
-
-  // Bezpośrednie ustawienie stanu checkboxa na podstawie wartości w AppStorageManager
-  if (ratingElement) {
-    ratingElement.checked = isRatingMode;
-
-    // Ustawienie klasy na chatContainer na podstawie stanu
-    if (isRatingMode) {
-      dom.chatContainer.classList.add("with-rating");
-    } else {
-      dom.chatContainer.classList.remove("with-rating");
-    }
-
-    // Dodanie nasłuchiwania na zdarzenie 'change'
-    ratingElement.addEventListener("change", (e) => {
-      const checked = e.target.checked;
-      isRatingMode = checked ? "1" : "0";
-      AppStorageManager.set("ratingMode", isRatingMode);
-
-      if (checked) {
-        dom.chatContainer.classList.add("with-rating");
-      } else {
-        dom.chatContainer.classList.remove("with-rating");
-      }
-    });
-  }
-}
-
-function editingModeChange(dom) {
-  let isEditingMode = AppStorageManager.getWithTTL("editingMode") === "1";
-  const editingElement = dom.settingSidePanel.querySelector("input[name='editingMode']"); 
-  // Bezpośrednie ustawienie stanu checkboxa na podstawie wartości w AppStorageManager
-  if (editingElement) {
-    editingElement.checked = isEditingMode;
-    // Ustawienie klasy na chatContainer na podstawie stanu
-    if (isEditingMode) {
-      dom.chatContainer.classList.add("with-editing");
-    } else {
-      dom.chatContainer.classList.remove("with-editing");
-    }
-    // Dodanie nasłuchiwania na zdarzenie 'change'
-    editingElement.addEventListener("change", (e) => {
-      const checked = e.target.checked;
-      isEditingMode = checked ? "1" : "0";
-      AppStorageManager.set("editingMode", isEditingMode);
-      if (checked) {
-        dom.chatContainer.classList.add("with-editing");
-      }
-      else {
-        dom.chatContainer.classList.remove("with-editing");
-      }
-    });
-  }
-}
 
 let originalBodyHTML = document.body.innerHTML;
 // 3) Start aplikacji
@@ -3706,7 +3498,6 @@ window.addEventListener("load", async () => {
   // b) Context – rejestrujesz dokładnie to, czego chcesz użyć (instancje, nie klasy!)
   const context = new Context({
     diagnostics: Diagnostics,
-    userManager: UserManager,
     dom,
     utils: Utils,
     backendAPI: BackendAPI,
@@ -3714,13 +3505,7 @@ window.addEventListener("load", async () => {
 
   // c) Skład modułów (to jest w 100% konfigurowalne per strona)
   const modules = [
-    UserManagerModule(),
-    VirtualKeyboardDockModule(dom),
     PanelsControllerModule(dom),
-    ChatManagerModule(context),       // tylko na stronie czatu
-    ClearImageCacheButtonModule(),    // feature
-    ratingModeChange(dom),
-    editingModeChange(dom),
   ];
 
   // d) App dostaje Context + listę modułów, i tylko je odpala
